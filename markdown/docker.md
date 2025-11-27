@@ -214,7 +214,7 @@ sudo chmod a+x /usr/local/bin/hadolint
 
 * Images are pushed to GHCR (GitHub Container Registry).
 
-* Namespace convention: ghcr.io/dcc-bs/<service-name>.
+* Namespace convention: `ghcr.io/dcc-bs/<service-name>`.
 
 ## Versioning Strategy
 

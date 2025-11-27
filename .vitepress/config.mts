@@ -2,27 +2,27 @@ import { defineConfig } from 'vitepress'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-  title: "Documentation",
-  description: "Documentation for the DCC AI toolsets",
+  title: "DCC Dev Guidelines",
+  description: "Guidelines for the DCC Developers",
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
+    logo: '/imgs/logo.png',
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Examples', link: '/markdown-examples' }
+      { text: 'Team', link: '/team' }
     ],
 
     sidebar: [
       {
-        text: 'Examples',
+        text: 'Docker',
         items: [
-          { text: 'Markdown Examples', link: '/markdown-examples' },
-          { text: 'Runtime API Examples', link: '/api-examples' }
+          { text: 'Docker', link: '/docker' }
         ]
       }
     ],
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/vuejs/vitepress' }
+      { icon: 'github', link: 'https://github.com/dcc-bs' },
     ]
   }
 })
