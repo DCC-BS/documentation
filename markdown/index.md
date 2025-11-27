@@ -8,6 +8,9 @@ hero:
   tagline: My great project tagline
   actions:
     - theme: brand
+      text: Docker Standards
+      link: /docker
+    - theme: brand
       text: Markdown Examples
       link: /markdown-examples
     - theme: alt
