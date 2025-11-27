@@ -8,7 +8,7 @@ export default defineConfig({
   description: "Guidelines for the DCC Developers",
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
-    logo: '/imgs/logo.png',
+    logo: 'imgs/logo.png',
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Team', link: '/team' },
