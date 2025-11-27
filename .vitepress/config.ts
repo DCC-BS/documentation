@@ -9,6 +9,9 @@ export default defineConfig({
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     logo: 'imgs/logo.png',
+    editLink: {
+      pattern: 'https://github.com/dcc-bs/documentation/edit/main/markdown/:path',
+    },
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Team', link: '/team' },

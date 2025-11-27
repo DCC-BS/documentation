@@ -30,27 +30,27 @@ features:
   - title: Docker
     details: Docker Standards
     icon: 
-      light: /imgs/docker.svg
-      dark: /imgs/dark/docker.svg
+      light: https://cdn.simpleicons.org/docker
+      dark: https://cdn.simpleicons.org/docker/white
   - title: Coding
     details: General Coding Standards
     icon: 
-      light: /imgs/githubsponsors.svg
-      dark: /imgs/dark/githubsponsors.svg
+      light: https://cdn.simpleicons.org/githubsponsors
+      dark: https://cdn.simpleicons.org/githubsponsors/white
   - title: Python
     details: Python Standards
     icon: 
-      light: /imgs/python.svg
-      dark: /imgs/dark/python.svg
+      light: https://cdn.simpleicons.org/python
+      dark: https://cdn.simpleicons.org/python/white
   - title: Nuxt / Vue
     details: Nuxt / Vue Standards
     icon: 
-      light: /imgs/nuxt.svg
-      dark: /imgs/dark/nuxt.svg
+      light: https://cdn.simpleicons.org/nuxt
+      dark: https://cdn.simpleicons.org/nuxt/white
   - title: Git / GitHub / CI/CD
     details: Git / GitHub / CI/CD Standards
     icon: 
-      light: /imgs/github.svg
-      dark: /imgs/dark/github.svg
+      light: https://cdn.simpleicons.org/github
+      dark: https://cdn.simpleicons.org/github/white
 ---
 
