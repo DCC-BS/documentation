@@ -23,6 +23,9 @@ hero:
       text: Git / GitHub / CI/CD Standards
       link: /git
     - theme: brand
+      text: Dev Setup
+      link: /dev-setup
+    - theme: brand
       text: Team
       link: /team
 

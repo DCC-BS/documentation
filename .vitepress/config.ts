@@ -29,6 +29,12 @@ export default withMermaid({
 
     sidebar: [
       {
+        text: 'Dev Setup',
+        items: [
+          { text: 'Dev Setup', link: '/dev-setup' }
+        ]
+      },
+      {
         text: 'Docker',
         items: [
           { text: 'Docker', link: '/docker' }

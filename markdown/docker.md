@@ -149,9 +149,17 @@ RUN addgroup -S app && adduser -S app -G app
 # Copy the environment, but not the source code
 COPY --from=builder --chown=app:app /app/.venv /app/.venv
 
+# Copy application code
+COPY . /app
+
+# Enable virtual environment
+ENV PATH="/app/.venv/bin:$PATH"
+
+RUN chown -R app:app /app
+
 USER app
 
-CMD ["/app/.venv/bin/main"]
+CMD ["uv", "run", "main"]
 ```
 
 # 3. Orchestration & Composition
