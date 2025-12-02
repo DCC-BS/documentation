@@ -327,7 +327,7 @@ http {
         }
 
         # Proxy backend API (with fallback for when backend is down)
-        location /app-backend/ {
+        location /backend/ {
             proxy_pass http://app-backend/;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
