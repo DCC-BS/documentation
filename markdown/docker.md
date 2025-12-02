@@ -24,7 +24,7 @@ Every project must be containerized. The root of the repository must contain the
 
 To optimize build speed and security, you must exclude all files not required for the application runtime. This prevents secrets (`.env`) and local build artifacts (`node_modules`) from accidentally entering the image.
 
-### Standard Exclusion List:
+### Standard Exclusion List
 ```
 .git
 .vscode
@@ -65,9 +65,10 @@ Use multi-stage builds to separate build dependencies (compilers, headers, full 
 
 * Kubernetes pod security standards prohibit "run as root" containers.
 
-### Examples
+## Examples
 
-# Node.js / Nuxt (Bun)
+### Node.js / Nuxt (Bun)
+
 ```
 # Stage 1: Build
 FROM node:24-alpine AS build
@@ -78,7 +79,7 @@ RUN npm install -g bun
 WORKDIR /app
 
 # Dependency caching layer
-COPY package.json package-lock.json ./
+COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
 
 # Build layer
@@ -148,31 +149,207 @@ We utilize a modular Docker Compose strategy to avoid duplication between develo
 
 * `docker/services.compose.yml`: The base definition. Contains image names, build contexts, and shared environment variables.
 
-* `dockercompose.dev.yml`: Extends the base. Adds hot-reloading (volumes), debugging ports, and local overrides.
+* `docker-compose.dev.yml`: Extends the base. Adds hot-reloading (volumes), debugging ports, and local overrides.
 
-* `dockercompose.yaml`: Extends the base. Defines production networks, restart policies, and resource limits.
+* `docker-compose.yml`: Extends the base. Defines production networks, restart policies, and resource limits.
 
-### Example Directory Structure:
+### Example Directory Structure
 ```
 project-root/
 ├── docker/
 │   └── services.compose.yml
-├── dockercompose.dev.yml
-├── dockercompose.yaml
+│   └── .env.backend
+│   └── nginx.conf
+├── Dockerfile
+├── .dockerignore
+├── docker-compose.dev.yml
+├── docker-compose.yml
 ```
 
-### Syntax Reference:
+### Syntax Reference
 ```
-# dockercompose.dev.yml
+# docker-compose.dev.yml
 services:
-  backend:
+  app-backend:
     extends:
       file: ./docker/services.compose.yml
-      service: backend
+      service: app-backend
     environment:
       - DEBUG=true
+    ports:
+      - "8000:8000"
+  llm:
+    extends:
+      file: ./docker/services.compose.yml
+      service: llm
 ```
 
+```
+# docker-compose.yml
+networks:
+  app-network:
+    driver: bridge
+
+services:
+  nginx:
+    extends:
+      file: ./docker/services.compose.yml
+      service: nginx
+    depends_on:
+      - app-frontend
+    networks:
+      - app-network
+
+  llm:
+    extends:
+      file: ./docker/services.compose.yml
+      service: llm
+    networks:
+      - app-network
+
+  app-backend:
+    extends:
+      file: ./docker/services.compose.yml
+      service: app-backend
+    networks:
+      - app-network
+
+  app-frontend:
+    extends:
+      file: ./docker/services.compose.yml
+      service: app-frontend
+    networks:
+      - app-network
+```
+
+```
+# docker/services.compose.yml
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - '8090:80'
+      - '8443:443'
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+  llm:
+    platform: linux/amd64
+    image: vllm/vllm-openai:v0.11.2
+    container_name: llm
+    expose:
+      - "8000"
+    env_file: ".env.backend"
+    runtime: nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [ gpu ]
+    ipc: host
+    volumes:
+      - ~/.cache/huggingface:/root/.cache/huggingface
+    command: >
+      Qwen/Qwen3-32B-AWQ
+      --port 8000
+      --max-model-len 10000
+      --max-num-seqs 1
+      --kv-cache-dtype fp8
+      --gpu-memory-utilization 0.95
+      --enable-auto-tool-choice
+      --tool-call-parser hermes
+      --tensor-parallel-size 1
+      --reasoning-parser qwen3
+      --uvicorn-log-level warning
+      --disable-log-requests
+  app-backend:
+    image: ghcr.io/dcc-bs/app-backend:latest
+    expose:
+     - "8000"
+    env_file:
+     - .env.backend
+  app-frontend:
+    container_name: app-frontend
+    build:
+      context: .
+      dockerfile: ../Dockerfile
+    env_file: "../.env"
+    environment:
+      - NUXT_API_URL=http://app-backend:8000
+      - PORT=3000
+    expose:
+      - 3000
+```
+
+```
+# nginx.conf
+events {
+    worker_connections 1024;
+}
+
+http {
+    # Increase buffer sizes for large headers/cookies
+    client_header_buffer_size 16k;
+    large_client_header_buffers 4 16k;
+    client_max_body_size 50M;
+    
+    upstream app-frontend {
+        server app-frontend:3000;
+    }
+
+    upstream app-backend {
+        server app-backend:8000;
+    }
+
+    # Frontend proxy
+    server {
+        listen 80;
+        server_name localhost;
+
+        # Proxy frontend
+        location / {
+            proxy_pass http://app-frontend;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            
+            # WebSocket support
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "upgrade";
+            
+            # Increase proxy buffer sizes for large headers
+            proxy_buffer_size 16k;
+            proxy_buffers 4 16k;
+            proxy_busy_buffers_size 16k;
+        }
+
+        # Proxy backend API (with fallback for when backend is down)
+        location /app-backend/ {
+            proxy_pass http://app-backend/;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            
+            # Handle backend unavailable gracefully
+            proxy_connect_timeout 2s;
+            proxy_send_timeout 2s;
+            proxy_read_timeout 2s;
+            
+            # Return 503 if backend is unavailable
+            error_page 502 503 504 = @backend_unavailable;
+        }
+        
+        location @backend_unavailable {
+            return 503 '{"error": "Backend service is currently unavailable"}';
+            add_header Content-Type application/json;
+        }
+    }
+}
+```
 # 4. Quality Assurance & Optimization
 
 ## Static Analysis & Linting

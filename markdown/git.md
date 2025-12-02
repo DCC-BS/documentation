@@ -39,5 +39,11 @@ gitGraph
 
 # GitHub CI/CD
 
+We use GitHub Actions for our CI/CD pipeline.
+The pipeline is triggered by a push to the `main` branch and on pull requests to the `main` branch.
+
+AI code reviews are performed by the Gemini and Code Rabbit.
+
+
 # GitHub Deployment
 Private Repo on GitHub Enterprise
