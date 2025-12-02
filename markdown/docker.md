@@ -34,6 +34,7 @@ README.md
 Dockerfile
 docker-compose*.yml
 node_modules
+.venv
 __pycache__
 .pytest_cache
 .nuxt
@@ -108,17 +109,34 @@ ENTRYPOINT ["node", "./server/index.mjs"]
 ```
 # Stage 1: Builder
 FROM python:3.13-alpine as builder
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 WORKDIR /app
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+ENV UV_COMPILE_BYTECODE=1
+ENV UV_LINK_MODE=copy
 
-# Install build dependencies (Alpine uses apk)
+# Install build dependencies
 RUN apk add --no-cache gcc musl-dev
 
-COPY requirements.txt .
-RUN pip wheel --no-cache-dir --no-deps --wheel-dir /app/wheels -r requirements.txt
+# Copy dependency files
+COPY pyproject.toml uv.lock ./
+
+# Install dependencies
+# --locked: Sync with lockfile
+# --no-dev: Exclude development dependencies
+# --no-install-project: Install dependencies only (caching layer)
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --locked --no-dev --no-install-project --no-editable
+
+# Copy application code
+COPY . /app
+
+# Sync project
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --locked --no-dev --no-editable
 
 # Stage 2: Runtime
 FROM python:3.13-alpine
@@ -126,19 +144,14 @@ FROM python:3.13-alpine
 WORKDIR /app
 
 # Create non-root user (Alpine syntax)
-RUN addgroup -S appuser && adduser -S appuser -G appuser
+RUN addgroup -S app && adduser -S app -G app
 
-COPY --from=builder /app/wheels /wheels
-COPY --from=builder /app/requirements.txt .
+# Copy the environment, but not the source code
+COPY --from=builder --chown=app:app /app/.venv /app/.venv
 
-RUN pip install --no-cache /wheels/*
+USER app
 
-COPY . .
-RUN chown -R appuser:appuser /app
-
-USER appuser
-
-CMD ["python", "main.py"]
+CMD ["/app/.venv/bin/main"]
 ```
 
 # 3. Orchestration & Composition
@@ -344,8 +357,8 @@ http {
         }
         
         location @backend_unavailable {
+            default_type application/json;
             return 503 '{"error": "Backend service is currently unavailable"}';
-            add_header Content-Type application/json;
         }
     }
 }
