@@ -2,6 +2,7 @@
 outline: deep
 ---
 
+* System Requirements
 * Docker rootless
 * Nvidia docker
 * uv
