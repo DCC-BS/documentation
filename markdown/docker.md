@@ -48,6 +48,7 @@ dist
 
 * No `latest` tags: Never depend on the `latest` tag. It is mutable and leads to non-reproducible builds.
 * Pin Versions: Use specific version tags (e.g., `node:24-alpine` or `python:3.13-alpine`).
+* For Web Applications which are sperated in Frontend and Backend services, ensure compatibility when the Major and Minor version are the same. Patch versions can differ. So for example `1.3.1` and `1.3.5` are compatible, but `1.2.x` and `1.3.x` are not.
 
 * Minimal Base Images: Prefer `alpine` or `slim` (only if `alpine` fails) variants to reduce image size and download time.
 
