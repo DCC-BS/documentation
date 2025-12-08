@@ -1,5 +1,6 @@
 ---
 outline: deep
+description: Coding standards and best practices for Nuxt.js + TypeScript projects.
 ---
 
 # Nuxt.js + TypeScript Coding Standards

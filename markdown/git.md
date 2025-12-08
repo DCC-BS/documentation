@@ -1,5 +1,6 @@
 ---
 outline: deep
+description: Documentation of our Git workflow, CI/CD, and deployment practices.
 ---
 
 # Git Workflow
