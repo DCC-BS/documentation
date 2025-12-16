@@ -56,4 +56,3 @@ features:
       light: https://cdn.simpleicons.org/github
       dark: https://cdn.simpleicons.org/github/white
 ---
-

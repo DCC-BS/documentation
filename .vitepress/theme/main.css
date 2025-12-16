@@ -1,0 +1,59 @@
+/* Import Tailwind CSS v4 with important modifier to override VitePress default styles */
+@import "tailwindcss" important;
+
+@source "@nuxt/runtime";
+@source "@dcc-bs/common-ui.bs.js/runtime";
+@source "./markdown";
+@source "./components";
+@source ".vitepress/theme";
+@source "../../";
+
+/* Import Nuxt UI styles */
+@import "@nuxt/ui";
+@import "@dcc-bs/common-ui.bs.js/runtime/assets/kantonbs/base/brand-colors.css";
+
+/* Additional CSS variable overrides for better integration */
+* {
+    --ui-primary: rgb(var(--color-primary-600));
+    --ui-secondary: rgb(var(--color-teal-600));
+    --ui-success: rgb(var(--color-green-600));
+    --ui-info: rgb(var(--color-blue-600));
+    --ui-warning: rgb(var(--color-yellow-600));
+    --ui-error: rgb(var(--color-red-700));
+    /* Ensure Tailwind and Nuxt UI variables work well with VitePress */
+}
+
+/* Custom layer for VitePress compatibility fixes */
+@layer components {
+    /* Reset VitePress button styles to allow Tailwind classes to work properly */
+    button.VPButton,
+    a.VPButton {
+        all: revert;
+    }
+
+    /* Ensure custom styled elements don't inherit VitePress defaults */
+    [class*="bg-"]:not([class*="vp-"]),
+    [class*="text-"]:not([class*="vp-"]),
+    [class*="border-"]:not([class*="vp-"]) {
+        background-image: none;
+    }
+}
+
+/* Additional utility overrides if needed */
+@layer utilities {
+    /* Force remove background gradients from VitePress on Tailwind utility classes */
+    .bg-primary {
+    }
+    .bg-secondary,
+    .bg-accent {
+        background-image: none;
+    }
+}
+
+input {
+    @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all;
+}
+
+textarea {
+    @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all;
+}
