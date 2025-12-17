@@ -20,14 +20,20 @@
         "dev": "vitepress dev",
         "build": "vitepress build",
         "preview": "vitepress preview",
-        "check": "biome check --write"
+        "check": "biome check --write",
+        "test": "playwright test",
+        "test:ui": "playwright test --ui",
+        "test:headed": "playwright test --headed",
+        "test:debug": "playwright test --debug",
+        "test:report": "playwright show-report"
     },
     "dependencies": {
         "@dcc-bs/common-ui.bs.js": "../common-ui.bs.js",
         "@nuxt/ui": "^4.2.1",
         "@tailwindcss/vite": "^4.1.18",
         "@vueuse/core": "^14.1.0",
+        "motion-v": "^1.7.0",
         "tailwindcss": "^4.1.18",
-        "motion-v": "^1.7.0"
+        "vue-i18n": "11"
     }
 }
