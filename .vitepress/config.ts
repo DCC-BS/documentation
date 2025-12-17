@@ -57,12 +57,32 @@ export default withMermaid({
                 text: "User Interfaces",
                 items: [
                     {
+                        text: "Changelogs",
+                        link: "/user-interface/changelogs.md",
+                    },
+                    {
+                        text: "Data Bs Footer",
+                        link: "/user-interface/databsfooter.md",
+                    },
+                    {
                         text: "Disclaimer",
                         link: "/user-interface/disclaimer.md",
                     },
                     {
-                        text: "Data Bs Banner",
-                        link: "/user-interface/databsbanner.md",
+                        text: "Disclaimer Button",
+                        link: "/user-interface/disclaimerbutton.md",
+                    },
+                    {
+                        text: "Disclaimer Page",
+                        link: "/user-interface/disclaimerpage.md",
+                    },
+                    {
+                        text: "Navigation Bar",
+                        link: "/user-interface/navigationbar.md",
+                    },
+                    {
+                        text: "Online Status",
+                        link: "/user-interface/onlinestatus.md",
                     },
                 ],
             },
