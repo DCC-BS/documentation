@@ -1,0 +1,10 @@
+{
+    "common-ui": {
+        "health_status": {
+            "online_title": "online",
+            "offline_title": "offline",
+            "online_description": "The system is operating normally.",
+            "offline_description": "The system is currently experiencing issues."
+        }
+    }
+}

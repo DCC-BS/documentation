@@ -1,5 +1,6 @@
-import { ref, type Ref, type App, computed } from "vue";
+/** biome-ignore-all lint/suspicious/noExplicitAny: <explanation> */
 import type { Head } from "@unhead/vue";
+import { type App, computed, type Ref, ref } from "vue";
 
 /**
  * Shim for Nuxt's useState composable
@@ -146,7 +147,7 @@ export function defineNuxtPlugin(plugin: any) {
 /**
  * Shim for Nuxt's useHead
  */
-export function useHead(input: any) {
+export function useHead(_: any) {
     // In VitePress, head management is done differently
     // This is a no-op shim
     return {};
@@ -198,7 +199,7 @@ export function useLocale() {
 /**
  * Shim for Nuxt's useCookie
  */
-export function useCookie<T>(name: string, options?: any): Ref<T | null> {
+export function useCookie<T>(name: string, _?: any): Ref<T | null> {
     const value = ref<T | null>(null);
 
     if (typeof document !== "undefined") {
@@ -209,7 +210,7 @@ export function useCookie<T>(name: string, options?: any): Ref<T | null> {
                 try {
                     value.value = JSON.parse(decodeURIComponent(val));
                 } catch {
-                    value.value = decodeURIComponent(val) as any;
+                    value.value = decodeURIComponent(val) as T;
                 }
                 break;
             }

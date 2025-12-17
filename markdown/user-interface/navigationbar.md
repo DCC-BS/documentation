@@ -3,210 +3,235 @@ outline: deep
 ---
 
 <script setup lang="ts">
-import NavigationBarExample from '../../components/NavigationBarExample.vue'
+import UiContainer from "../../components/UiContainer.vue";
+import { NavigationBar } from "@dcc-bs/common-ui.bs.js/components";
+
+const exampleCode = `<template>
+    <NavigationBar>
+        <template #left>
+            <div class="text-xl font-bold">
+                MyApp
+            </div>
+        </template>
+        <template #center>
+            <span>Center Content</span>
+        </template>
+        <template #right>
+            <span>Custom Right</span>
+        </template>
+    </NavigationBar>
+</template>`;
 </script>
 
 # NavigationBar
 
-The `NavigationBar` component provides a responsive navigation bar with language switching, disclaimer button, and customizable content areas. It integrates seamlessly with Nuxt i18n for internationalization and provides a consistent navigation experience across your application.
+The `NavigationBar` component provides a flexible, responsive navigation bar with customizable content areas. It includes built-in support for language switching, disclaimer button, and multiple slot areas for complete customization of the navigation layout.
+
+<UiContainer :code="exampleCode">
+    <template #element>
+        <NavigationBar>
+            <template #left>
+                <div class="text-xl font-bold">
+                    MyApp
+                </div>
+            </template>
+            <template #center>
+                <span>Center Content</span>
+            </template>
+            <template #right>
+                <span>Custom Right</span>
+            </template>
+        </NavigationBar>
+    </template>
+</UiContainer>
 
 ## Features
 
-- **Language Switcher**: Built-in language selection dropdown
-- **Disclaimer Access**: Integrated disclaimer button for easy access to terms
-- **Customizable Slots**: Flexible content areas for center and right sections
+- **Flexible Slot System**: Multiple slots for left, center, and right sections
+- **Language Switcher**: Built-in language selection component
+- **Disclaimer Button**: Integrated disclaimer access
+- **Default Branding**: App name displayed by default on the left
+- **Nested Slot Support**: Fine-grained control over right section items
 - **Responsive Design**: Adapts to mobile, tablet, and desktop screens
-- **i18n Integration**: Automatic integration with Nuxt i18n module
-- **Kanton Basel-Stadt Branding**: Uses official design system styling
-- **Accessibility**: Fully keyboard accessible with ARIA support
+- **i18n Integration**: Automatic integration with Vue i18n
+- **Accessibility**: Fully keyboard accessible with proper structure
 
 ## Props
 
-This component has no props - it uses slots for customization.
+This component has no props - it uses slots for all customization.
 
 ## Slots
 
-| Slot | Description |
-|------|-------------|
-| `center` | Content for the center section of the navigation bar |
-| `right` | Additional content for the right section (appears before language switcher) |
-
-## Requirements
-
-This component requires:
-- **Nuxt i18n module** configured in your project
-- **Translation key** `navigation.app` for the application name
-- The `Disclaimer` component if you want to use the built-in disclaimer button
+| Slot             | Description                                                                 | Default Content                                  |
+| ---------------- | --------------------------------------------------------------------------- | ------------------------------------------------ |
+| `left`           | Content for the left section of the navigation bar                          | App name from `navigation.app` translation       |
+| `center`         | Content for the center section                                              | Empty                                            |
+| `right`          | Complete override of the right section                                      | DisclaimerButton + LanguageSelect + nested slots |
+| `rightPreItems`  | Items to appear before the disclaimer button (within default right section) | Empty                                            |
+| `rightPostItems` | Items to appear after the language select (within default right section)    | Empty                                            |
 
 ## Usage
 
 ### Basic Implementation
 
-Simple navigation bar with just the default elements:
+Simple navigation bar with default elements:
 
 ```vue
 <template>
-  <NavigationBar />
+    <NavigationBar />
 </template>
 ```
 
-This will display:
+This displays:
+
 - App name on the left (from `navigation.app` translation)
-- Disclaimer button
-- Language switcher
+- Disclaimer button on the right
+- Language switcher on the right
+
+### With Custom Left Content
+
+Replace the default app name with custom branding:
+
+```vue
+<template>
+    <NavigationBar>
+        <template #left>
+            <div class="flex items-center gap-3 ml-4">
+                <img src="/logo.svg" alt="Logo" class="h-8 w-8" />
+                <span class="text-xl font-bold">My App</span>
+            </div>
+        </template>
+    </NavigationBar>
+</template>
+```
 
 ### With Center Content
 
-Add custom content in the center:
+Add navigation links in the center:
 
 ```vue
 <template>
-  <NavigationBar>
-    <template #center>
-      <div class="text-sm font-medium">
-        Dashboard
-      </div>
-    </template>
-  </NavigationBar>
+    <NavigationBar>
+        <template #center>
+            <nav class="flex items-center gap-4">
+                <NuxtLink to="/" class="hover:underline">Home</NuxtLink>
+                <NuxtLink to="/about" class="hover:underline">About</NuxtLink>
+                <NuxtLink to="/contact" class="hover:underline">Contact</NuxtLink>
+            </nav>
+        </template>
+    </NavigationBar>
 </template>
 ```
 
-### With Right Content
+### With Right Pre Items
 
-Add additional actions or information on the right:
+Add items before the disclaimer button:
 
 ```vue
 <template>
-  <NavigationBar>
-    <template #right>
-      <UButton variant="ghost" icon="i-lucide-bell" size="sm">
-        Notifications
-      </UButton>
-    </template>
-  </NavigationBar>
+    <NavigationBar>
+        <template #rightPreItems>
+            <button class="px-3 py-2 hover:bg-gray-100 rounded">
+                <UIcon name="i-lucide-bell" />
+            </button>
+        </template>
+    </NavigationBar>
 </template>
 ```
 
-### With Both Slots
+### With Right Post Items
 
-Combine center and right content:
+Add items after the language select:
 
 ```vue
 <template>
-  <NavigationBar>
-    <template #center>
-      <div class="flex items-center gap-2">
-        <UIcon name="i-lucide-home" />
-        <span>Home</span>
-      </div>
-    </template>
-    
-    <template #right>
-      <UButton variant="ghost" icon="i-lucide-settings">
-        Settings
-      </UButton>
-      <UButton variant="ghost" icon="i-lucide-user">
-        Profile
-      </UButton>
-    </template>
-  </NavigationBar>
+    <NavigationBar>
+        <template #rightPostItems>
+            <UButton variant="ghost" icon="i-lucide-user">Profile</UButton>
+        </template>
+    </NavigationBar>
 </template>
 ```
 
-### With Navigation Menu
+### Complete Customization
 
-Create a navigation menu in the center:
+Use all slots together:
 
 ```vue
 <script setup lang="ts">
-const route = useRoute();
-
-const navItems = [
-  { label: 'Dashboard', path: '/', icon: 'i-lucide-home' },
-  { label: 'Projects', path: '/projects', icon: 'i-lucide-folder' },
-  { label: 'Reports', path: '/reports', icon: 'i-lucide-bar-chart' },
-];
+const { t } = useI18n();
 </script>
 
 <template>
-  <NavigationBar>
-    <template #center>
-      <nav class="flex gap-4">
-        <NuxtLink
-          v-for="item in navItems"
-          :key="item.path"
-          :to="item.path"
-          class="flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-100"
-          :class="{ 'bg-blue-100': route.path === item.path }"
-        >
-          <UIcon :name="item.icon" />
-          {{ item.label }}
-        </NuxtLink>
-      </nav>
-    </template>
-  </NavigationBar>
+    <NavigationBar>
+        <template #left>
+            <div class="flex items-center gap-2 ml-4">
+                <img src="/logo.png" alt="Logo" class="h-10" />
+                <span class="text-xl font-bold">{{ t("app.name") }}</span>
+            </div>
+        </template>
+
+        <template #center>
+            <nav class="flex gap-6">
+                <NuxtLink to="/" class="font-medium">Dashboard</NuxtLink>
+                <NuxtLink to="/projects" class="font-medium">Projects</NuxtLink>
+            </nav>
+        </template>
+
+        <template #rightPreItems>
+            <UButton variant="ghost" icon="i-lucide-bell" size="sm" />
+        </template>
+
+        <template #rightPostItems>
+            <UDropdown :items="userMenuItems">
+                <UAvatar src="/avatar.jpg" alt="User" />
+            </UDropdown>
+        </template>
+    </NavigationBar>
 </template>
 ```
 
-### With User Information
+### Override Right Section Completely
 
-Display user info in the right section:
-
-```vue
-<script setup lang="ts">
-const user = ref({
-  name: 'John Doe',
-  email: 'john.doe@example.com',
-  avatar: '/avatars/john.jpg',
-});
-</script>
-
-<template>
-  <NavigationBar>
-    <template #right>
-      <div class="flex items-center gap-2">
-        <img 
-          :src="user.avatar" 
-          :alt="user.name"
-          class="w-8 h-8 rounded-full"
-        />
-        <span class="text-sm font-medium">{{ user.name }}</span>
-      </div>
-    </template>
-  </NavigationBar>
-</template>
-```
-
-### With Status Indicator
-
-Add online status indicator:
+Replace the entire right section if you don't want the default buttons:
 
 ```vue
 <template>
-  <NavigationBar>
-    <template #right>
-      <OnlineStatus :show-text="true" />
-    </template>
-  </NavigationBar>
+    <NavigationBar>
+        <template #right>
+            <div class="flex items-center gap-4 mr-4">
+                <span>Custom Right Content</span>
+                <button>Login</button>
+                <button>Sign Up</button>
+            </div>
+        </template>
+    </NavigationBar>
 </template>
 ```
+
+**Note:** When you override the `right` slot, the `rightPreItems` and `rightPostItems` slots are not rendered, and you lose the default DisclaimerButton and LanguageSelect components unless you add them manually.
 
 ## i18n Configuration
 
-Set up the required translation keys in your i18n configuration:
+Set up the required translation keys:
 
 ```json
 {
-  "en": {
-    "navigation": {
-      "app": "My Application"
+    "en": {
+        "navigation": {
+            "app": "My Application"
+        }
+    },
+    "de": {
+        "navigation": {
+            "app": "Meine Anwendung"
+        }
+    },
+    "fr": {
+        "navigation": {
+            "app": "Mon Application"
+        }
     }
-  },
-  "de": {
-    "navigation": {
-      "app": "Meine Anwendung"
-    }
-  }
 }
 ```
 
@@ -214,213 +239,143 @@ Set up the required translation keys in your i18n configuration:
 
 ### Default Layout
 
-Use in your default layout for consistent navigation:
+Use in your layout for consistent navigation:
 
 ```vue
 <!-- layouts/default.vue -->
 <template>
-  <div>
-    <NavigationBar>
-      <template #center>
-        <nav><!-- Your nav items --></nav>
-      </template>
-      <template #right>
-        <OnlineStatus />
-      </template>
-    </NavigationBar>
-    
-    <main class="container mx-auto p-4">
-      <slot />
-    </main>
-  </div>
+    <div class="min-h-screen flex flex-col">
+        <NavigationBar>
+            <template #center>
+                <nav><!-- Your nav items --></nav>
+            </template>
+            <template #rightPreItems>
+                <OnlineStatus />
+            </template>
+        </NavigationBar>
+
+        <main class="flex-1 container mx-auto p-4">
+            <slot />
+        </main>
+    </div>
 </template>
 ```
 
-### With Fixed Position
+### Sticky Navigation
 
-Make the navigation bar sticky:
+Make the navigation bar stick to the top:
 
 ```vue
 <template>
-  <div class="sticky top-0 z-50">
-    <NavigationBar>
-      <template #center>
-        <!-- Content -->
-      </template>
-    </NavigationBar>
-  </div>
-  
-  <main>
-    <!-- Page content -->
-  </main>
+    <div>
+        <div class="sticky top-0 z-50 bg-white shadow">
+            <NavigationBar>
+                <template #center>
+                    <!-- Navigation content -->
+                </template>
+            </NavigationBar>
+        </div>
+
+        <main class="container mx-auto p-4">
+            <slot />
+        </main>
+    </div>
 </template>
 ```
 
-## Interactive Example
+## Component Structure
 
-Try customizing the navigation bar:
+The NavigationBar uses a flexbox layout with three main sections:
 
-<NavigationBarExample />
+```vue
+<div class="flex justify-between gap-2 p-2 w-full z-50">
+  <!-- Left Section -->
+  <slot name="left">
+    <!-- Default: App name -->
+  </slot>
 
-## Responsive Behavior
+  <!-- Center Section -->
+  <slot name="center" />
 
-The NavigationBar adapts to different screen sizes:
+  <!-- Right Section -->
+  <slot name="right">
+    <div class="flex items-center gap-2">
+      <slot name="rightPreItems" />
+      <DisclaimerButton variant="ghost" />
+      <LanguageSelect />
+      <slot name="rightPostItems" />
+    </div>
+  </slot>
+</div>
+```
 
-- **Desktop (≥1024px)**: Full layout with all elements visible
-- **Tablet (768px-1023px)**: Adjusted spacing, may wrap content
-- **Mobile (<768px)**: Compact layout, may hide some elements or use hamburger menu
+## Slot Behavior
+
+### Default Left Content
+
+If you don't provide a `left` slot, the component displays:
+
+```vue
+<div class="text-xl font-bold mt-4 ml-4">
+  {{ t("navigation.app") }}
+</div>
+```
+
+### Default Right Content
+
+The default `right` slot includes:
+
+1. Content from `rightPreItems` slot
+2. DisclaimerButton with `ghost` variant
+3. LanguageSelect component
+4. Content from `rightPostItems` slot
+
+### Nested Slots vs Complete Override
+
+- **Use `rightPreItems` and `rightPostItems`**: When you want to keep the DisclaimerButton and LanguageSelect
+- **Use `right` slot**: When you want complete control over the entire right section
 
 ## Styling
 
-The component uses the Kanton Basel-Stadt design system:
+The component uses utility classes for layout:
 
-- **Background**: Primary brand color (green)
-- **Text**: White for contrast
-- **Spacing**: Consistent padding and gaps
-- **Height**: Optimal height for usability
-- **Shadow**: Subtle shadow for depth
-
-### Custom Styling
-
-Override styles using CSS classes on slot content:
-
-```vue
-<template>
-  <NavigationBar>
-    <template #center>
-      <div class="custom-nav-content">
-        <!-- Your content -->
-      </div>
-    </template>
-  </NavigationBar>
-</template>
-
-<style scoped>
-.custom-nav-content {
-  /* Your custom styles */
-}
-</style>
-```
-
-## Accessibility
-
-- **Keyboard Navigation**: Full Tab and arrow key support
-- **Screen Readers**: Proper ARIA labels and landmarks
-- **Focus Management**: Clear focus indicators
-- **Semantic HTML**: Uses `<nav>` element
-- **Skip Links**: Consider adding skip to main content link
-- **Color Contrast**: Meets WCAG AA standards
-
-### Skip Link Example
-
-```vue
-<template>
-  <div>
-    <a href="#main-content" class="sr-only focus:not-sr-only">
-      Skip to main content
-    </a>
-    
-    <NavigationBar>
-      <!-- Navigation content -->
-    </NavigationBar>
-    
-    <main id="main-content">
-      <slot />
-    </main>
-  </div>
-</template>
-```
-
-## Language Switching
-
-The built-in language switcher:
-- Detects available locales from i18n configuration
-- Shows current language
-- Allows switching between configured languages
-- Persists language preference
-- Updates all translated content automatically
-
-### Configure Available Languages
-
-In your Nuxt i18n config:
-
-```typescript
-export default defineNuxtConfig({
-  i18n: {
-    locales: [
-      { code: 'en', name: 'English' },
-      { code: 'de', name: 'Deutsch' },
-      { code: 'fr', name: 'Français' },
-    ],
-    defaultLocale: 'de',
-  },
-});
-```
-
-## Disclaimer Button
-
-The built-in disclaimer button:
-- Opens the disclaimer modal when clicked
-- Always accessible to users
-- Integrates with `Disclaimer` component
-- Uses i18n for button text
-
-## Best Practices
-
-1. **Consistent Placement**: Use the same navigation across all pages
-2. **Clear Labels**: Use descriptive text for navigation items
-3. **Active States**: Highlight the current page/section
-4. **Mobile First**: Test on mobile devices regularly
-5. **Performance**: Keep slot content lightweight
-6. **Accessibility**: Test with keyboard and screen readers
-7. **i18n**: Translate all navigation text
-8. **Icons**: Use icons consistently and with labels
-
-## Use Cases
-
-- **Application Header**: Main navigation for web applications
-- **Dashboard Navigation**: Navigation for admin dashboards
-- **Portal Header**: Header for user portals
-- **Documentation Sites**: Navigation for documentation
-- **Content Management**: Header for CMS interfaces
-- **E-commerce**: Navigation for online shops
-- **Intranet**: Internal company portals
+- `flex justify-between`: Distributes space between sections
+- `gap-2`: Spacing between elements
+- `p-2`: Padding around the entire bar
+- `w-full`: Full width
+- `z-50`: High z-index for layering
 
 ## Related Components
 
-- [DisclaimerButton](./disclaimerbutton.md) - Built-in disclaimer trigger
-- [Disclaimer](./disclaimer.md) - Disclaimer modal
-- [OnlineStatus](./onlinestatus.md) - Status indicator for navigation
-- [DataBsBanner](./databsbanner.md) - Banner component for top of page
+- [DisclaimerButton](./disclaimerbutton.md) - Built-in disclaimer trigger button
+- [LanguageSelect](./languageselect.md) - Built-in language selection component
+- [Disclaimer](./disclaimer.md) - Disclaimer modal component
+- [OnlineStatus](./onlinestatus.md) - Online/offline status indicator
+- [DataBsBanner](./databsbanner.md) - Banner for top of page
 - [DataBsFooter](./databsfooter.md) - Footer component
 
-## Browser Support
+## Migration Guide
 
-Works in all modern browsers that support:
-- Vue 3
-- Nuxt 3
-- Modern JavaScript (ES6+)
-- CSS Flexbox
-- Nuxt i18n
+If you're migrating from an older version with only `center` and `right` slots:
 
-## Troubleshooting
+**Old:**
 
-**Language switcher not appearing:**
-- Verify Nuxt i18n module is installed and configured
-- Check that multiple locales are defined
-- Ensure i18n is properly initialized
+```vue
+<NavigationBar>
+  <template #right>
+    <OnlineStatus />
+  </template>
+</NavigationBar>
+```
 
-**App name not showing:**
-- Check that `navigation.app` translation key exists
-- Verify i18n translations are loaded
-- Check browser console for errors
+**New:**
 
-**Styling issues:**
-- Import required CSS from common-ui.bs.js
-- Verify Tailwind CSS is configured
-- Check for CSS conflicts
+```vue
+<NavigationBar>
+  <template #rightPreItems>
+    <OnlineStatus />
+  </template>
+</NavigationBar>
+```
 
-**Responsive problems:**
-- Test on actual devices, not just browser resize
-- Check viewport meta tag is present
-- Verify breakpoint configurations
+This allows you to keep the default DisclaimerButton and LanguageSelect while adding your custom content.

@@ -6,7 +6,19 @@
         "useIgnoreFile": true
     },
     "files": {
-        "ignoreUnknown": false
+        "ignoreUnknown": false,
+        "includes": [
+            "**/*.ts",
+            "**/*.js",
+            "**/*.mts",
+            "**/*.cts",
+            "**/*.vue",
+            ".vitepress/**/*.ts",
+            ".vitepress/**/*.vue",
+            "!node_modules",
+            "!dist",
+            "!.vitepress/cache"
+        ]
     },
     "formatter": {
         "enabled": true,
@@ -22,6 +34,11 @@
     "javascript": {
         "formatter": {
             "quoteStyle": "double"
+        }
+    },
+    "css": {
+        "parser": {
+            "tailwindDirectives": true
         }
     },
     "assist": {

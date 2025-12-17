@@ -99,23 +99,6 @@ Customize the disclaimer content and see changes in real-time, try to leave prop
   />
 </div>
 
-```vue-vue
-<script setup lang="ts">
-const content = `{{ contentHtml }}`;
-const postfix = `{{ postfixHtml }}`;
-</script>
-
-<template>
-    <Disclaimer
-        confirmation-text="{{ confirmationText }}"
-        app-name="{{ appName }}"
-        :content-html="content"
-        :postfix-html="postfix"
-        disclaimer-version="1.0.0"
-    />
-</template>
-```
-
 <DisclaimerExample :appName="appName" :confirmationText="confirmationText" :contentHtml="contentHtml" :postfixHtml="postfixHtml" />
 
 ## Version Management

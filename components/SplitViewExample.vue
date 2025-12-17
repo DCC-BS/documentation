@@ -3,8 +3,12 @@ import { SplitView } from "@dcc-bs/common-ui.bs.js/components";
 import { ref } from "vue";
 
 const isHorizontal = ref(false);
-const aPaneContent = ref("This is Pane A. Drag the resizer to adjust the split.");
-const bPaneContent = ref("This is Pane B. The split view supports both horizontal and vertical orientations.");
+const aPaneContent = ref(
+    "This is Pane A. Drag the resizer to adjust the split.",
+);
+const bPaneContent = ref(
+    "This is Pane B. The split view supports both horizontal and vertical orientations.",
+);
 </script>
 
 <template>

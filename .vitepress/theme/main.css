@@ -1,16 +1,16 @@
 /* Import Tailwind CSS v4 with important modifier to override VitePress default styles */
 @import "tailwindcss" important;
 
+/* Import Nuxt UI styles */
+@import "@nuxt/ui";
+@import "@dcc-bs/common-ui.bs.js/runtime/assets/kantonbs/base/brand-colors.css";
+
 @source "@nuxt/runtime";
 @source "@dcc-bs/common-ui.bs.js/runtime";
 @source "./markdown";
 @source "./components";
 @source ".vitepress/theme";
 @source "../../";
-
-/* Import Nuxt UI styles */
-@import "@nuxt/ui";
-@import "@dcc-bs/common-ui.bs.js/runtime/assets/kantonbs/base/brand-colors.css";
 
 /* Additional CSS variable overrides for better integration */
 * {
@@ -42,8 +42,7 @@
 /* Additional utility overrides if needed */
 @layer utilities {
     /* Force remove background gradients from VitePress on Tailwind utility classes */
-    .bg-primary {
-    }
+    .bg-primary,
     .bg-secondary,
     .bg-accent {
         background-image: none;
@@ -56,4 +55,21 @@ input {
 
 textarea {
     @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all;
+}
+
+.disclaimer-content * {
+    color-scheme: light;
+    color: black;
+}
+
+.disclaimer-content h2 {
+    border: none;
+    padding-top: 0px;
+    margin-top: 0px;
+}
+
+.disclaimer-content .confirmation input {
+    width: 25px;
+    height: 25px;
+    background-color: transparent;
 }

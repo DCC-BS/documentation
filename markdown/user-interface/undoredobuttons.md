@@ -3,12 +3,132 @@ outline: deep
 ---
 
 <script setup lang="ts">
-import UndoRedoButtonsExample from '../../components/UndoRedoButtonsExample.vue'
+import { ref } from 'vue';
+import UiContainer from '../../components/UiContainer.vue';
+import { UndoRedoButtons } from "@dcc-bs/common-ui.bs.js/components";
+
+const canUndo = ref(false);
+const canRedo = ref(false);
+const history = ref<string[]>(["Initial state"]);
+const currentIndex = ref(0);
+
+function addAction(action: string) {
+    history.value = history.value.slice(0, currentIndex.value + 1);
+    history.value.push(action);
+    currentIndex.value = history.value.length - 1;
+    updateButtons();
+}
+
+function handleUndo() {
+    if (currentIndex.value > 0) {
+        currentIndex.value--;
+        updateButtons();
+    }
+}
+
+function handleRedo() {
+    if (currentIndex.value < history.value.length - 1) {
+        currentIndex.value++;
+        updateButtons();
+    }
+}
+
+function updateButtons() {
+    canUndo.value = currentIndex.value > 0;
+    canRedo.value = currentIndex.value < history.value.length - 1;
+}
+
+function resetHistory() {
+    history.value = ["Initial state"];
+    currentIndex.value = 0;
+    updateButtons();
+}
+
+const code = `<template>
+  <UndoRedoButtons 
+    :can-undo="canUndo" 
+    :can-redo="canRedo"
+    @undo="handleUndo"
+    @redo="handleRedo"
+  />
+</template>`;
 </script>
 
 # UndoRedoButtons
 
 The `UndoRedoButtons` component provides undo and redo functionality with keyboard shortcuts and tooltips. The buttons are automatically disabled when undo/redo actions are not available, providing a consistent user experience across applications.
+
+## Preview
+
+<UiContainer :code="code">
+    <template #element>
+        <div class="flex flex-col gap-4">
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p class="text-sm text-blue-800">
+                    <strong>Info:</strong> The UndoRedoButtons component provides undo and redo functionality with keyboard shortcuts (Ctrl+Z for undo, Ctrl+Y or Ctrl+Shift+Z for redo) and tooltips. The buttons are automatically disabled when actions are not available.
+                </p>
+            </div>
+
+            <div class="flex flex-col gap-3">
+                <h4 class="text-lg font-semibold">Test the Undo/Redo functionality:</h4>
+                <div class="flex gap-2">
+                    <UButton
+                        variant="solid"
+                        icon="i-lucide-plus"
+                        @click="addAction('Action ' + history.length)"
+                    >
+                        Add Action
+                    </UButton>
+                    <UButton
+                        variant="outline"
+                        icon="i-lucide-refresh-cw"
+                        @click="resetHistory"
+                    >
+                        Reset History
+                    </UButton>
+                </div>
+
+                <div class="border rounded-lg p-4 bg-gray-50">
+                    <h4 class="font-semibold mb-2">History:</h4>
+                    <ul class="space-y-1">
+                        <li
+                            v-for="(item, index) in history"
+                            :key="index"
+                            :class="[
+                                'text-sm',
+                                index === currentIndex
+                                    ? 'font-bold text-blue-600'
+                                    : 'text-gray-500',
+                            ]"
+                        >
+                            {{ index === currentIndex ? '→ ' : '  ' }}{{ item }}
+                            {{ index === currentIndex ? ' (Current)' : '' }}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="border rounded-lg p-6 bg-white">
+                <h4 class="text-lg font-semibold mb-4">Undo/Redo Controls:</h4>
+                <UndoRedoButtons
+                    :can-undo="canUndo"
+                    :can-redo="canRedo"
+                    @undo="handleUndo"
+                    @redo="handleRedo"
+                />
+            </div>
+
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <p class="text-sm text-yellow-800">
+                    <strong>Tip:</strong> Try using keyboard shortcuts:
+                    <code class="bg-yellow-100 px-2 py-1 rounded">Ctrl+Z</code> for undo and
+                    <code class="bg-yellow-100 px-2 py-1 rounded">Ctrl+Y</code> or
+                    <code class="bg-yellow-100 px-2 py-1 rounded">Ctrl+Shift+Z</code> for redo.
+                </p>
+            </div>
+        </div>
+    </template>
+</UiContainer>
 
 ## Features
 
@@ -48,12 +168,10 @@ const canUndo = ref(false);
 const canRedo = ref(false);
 
 function handleUndo() {
-  // Implement undo logic
   console.log('Undo action');
 }
 
 function handleRedo() {
-  // Implement redo logic
   console.log('Redo action');
 }
 </script>
@@ -82,10 +200,8 @@ const currentIndex = ref(0);
 const canUndo = computed(() => currentIndex.value > 0);
 const canRedo = computed(() => currentIndex.value < history.value.length - 1);
 
-function addToHistory(state) {
-  // Remove any future history after current index
+function addToHistory(state: string) {
   history.value = history.value.slice(0, currentIndex.value + 1);
-  // Add new state
   history.value.push(state);
   currentIndex.value = history.value.length - 1;
 }
@@ -93,7 +209,6 @@ function addToHistory(state) {
 function undo() {
   if (canUndo.value) {
     currentIndex.value--;
-    // Apply the state at currentIndex
     applyState(history.value[currentIndex.value]);
   }
 }
@@ -101,13 +216,11 @@ function undo() {
 function redo() {
   if (canRedo.value) {
     currentIndex.value++;
-    // Apply the state at currentIndex
     applyState(history.value[currentIndex.value]);
   }
 }
 
-function applyState(state) {
-  // Your logic to apply the state
+function applyState(state: string) {
   console.log('Applying state:', state);
 }
 </script>
@@ -151,75 +264,6 @@ Add to a toolbar with other actions:
 </template>
 ```
 
-### Form Editing
-
-Use with form state management:
-
-```vue
-<script setup lang="ts">
-import { ref, watch } from 'vue';
-
-const formData = ref({ name: '', email: '' });
-const formHistory = ref([{ ...formData.value }]);
-const historyIndex = ref(0);
-
-// Track changes
-watch(formData, (newData) => {
-  // Only add to history on intentional changes
-  if (!isUndoRedoAction.value) {
-    formHistory.value = formHistory.value.slice(0, historyIndex.value + 1);
-    formHistory.value.push({ ...newData });
-    historyIndex.value++;
-  }
-}, { deep: true });
-
-const canUndo = computed(() => historyIndex.value > 0);
-const canRedo = computed(() => historyIndex.value < formHistory.value.length - 1);
-
-const isUndoRedoAction = ref(false);
-
-function undo() {
-  if (canUndo.value) {
-    isUndoRedoAction.value = true;
-    historyIndex.value--;
-    formData.value = { ...formHistory.value[historyIndex.value] };
-    nextTick(() => {
-      isUndoRedoAction.value = false;
-    });
-  }
-}
-
-function redo() {
-  if (canRedo.value) {
-    isUndoRedoAction.value = true;
-    historyIndex.value++;
-    formData.value = { ...formHistory.value[historyIndex.value] };
-    nextTick(() => {
-      isUndoRedoAction.value = false;
-    });
-  }
-}
-</script>
-
-<template>
-  <div>
-    <div class="mb-4">
-      <UndoRedoButtons 
-        :can-undo="canUndo" 
-        :can-redo="canRedo"
-        @undo="undo"
-        @redo="redo"
-      />
-    </div>
-    
-    <form class="space-y-4">
-      <input v-model="formData.name" placeholder="Name" />
-      <input v-model="formData.email" placeholder="Email" />
-    </form>
-  </div>
-</template>
-```
-
 ### Text Editor
 
 Implement undo/redo for a text editor:
@@ -232,7 +276,7 @@ const content = ref('');
 const contentHistory = ref(['']);
 const historyIndex = ref(0);
 
-function updateContent(newContent) {
+function updateContent(newContent: string) {
   contentHistory.value = contentHistory.value.slice(0, historyIndex.value + 1);
   contentHistory.value.push(newContent);
   historyIndex.value++;
@@ -259,7 +303,7 @@ function redo() {
 
 <template>
   <div class="editor">
-    <div class="toolbar">
+    <div class="toolbar mb-2">
       <UndoRedoButtons 
         :can-undo="canUndo" 
         :can-redo="canRedo"
@@ -271,76 +315,11 @@ function redo() {
     <textarea 
       v-model="content"
       @input="updateContent($event.target.value)"
-      class="w-full h-64 p-4 border"
+      class="w-full h-64 p-4 border rounded"
     />
   </div>
 </template>
 ```
-
-### Canvas/Drawing Application
-
-Use with canvas operations:
-
-```vue
-<script setup lang="ts">
-import { ref, computed } from 'vue';
-
-const canvasStates = ref([]);
-const currentStateIndex = ref(-1);
-
-function saveCanvasState(imageData) {
-  // Remove any states after current index
-  canvasStates.value = canvasStates.value.slice(0, currentStateIndex.value + 1);
-  canvasStates.value.push(imageData);
-  currentStateIndex.value++;
-}
-
-const canUndo = computed(() => currentStateIndex.value > 0);
-const canRedo = computed(() => currentStateIndex.value < canvasStates.value.length - 1);
-
-function undo() {
-  if (canUndo.value) {
-    currentStateIndex.value--;
-    restoreCanvasState(canvasStates.value[currentStateIndex.value]);
-  }
-}
-
-function redo() {
-  if (canRedo.value) {
-    currentStateIndex.value++;
-    restoreCanvasState(canvasStates.value[currentStateIndex.value]);
-  }
-}
-
-function restoreCanvasState(state) {
-  // Restore canvas to saved state
-  const canvas = canvasRef.value;
-  const ctx = canvas.getContext('2d');
-  ctx.putImageData(state, 0, 0);
-}
-</script>
-
-<template>
-  <div>
-    <div class="toolbar">
-      <UndoRedoButtons 
-        :can-undo="canUndo" 
-        :can-redo="canRedo"
-        @undo="undo"
-        @redo="redo"
-      />
-    </div>
-    
-    <canvas ref="canvasRef" width="800" height="600"></canvas>
-  </div>
-</template>
-```
-
-## Interactive Example
-
-Try the interactive example to see how the component works:
-
-<UndoRedoButtonsExample />
 
 ## Keyboard Shortcuts
 
@@ -378,49 +357,6 @@ The component automatically listens for keyboard shortcuts:
 - Keyboard shortcuts are ignored
 - Cursor shows "not-allowed"
 
-## Styling
-
-The component uses Nuxt UI button styling:
-
-- **Default**: Ghost variant for minimal appearance
-- **Icons**: Standard undo/redo icons
-- **Size**: Small size for toolbar integration
-- **Spacing**: Grouped together with minimal gap
-
-### Custom Styling
-
-Wrap the component to add custom styling:
-
-```vue
-<template>
-  <div class="custom-undo-redo">
-    <UndoRedoButtons 
-      :can-undo="canUndo" 
-      :can-redo="canRedo"
-      @undo="undo"
-      @redo="redo"
-    />
-  </div>
-</template>
-
-<style scoped>
-.custom-undo-redo {
-  padding: 0.5rem;
-  background: #f5f5f5;
-  border-radius: 0.5rem;
-}
-</style>
-```
-
-## Accessibility
-
-- **Keyboard Navigation**: Full Tab key support to navigate between buttons
-- **Keyboard Shortcuts**: Standard shortcuts for undo/redo
-- **ARIA Labels**: Proper labels for screen readers
-- **Tooltips**: Show keyboard shortcuts on hover
-- **Disabled State**: Properly announced to screen readers
-- **Focus Indicators**: Clear visual focus states
-
 ## Best Practices
 
 1. **State Management**: Maintain a clear history of states
@@ -428,11 +364,10 @@ Wrap the component to add custom styling:
 3. **Deep Cloning**: Clone objects deeply to avoid reference issues
 4. **Action Granularity**: Group related changes into single history entries
 5. **User Feedback**: Provide visual feedback when undo/redo happens
-6. **Persistence**: Consider persisting history for critical applications
-7. **Clear Communication**: Show current state in UI after undo/redo
-8. **Testing**: Test edge cases (empty history, single item, etc.)
+6. **Clear Communication**: Show current state in UI after undo/redo
+7. **Testing**: Test edge cases (empty history, single item, etc.)
 
-## History Management Patterns
+## History Management Pattern
 
 ### Basic Array-based History
 
@@ -481,54 +416,10 @@ function addState<T>(history: HistoryManager<T>, state: T) {
   history.states = history.states.slice(0, history.currentIndex + 1);
   history.states.push(state);
   
-  // Limit history size
   if (history.states.length > MAX_HISTORY_SIZE) {
     history.states.shift();
   } else {
     history.currentIndex++;
-  }
-}
-```
-
-### Command Pattern
-
-```typescript
-interface Command {
-  execute(): void;
-  undo(): void;
-}
-
-class CommandHistory {
-  private commands: Command[] = [];
-  private currentIndex = -1;
-
-  execute(command: Command) {
-    command.execute();
-    this.commands = this.commands.slice(0, this.currentIndex + 1);
-    this.commands.push(command);
-    this.currentIndex++;
-  }
-
-  undo() {
-    if (this.canUndo()) {
-      this.commands[this.currentIndex].undo();
-      this.currentIndex--;
-    }
-  }
-
-  redo() {
-    if (this.canRedo()) {
-      this.currentIndex++;
-      this.commands[this.currentIndex].execute();
-    }
-  }
-
-  canUndo(): boolean {
-    return this.currentIndex >= 0;
-  }
-
-  canRedo(): boolean {
-    return this.currentIndex < this.commands.length - 1;
   }
 }
 ```
@@ -541,7 +432,6 @@ class CommandHistory {
 - **Code Editors**: Source code editing
 - **Data Entry Forms**: Complex form editing
 - **Design Tools**: UI/graphic design applications
-- **Spreadsheets**: Cell editing and formula changes
 - **Diagram Editors**: Flow chart and diagram tools
 - **Photo Editors**: Image manipulation
 - **Configuration Panels**: Settings management
@@ -551,6 +441,15 @@ class CommandHistory {
 - [NavigationBar](./navigationbar.md) - Navigation component
 - [SplitView](./splitview.md) - Split view for editor layouts
 - [SplitContainer](./splitcontainer.md) - Container for split content
+
+## Accessibility
+
+- **Keyboard Navigation**: Full Tab key support to navigate between buttons
+- **Keyboard Shortcuts**: Standard shortcuts for undo/redo
+- **ARIA Labels**: Proper labels for screen readers
+- **Tooltips**: Show keyboard shortcuts on hover
+- **Disabled State**: Properly announced to screen readers
+- **Focus Indicators**: Clear visual focus states
 
 ## Browser Support
 
@@ -585,46 +484,3 @@ Works in all modern browsers that support:
 - Check that history index is managed correctly
 - Verify state application logic
 - Test edge cases (empty history, etc.)
-
-**Events not firing:**
-- Check event handler binding
-- Verify component is properly imported
-- Check Vue devtools for event emissions
-- Ensure no errors in event handlers
-
-## Performance Optimization
-
-### Debounce History Updates
-
-```vue
-<script setup lang="ts">
-import { useDebounceFn } from '@vueuse/core';
-
-const addToHistory = useDebounceFn((state) => {
-  // Add to history
-  history.value.push(state);
-}, 500);
-</script>
-```
-
-### Use Diffs Instead of Full States
-
-```typescript
-interface StateDiff {
-  path: string;
-  oldValue: any;
-  newValue: any;
-}
-
-// Store only what changed
-function createDiff(oldState, newState): StateDiff[] {
-  // Calculate differences
-  return differences;
-}
-
-// Apply diff to restore state
-function applyDiff(state, diff: StateDiff[]) {
-  // Apply changes
-  return newState;
-}
-```

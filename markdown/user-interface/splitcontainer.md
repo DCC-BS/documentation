@@ -3,12 +3,87 @@ outline: deep
 ---
 
 <script setup lang="ts">
-import SplitContainerExample from '../../components/SplitContainerExample.vue'
+import { ref } from 'vue';
+import UiContainer from '../../components/UiContainer.vue';
+import { SplitContainer } from "@dcc-bs/common-ui.bs.js/components";
+
+const headerText = ref("Split Container Header");
+const leftContent = ref("This is the left pane content. You can put any content here.");
+const rightContent = ref("This is the right pane content. It displays side-by-side on desktop and stacks on mobile.");
+
+const code = `<template>
+  <SplitContainer>
+    <template #header>
+      <h2>My Split Container</h2>
+    </template>
+    <template #left>
+      <p>Left pane content</p>
+    </template>
+    <template #right>
+      <p>Right pane content</p>
+    </template>
+  </SplitContainer>
+</template>`;
 </script>
 
 # SplitContainer
 
 The `SplitContainer` component provides a card-like container with a header and two side-by-side content areas separated by a border. It's responsive and automatically stacks vertically on mobile devices, making it perfect for displaying paired content or comparison views.
+
+## Preview
+
+<UiContainer :code="code">
+    <template #element>
+        <div class="flex flex-col gap-4">
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p class="text-sm text-blue-800">
+                    <strong>Info:</strong> The SplitContainer component provides a card-like container with a header and two side-by-side content areas. It's responsive and stacks vertically on mobile devices.
+                </p>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label class="text-sm font-medium">Header Text:</label>
+                <input
+                    v-model="headerText"
+                    class="border rounded px-3 py-2"
+                    placeholder="Header text"
+                />
+
+                <label class="text-sm font-medium">Left Content:</label>
+                <textarea
+                    v-model="leftContent"
+                    class="border rounded px-3 py-2"
+                    rows="3"
+                    placeholder="Left pane content..."
+                />
+
+                <label class="text-sm font-medium">Right Content:</label>
+                <textarea
+                    v-model="rightContent"
+                    class="border rounded px-3 py-2"
+                    rows="3"
+                    placeholder="Right pane content..."
+                />
+            </div>
+
+            <SplitContainer>
+                <template #header>
+                    <h2 class="text-xl font-bold">{{ headerText }}</h2>
+                </template>
+                <template #left>
+                    <div class="p-4">
+                        <p>{{ leftContent }}</p>
+                    </div>
+                </template>
+                <template #right>
+                    <div class="p-4">
+                        <p>{{ rightContent }}</p>
+                    </div>
+                </template>
+            </SplitContainer>
+        </div>
+    </template>
+</UiContainer>
 
 ## Features
 
@@ -90,45 +165,6 @@ Perfect for showing before/after or comparison content:
 </template>
 ```
 
-### Input and Output Display
-
-Show input and corresponding output:
-
-```vue
-<script setup lang="ts">
-import { ref, computed } from 'vue';
-
-const inputText = ref('Hello, world!');
-const output = computed(() => inputText.value.toUpperCase());
-</script>
-
-<template>
-  <SplitContainer>
-    <template #header>
-      <h2>Text Transformer</h2>
-    </template>
-    <template #left>
-      <div class="p-4">
-        <label class="block mb-2 font-semibold">Input:</label>
-        <textarea 
-          v-model="inputText"
-          class="w-full p-2 border rounded"
-          rows="5"
-        />
-      </div>
-    </template>
-    <template #right>
-      <div class="p-4">
-        <label class="block mb-2 font-semibold">Output:</label>
-        <div class="p-2 bg-gray-50 rounded min-h-[120px]">
-          {{ output }}
-        </div>
-      </div>
-    </template>
-  </SplitContainer>
-</template>
-```
-
 ### Code and Preview
 
 Display code alongside its rendered preview:
@@ -143,9 +179,7 @@ Display code alongside its rendered preview:
       <div class="p-4">
         <h3 class="font-semibold mb-2">Code:</h3>
         <pre class="bg-gray-900 text-white p-4 rounded overflow-auto">
-          <code>&lt;UButton variant="solid"&gt;
-  Click Me
-&lt;/UButton&gt;</code>
+          <code>&lt;UButton variant="solid"&gt;Click Me&lt;/UButton&gt;</code>
         </pre>
       </div>
     </template>
@@ -218,80 +252,6 @@ const data = [
 </template>
 ```
 
-### Settings and Preview
-
-Configuration on left, preview on right:
-
-```vue
-<script setup lang="ts">
-import { ref } from 'vue';
-
-const fontSize = ref(16);
-const fontWeight = ref('normal');
-const textAlign = ref('left');
-</script>
-
-<template>
-  <SplitContainer>
-    <template #header>
-      <h2>Text Style Editor</h2>
-    </template>
-    <template #left>
-      <div class="p-4 space-y-4">
-        <div>
-          <label class="block mb-1">Font Size:</label>
-          <input 
-            v-model.number="fontSize"
-            type="range"
-            min="12"
-            max="48"
-            class="w-full"
-          />
-          <span class="text-sm">{{ fontSize }}px</span>
-        </div>
-        <div>
-          <label class="block mb-1">Font Weight:</label>
-          <select v-model="fontWeight" class="w-full p-2 border rounded">
-            <option value="normal">Normal</option>
-            <option value="bold">Bold</option>
-            <option value="lighter">Lighter</option>
-          </select>
-        </div>
-        <div>
-          <label class="block mb-1">Text Align:</label>
-          <select v-model="textAlign" class="w-full p-2 border rounded">
-            <option value="left">Left</option>
-            <option value="center">Center</option>
-            <option value="right">Right</option>
-          </select>
-        </div>
-      </div>
-    </template>
-    <template #right>
-      <div class="p-4">
-        <h3 class="font-semibold mb-3">Preview:</h3>
-        <div 
-          class="border rounded p-4"
-          :style="{
-            fontSize: `${fontSize}px`,
-            fontWeight: fontWeight,
-            textAlign: textAlign
-          }"
-        >
-          The quick brown fox jumps over the lazy dog.
-        </div>
-      </div>
-    </template>
-  </SplitContainer>
-</template>
-```
-
-## Interactive Example
-
-Try customizing the content and see the component in action:
-
-<SplitContainerExample />
-
 ## Responsive Behavior
 
 The component automatically adapts to screen size:
@@ -299,15 +259,9 @@ The component automatically adapts to screen size:
 - **Desktop (≥768px)**: Two columns side-by-side
 - **Mobile (<768px)**: Single column, stacked vertically (left on top, right below)
 
-### Breakpoint Details
+### Layout Structure
 
-- Uses Tailwind's `md:` breakpoint (768px)
-- No configuration needed - responsive by default
-- Content flows naturally on smaller screens
-- Maintains readability on all devices
-
-## Layout Structure
-
+Desktop:
 ```
 ┌─────────────────────────────────┐
 │         Header Slot             │
@@ -318,8 +272,7 @@ The component automatically adapts to screen size:
 └────────────────┴────────────────┘
 ```
 
-On mobile:
-
+Mobile:
 ```
 ┌─────────────────────────────────┐
 │         Header Slot             │
@@ -330,75 +283,6 @@ On mobile:
 └─────────────────────────────────┘
 ```
 
-## Styling
-
-The component uses these design elements:
-
-- **Border**: Clean border around container
-- **Shadow**: Subtle shadow for depth
-- **Padding**: Appropriate spacing in all sections
-- **Separator**: Vertical border between panes on desktop
-- **Rounded Corners**: Modern card appearance
-- **Background**: White/light background
-
-### Custom Styling
-
-Add custom classes to slot content:
-
-```vue
-<template>
-  <SplitContainer>
-    <template #header>
-      <div class="bg-blue-100 p-4 rounded-t">
-        <h2>Custom Header</h2>
-      </div>
-    </template>
-    <template #left>
-      <div class="bg-gray-50 p-6">
-        <p>Custom left content</p>
-      </div>
-    </template>
-    <template #right>
-      <div class="bg-green-50 p-6">
-        <p>Custom right content</p>
-      </div>
-    </template>
-  </SplitContainer>
-</template>
-```
-
-## Accessibility
-
-- **Semantic HTML**: Uses appropriate container elements
-- **Heading Structure**: Header slot typically contains headings
-- **Keyboard Navigation**: All content is keyboard accessible
-- **Screen Reader Friendly**: Logical reading order
-- **ARIA Landmarks**: Consider adding landmarks for complex content
-
-### Accessibility Example
-
-```vue
-<template>
-  <SplitContainer>
-    <template #header>
-      <h2 id="container-title">Accessible Container</h2>
-    </template>
-    <template #left>
-      <section aria-labelledby="left-heading">
-        <h3 id="left-heading">Left Section</h3>
-        <p>Content...</p>
-      </section>
-    </template>
-    <template #right>
-      <section aria-labelledby="right-heading">
-        <h3 id="right-heading">Right Section</h3>
-        <p>Content...</p>
-      </section>
-    </template>
-  </SplitContainer>
-</template>
-```
-
 ## Best Practices
 
 1. **Header Content**: Use clear, descriptive headers
@@ -407,19 +291,16 @@ Add custom classes to slot content:
 4. **Scrollable Content**: Use `overflow-auto` for long content
 5. **Mobile Testing**: Always test on mobile devices
 6. **Semantic Markup**: Use appropriate HTML elements in slots
-7. **Consistent Heights**: Consider min-height for visual balance
 
 ## Use Cases
 
 - **Comparison Views**: Side-by-side comparisons
 - **Before/After**: Show changes or transformations
-- **Input/Output**: Forms with live preview
 - **Code/Preview**: Code examples with rendered output
 - **Data/Visualization**: Tables with charts
 - **Settings/Preview**: Configuration with live preview
 - **Documentation**: Examples with explanations
 - **Translations**: Original and translated text
-- **Diff Views**: Code or text differences
 
 ## Comparison with SplitView
 
@@ -446,8 +327,13 @@ Choose **SplitView** when:
 
 - [SplitView](./splitview.md) - Resizable split view layout
 - [UCard](https://ui.nuxt.com/components/card) - Nuxt UI card component
-- [DataBsBanner](./databsbanner.md) - Banner component
-- [DataBsFooter](./databsfooter.md) - Footer component
+
+## Accessibility
+
+- **Semantic HTML**: Uses appropriate container elements
+- **Heading Structure**: Header slot typically contains headings
+- **Keyboard Navigation**: All content is keyboard accessible
+- **Screen Reader Friendly**: Logical reading order
 
 ## Browser Support
 
@@ -474,8 +360,3 @@ Works in all modern browsers that support:
 - Test on actual mobile devices
 - Check responsive breakpoints
 - Verify content width constraints
-
-**Styling conflicts:**
-- Use scoped styles for custom CSS
-- Check for global style overrides
-- Verify Tailwind CSS is configured correctly

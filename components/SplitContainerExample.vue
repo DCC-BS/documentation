@@ -3,8 +3,12 @@ import { SplitContainer } from "@dcc-bs/common-ui.bs.js/components";
 import { ref } from "vue";
 
 const headerText = ref("Split Container Header");
-const leftContent = ref("This is the left pane content. You can put any content here.");
-const rightContent = ref("This is the right pane content. It displays side-by-side on desktop and stacks on mobile.");
+const leftContent = ref(
+    "This is the left pane content. You can put any content here.",
+);
+const rightContent = ref(
+    "This is the right pane content. It displays side-by-side on desktop and stacks on mobile.",
+);
 </script>
 
 <template>

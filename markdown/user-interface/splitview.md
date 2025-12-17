@@ -3,12 +3,90 @@ outline: deep
 ---
 
 <script setup lang="ts">
-import SplitViewExample from '../../components/SplitViewExample.vue'
+import { ref } from 'vue';
+import UiContainer from '../../components/UiContainer.vue';
+import { SplitView } from "@dcc-bs/common-ui.bs.js/components";
+
+const isHorizontal = ref(false);
+const aPaneContent = ref("This is Pane A. Drag the resizer to adjust the split.");
+const bPaneContent = ref("This is Pane B. The split view supports both horizontal and vertical orientations.");
+
+const code = `<template>
+  <SplitView>
+    <template #a>
+      <div>Left Pane Content</div>
+    </template>
+    <template #b>
+      <div>Right Pane Content</div>
+    </template>
+  </SplitView>
+</template>`;
 </script>
 
 # SplitView
 
 The `SplitView` component allows you to create a resizable split view layout with two panes separated by a draggable resizer. It supports both horizontal and vertical orientations, giving users full control over the layout proportions.
+
+## Preview
+
+<UiContainer :code="code">
+    <template #element>
+        <div class="flex flex-col gap-4">
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p class="text-sm text-blue-800">
+                    <strong>Info:</strong> The SplitView component allows you to create a resizable split view layout. It supports both horizontal and vertical orientations. Drag the resizer to adjust the split.
+                </p>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <div class="flex items-center gap-2">
+                    <input
+                        id="is-horizontal"
+                        v-model="isHorizontal"
+                        type="checkbox"
+                        class="w-4 h-4"
+                    />
+                    <label for="is-horizontal" class="text-sm font-medium">
+                        Horizontal Split (unchecked = vertical)
+                    </label>
+                </div>
+
+                <label class="text-sm font-medium">Pane A Content:</label>
+                <textarea
+                    v-model="aPaneContent"
+                    class="border rounded px-3 py-2"
+                    rows="3"
+                    placeholder="Pane A content..."
+                />
+
+                <label class="text-sm font-medium">Pane B Content:</label>
+                <textarea
+                    v-model="bPaneContent"
+                    class="border rounded px-3 py-2"
+                    rows="3"
+                    placeholder="Pane B content..."
+                />
+            </div>
+
+            <div class="border rounded-lg overflow-hidden" style="height: 400px;">
+                <SplitView :is-horizontal="isHorizontal">
+                    <template #a>
+                        <div class="p-4 bg-blue-50 h-full overflow-auto">
+                            <h3 class="text-lg font-semibold mb-2">Pane A</h3>
+                            <p>{{ aPaneContent }}</p>
+                        </div>
+                    </template>
+                    <template #b>
+                        <div class="p-4 bg-green-50 h-full overflow-auto">
+                            <h3 class="text-lg font-semibold mb-2">Pane B</h3>
+                            <p>{{ bPaneContent }}</p>
+                        </div>
+                    </template>
+                </SplitView>
+            </div>
+        </div>
+    </template>
+</UiContainer>
 
 ## Features
 
@@ -17,7 +95,6 @@ The `SplitView` component allows you to create a resizable split view layout wit
 - **Smooth Resizing**: Fluid drag interaction with visual feedback
 - **Customizable Styling**: Style each pane and resizer independently
 - **Flexible Content**: Accepts any content in either pane
-- **Persistent Sizes**: Pane sizes remain after resizing
 - **Keyboard Accessible**: Resizer can be controlled with keyboard
 - **Touch Support**: Works on touch devices
 
@@ -102,7 +179,7 @@ Perfect for code editor with preview:
 
 ```vue
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 
 const code = ref(`<template>
   <div>Hello World</div>
@@ -210,71 +287,6 @@ Dashboard layout with resizable sidebar:
 </template>
 ```
 
-### Horizontal Layout (Email Client)
-
-Email client with message list on top and content below:
-
-```vue
-<template>
-  <SplitView :is-horizontal="true">
-    <template #a>
-      <div class="p-4">
-        <h3 class="font-bold mb-4">Messages</h3>
-        <ul class="space-y-2">
-          <li class="p-3 border rounded hover:bg-gray-50 cursor-pointer">
-            <div class="font-semibold">John Doe</div>
-            <div class="text-sm text-gray-600">Meeting tomorrow</div>
-          </li>
-          <li class="p-3 border rounded hover:bg-gray-50 cursor-pointer">
-            <div class="font-semibold">Jane Smith</div>
-            <div class="text-sm text-gray-600">Project update</div>
-          </li>
-        </ul>
-      </div>
-    </template>
-    <template #b>
-      <div class="p-4">
-        <h3 class="font-bold mb-2">Message Content</h3>
-        <p>Select a message to view its content</p>
-      </div>
-    </template>
-  </SplitView>
-</template>
-```
-
-### Nested Split Views
-
-Create complex layouts with nested splits:
-
-```vue
-<template>
-  <SplitView>
-    <!-- Left pane with nested horizontal split -->
-    <template #a>
-      <SplitView :is-horizontal="true">
-        <template #a>
-          <div class="p-4">Top Left</div>
-        </template>
-        <template #b>
-          <div class="p-4">Bottom Left</div>
-        </template>
-      </SplitView>
-    </template>
-    
-    <!-- Right pane -->
-    <template #b>
-      <div class="p-4">Right Pane</div>
-    </template>
-  </SplitView>
-</template>
-```
-
-## Interactive Example
-
-Try resizing the panes and switching between orientations:
-
-<SplitViewExample />
-
 ## Orientation Modes
 
 ### Vertical Split (Default)
@@ -318,84 +330,14 @@ The resizer between panes:
 - **Smooth Dragging**: Responsive to mouse/touch movement
 - **Keyboard Support**: Can be controlled with arrow keys
 
-## Styling Options
-
-### Pane Styling
-
-Add classes to individual panes:
-
-```vue
-<template>
-  <SplitView
-    a-pane-style="bg-gray-50 overflow-auto"
-    b-pane-style="bg-white overflow-hidden"
-  >
-    <!-- Content -->
-  </SplitView>
-</template>
-```
-
-Common pane styles:
-- `overflow-auto` - Scrollable content
-- `overflow-hidden` - No scrolling
-- `p-4` - Padding
-- `bg-*` - Background colors
-- `h-full` - Full height
-
-### Resizer Styling
-
-Customize the resizer appearance:
-
-```vue
-<template>
-  <SplitView
-    resizer-style="bg-blue-500 w-2"
-    resizer-inner-style="bg-blue-700"
-  >
-    <!-- Content -->
-  </SplitView>
-</template>
-```
-
-### Container Styling
-
-Style the outer container:
-
-```vue
-<template>
-  <SplitView
-    split-view-style="h-screen border rounded-lg"
-  >
-    <!-- Content -->
-  </SplitView>
-</template>
-```
-
-## Accessibility
-
-- **Keyboard Navigation**: Resizer is keyboard accessible
-- **Focus Indicators**: Clear focus states on resizer
-- **ARIA Labels**: Proper labeling for assistive technology
-- **Semantic Structure**: Logical content organization
-- **Screen Reader**: Announces resize actions
-
-### Keyboard Controls
-
-When resizer is focused:
-- **Arrow Keys**: Adjust split position
-- **Tab**: Navigate to/from resizer
-- **Enter/Space**: Activate resizer for keyboard control
-
 ## Best Practices
 
 1. **Set Container Height**: Ensure parent container has explicit height
 2. **Overflow Handling**: Use `overflow-auto` for scrollable content
-3. **Minimum Sizes**: Consider setting minimum pane widths/heights
-4. **Content Padding**: Add padding to pane content for readability
-5. **Responsive Design**: Consider mobile layouts (may need different approach)
-6. **Initial Proportions**: Default split is usually 50/50
-7. **Persist Sizes**: Save user's resize preferences if needed
-8. **Performance**: Optimize content rendering during resize
+3. **Content Padding**: Add padding to pane content for readability
+4. **Responsive Design**: Consider mobile layouts (may need different approach)
+5. **Initial Proportions**: Default split is usually 50/50
+6. **Performance**: Optimize content rendering during resize
 
 ## Use Cases
 
@@ -436,8 +378,21 @@ Choose **SplitContainer** when:
 
 - [SplitContainer](./splitcontainer.md) - Fixed split layout with header
 - [UCard](https://ui.nuxt.com/components/card) - Nuxt UI card component
-- [DataBsBanner](./databsbanner.md) - Banner component
-- [NavigationBar](./navigationbar.md) - Navigation component
+
+## Accessibility
+
+- **Keyboard Navigation**: Resizer is keyboard accessible
+- **Focus Indicators**: Clear focus states on resizer
+- **ARIA Labels**: Proper labeling for assistive technology
+- **Semantic Structure**: Logical content organization
+- **Screen Reader**: Announces resize actions
+
+### Keyboard Controls
+
+When resizer is focused:
+- **Arrow Keys**: Adjust split position
+- **Tab**: Navigate to/from resizer
+- **Enter/Space**: Activate resizer for keyboard control
 
 ## Browser Support
 
@@ -470,87 +425,3 @@ Works in all modern browsers that support:
 - Test on actual touch devices
 - Ensure touch events are not blocked
 - Consider providing alternative layout for mobile
-
-**Layout breaking:**
-- Verify container has explicit height
-- Check for conflicting CSS
-- Ensure proper parent-child relationships
-- Use browser dev tools to inspect layout
-
-## Advanced Usage
-
-### Save and Restore Split Position
-
-```vue
-<script setup lang="ts">
-import { ref, watch, onMounted } from 'vue';
-
-const splitPosition = ref(50);
-
-onMounted(() => {
-  const saved = localStorage.getItem('splitPosition');
-  if (saved) splitPosition.value = Number(saved);
-});
-
-watch(splitPosition, (newPos) => {
-  localStorage.setItem('splitPosition', newPos.toString());
-});
-</script>
-
-<template>
-  <SplitView>
-    <!-- Content -->
-  </SplitView>
-</template>
-```
-
-### Dynamic Orientation
-
-```vue
-<script setup lang="ts">
-import { ref, computed } from 'vue';
-
-const windowWidth = ref(window.innerWidth);
-const isHorizontal = computed(() => windowWidth.value < 768);
-
-onMounted(() => {
-  window.addEventListener('resize', () => {
-    windowWidth.value = window.innerWidth;
-  });
-});
-</script>
-
-<template>
-  <SplitView :is-horizontal="isHorizontal">
-    <!-- Content adapts to screen size -->
-  </SplitView>
-</template>
-```
-
-### Collapse/Expand Panes
-
-```vue
-<script setup lang="ts">
-import { ref } from 'vue';
-
-const isPaneAVisible = ref(true);
-</script>
-
-<template>
-  <SplitView 
-    :a-pane-style="isPaneAVisible ? '' : 'w-0'"
-  >
-    <template #a>
-      <div v-if="isPaneAVisible">
-        <!-- Pane A content -->
-      </div>
-    </template>
-    <template #b>
-      <button @click="isPaneAVisible = !isPaneAVisible">
-        {{ isPaneAVisible ? 'Hide' : 'Show' }} Sidebar
-      </button>
-      <!-- Pane B content -->
-    </template>
-  </SplitView>
-</template>
-```

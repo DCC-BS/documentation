@@ -1,9 +1,9 @@
-import llmstxt from "vitepress-plugin-llms";
-import { withMermaid } from "vitepress-plugin-mermaid";
 import ui from "@nuxt/ui/vite";
 import tailwindcss from "@tailwindcss/vite";
-import { fileURLToPath } from "url";
 import path from "path";
+import { fileURLToPath } from "url";
+import llmstxt from "vitepress-plugin-llms";
+import { withMermaid } from "vitepress-plugin-mermaid";
 
 // https://vitepress.dev/reference/site-config
 export default withMermaid({

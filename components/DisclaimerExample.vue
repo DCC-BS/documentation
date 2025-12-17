@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import UiContainer from "./UiContainer.vue";
 import { Disclaimer } from "@dcc-bs/common-ui.bs.js/components";
 import { useLocalStorage } from "@dcc-bs/common-ui.bs.js/composables";
 import { onMounted } from "vue";
@@ -22,36 +23,36 @@ onMounted(() => {
 function showDisclaimer() {
     disclaimerAcceptedVersion.value = undefined;
 }
-</script>
+
+const code = `<script setup lang="ts">
+const content = \`${props.contentHtml}\`;
+const postfix = \`${props.postfixHtml}\`;
+const confirmationText = \"${props.confirmationText}\";
+<\/script>
 
 <template>
     <Disclaimer
-        :confirmation-text="props.confirmationText"
-        :app-name="props.appName"
-        :content-html="props.contentHtml"
-        :postfix-html="props.postfixHtml"
-    ></Disclaimer>
+        app-name="${props.appName}"
+        :content-html="content"
+        :postfix-html="postfix"
+        :confirmation-text="confirmationText"
+        disclaimer-version="1.0.0"
+    \/>
+</template>`;
+</script>
 
-    <UButton varian="solid" icon="i-lucide-eye" @click="showDisclaimer"
-        >Show Disclaimer
-    </UButton>
+<template>
+    <UiContainer :code="code">
+        <template #element>
+            <Disclaimer
+                :confirmation-text="props.confirmationText"
+                :app-name="props.appName"
+                :content-html="props.contentHtml"
+                :postfix-html="props.postfixHtml"
+            ></Disclaimer>
+            <UButton varian="solid" icon="i-lucide-eye" @click="showDisclaimer"
+                >Show Disclaimer
+            </UButton>
+        </template>
+    </UiContainer>
 </template>
-
-<style>
-.disclaimer-content * {
-    color-scheme: light;
-    color: black;
-}
-
-.disclaimer-content h2 {
-    border: none;
-    padding-top: 0px;
-    margin-top: 0px;
-}
-
-.disclaimer-content .confirmation input {
-    width: 25px;
-    height: 25px;
-    background-color: transparent;
-}
-</style>

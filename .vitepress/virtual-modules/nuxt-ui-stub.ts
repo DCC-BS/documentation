@@ -16,15 +16,18 @@ export interface Toast {
 export function useToast() {
     return {
         add: (toast: Toast) => {
-            console.warn('Toast functionality not available in VitePress build:', toast);
+            console.warn(
+                "Toast functionality not available in VitePress build:",
+                toast,
+            );
         },
         remove: (id: string | number) => {
-            console.warn('Toast remove not available in VitePress build:', id);
+            console.warn("Toast remove not available in VitePress build:", id);
         },
         clear: () => {
-            console.warn('Toast clear not available in VitePress build');
-        }
+            console.warn("Toast clear not available in VitePress build");
+        },
     };
 }
 
-export const toastMaxInjectionKey = Symbol('toastMax');
+export const toastMaxInjectionKey = Symbol("toastMax");
