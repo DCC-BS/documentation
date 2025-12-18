@@ -65,7 +65,7 @@ export default withMermaid({
                                 text: "useUserFeedback",
                                 link: "/user-interface/composables/useUserFeedback.md",
                             },
-                        ]
+                        ],
                     },
                     {
                         text: "Components",
@@ -111,9 +111,8 @@ export default withMermaid({
                                 text: "Undo Redo Buttons",
                                 link: "/user-interface/components/undoredobuttons.md",
                             },
-                        ]
-                    }
-
+                        ],
+                    },
                 ],
             },
             {
