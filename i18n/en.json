@@ -5,6 +5,8 @@
             "offline_title": "offline",
             "online_description": "The system is operating normally.",
             "offline_description": "The system is currently experiencing issues."
-        }
+        },
+        "undo_tooltip": "Undo the last action",
+        "redo_tooltip": "Redo the last undone action"
     }
 }

@@ -1,5 +1,6 @@
 import ui from "@nuxt/ui/vite";
 import tailwindcss from "@tailwindcss/vite";
+import { link } from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
 import llmstxt from "vitepress-plugin-llms";
@@ -39,51 +40,80 @@ export default withMermaid({
             },
             {
                 text: "Docker",
-                items: [{ text: "Docker", link: "/docker" }],
+                link: "/docker/index.md",
             },
             {
                 text: "Coding",
+                link: "/coding/index.md",
                 items: [
-                    { text: "Coding", link: "/general" },
-                    { text: "Python", link: "/python" },
-                    { text: "Nuxt / Vue", link: "/nuxt" },
+                    { text: "Python", link: "/coding/python" },
+                    { text: "Nuxt / Vue", link: "/coding/nuxt" },
                 ],
             },
             {
                 text: "Git / GitHub / CI/CD",
-                items: [{ text: "Git / GitHub / CI/CD", link: "/git" }],
+                link: "/git",
             },
             {
                 text: "User Interfaces",
+                link: "/user-interface/index.md",
                 items: [
                     {
-                        text: "Changelogs",
-                        link: "/user-interface/changelogs.md",
+                        text: "Composables",
+                        items: [
+                            {
+                                text: "useUserFeedback",
+                                link: "/user-interface/composables/useUserFeedback.md",
+                            },
+                        ]
                     },
                     {
-                        text: "Data Bs Footer",
-                        link: "/user-interface/databsfooter.md",
-                    },
-                    {
-                        text: "Disclaimer",
-                        link: "/user-interface/disclaimer.md",
-                    },
-                    {
-                        text: "Disclaimer Button",
-                        link: "/user-interface/disclaimerbutton.md",
-                    },
-                    {
-                        text: "Disclaimer Page",
-                        link: "/user-interface/disclaimerpage.md",
-                    },
-                    {
-                        text: "Navigation Bar",
-                        link: "/user-interface/navigationbar.md",
-                    },
-                    {
-                        text: "Online Status",
-                        link: "/user-interface/onlinestatus.md",
-                    },
+                        text: "Components",
+                        link: "/user-interface/components/index.md",
+                        items: [
+                            {
+                                text: "Changelogs",
+                                link: "/user-interface/components/changelogs.md",
+                            },
+                            {
+                                text: "Data Bs Footer",
+                                link: "/user-interface/components/databsfooter.md",
+                            },
+                            {
+                                text: "Disclaimer",
+                                link: "/user-interface/components/disclaimer.md",
+                            },
+                            {
+                                text: "Disclaimer Button",
+                                link: "/user-interface/components/disclaimerbutton.md",
+                            },
+                            {
+                                text: "Disclaimer Page",
+                                link: "/user-interface/components/disclaimerpage.md",
+                            },
+                            {
+                                text: "Navigation Bar",
+                                link: "/user-interface/components/navigationbar.md",
+                            },
+                            {
+                                text: "Online Status",
+                                link: "/user-interface/components/onlinestatus.md",
+                            },
+                            {
+                                text: "Split Container",
+                                link: "/user-interface/components/splitcontainer.md",
+                            },
+                            {
+                                text: "Split View",
+                                link: "/user-interface/components/splitview.md",
+                            },
+                            {
+                                text: "Undo Redo Buttons",
+                                link: "/user-interface/components/undoredobuttons.md",
+                            },
+                        ]
+                    }
+
                 ],
             },
             {
@@ -97,7 +127,7 @@ export default withMermaid({
             },
             {
                 text: "Team",
-                items: [{ text: "Team", link: "/team" }],
+                link: "/team",
             },
         ],
 

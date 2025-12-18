@@ -3,7 +3,7 @@ outline: deep
 ---
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import UiContainer from '../../components/UiContainer.vue';
+import UiContainer from '../../../components/UiContainer.vue';
 import { DisclaimerButton, Disclaimer } from "@dcc-bs/common-ui.bs.js/components";
 import { useLocalStorage } from "@dcc-bs/common-ui.bs.js/composables";
 
@@ -108,10 +108,3 @@ Commonly placed in the navigation bar for easy access (ghost variant is commonly
   </NavigationBar>
 </template>
 ```
-
-## Related Components
-
-- [Disclaimer](./disclaimer.md) - Main disclaimer modal component
-- [DisclaimerPage](./disclaimerpage.md) - Full-page disclaimer view
-- [DisclaimerView](./disclaimerview.md) - Disclaimer content component
-- [NavigationBar](./navigationbar.md) - Navigation component with built-in disclaimer button

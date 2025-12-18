@@ -3,7 +3,7 @@ outline: deep
 ---
 
 <script setup lang="ts">
-import UiContainer from "../../components/UiContainer.vue";
+import UiContainer from "../../../components/UiContainer.vue";
 import { NavigationBar } from "@dcc-bs/common-ui.bs.js/components";
 
 const exampleCode = `<template>
@@ -344,15 +344,6 @@ The component uses utility classes for layout:
 - `p-2`: Padding around the entire bar
 - `w-full`: Full width
 - `z-50`: High z-index for layering
-
-## Related Components
-
-- [DisclaimerButton](./disclaimerbutton.md) - Built-in disclaimer trigger button
-- [LanguageSelect](./languageselect.md) - Built-in language selection component
-- [Disclaimer](./disclaimer.md) - Disclaimer modal component
-- [OnlineStatus](./onlinestatus.md) - Online/offline status indicator
-- [DataBsBanner](./databsbanner.md) - Banner for top of page
-- [DataBsFooter](./databsfooter.md) - Footer component
 
 ## Migration Guide
 

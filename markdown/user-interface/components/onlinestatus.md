@@ -2,7 +2,7 @@
 outline: deep
 ---
 <script setup lang="ts">
-import OnlineStatusExample from '../../components/OnlineStatusExample.vue';
+import OnlineStatusExample from '../../../components/OnlineStatusExample.vue';
 </script>
 
 # OnlineStatus
@@ -115,9 +115,3 @@ export default defineEventHandler(() => {
   };
 });
 ```
-
-## Related Components
-
-- [NavigationBar](./navigationbar.md) - Navigation component where status is often displayed
-- [DataBsFooter](./databsfooter.md) - Footer component for status display
-- [Changelogs](./changelogs.md) - Another information display component

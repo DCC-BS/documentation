@@ -4,7 +4,7 @@ outline: deep
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import DisclaimerExample from '../../components/DisclaimerExample.vue';
+import DisclaimerExample from '../../../components/DisclaimerExample.vue';
 
 const confirmationText = ref(
     "I have read and understood the instructions and confirm that I will use Test App exclusively in compliance with the stated guidelines.",
@@ -152,10 +152,3 @@ When you update your terms, increment the version:
 
 localStorage.getItem("disclaimerAccepted"); // "1.0.0"
 ```
-
-## Related Components
-
-- [DisclaimerButton](./disclaimerbutton.md) - Button to re-trigger the disclaimer modal
-- [DisclaimerPage](./disclaimerpage.md) - Full-page disclaimer view
-- [DisclaimerView](./disclaimerview.md) - Reusable disclaimer content component
-- [NavigationBar](./navigationbar.md) - Navigation bar with built-in disclaimer access

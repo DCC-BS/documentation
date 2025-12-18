@@ -4,7 +4,7 @@ outline: deep
 
 <script setup lang="ts">
 import { DisclaimerPage } from '@dcc-bs/common-ui.bs.js/components';
-import UiContainer from '../../components/UiContainer.vue';
+import UiContainer from '../../../components/UiContainer.vue';
 
 const code = `<template>
     <DisclaimerPage
@@ -46,10 +46,3 @@ Use as a standalone page component:
   />
 </template>
 ```
-
-## Related Components
-
-- [Disclaimer](./disclaimer.md) - Modal version of the disclaimer
-- [DisclaimerButton](./disclaimerbutton.md) - Button to re-trigger disclaimer
-- [DisclaimerView](./disclaimerview.md) - Reusable disclaimer content component
-- [NavigationBar](./navigationbar.md) - Navigation with disclaimer access
