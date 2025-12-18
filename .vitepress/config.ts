@@ -1,6 +1,5 @@
 import ui from "@nuxt/ui/vite";
 import tailwindcss from "@tailwindcss/vite";
-import { link } from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
 import llmstxt from "vitepress-plugin-llms";
@@ -14,7 +13,7 @@ export default withMermaid({
     description: "Guidelines for the DCC Developers",
     themeConfig: {
         // https://vitepress.dev/reference/default-theme-config
-        logo: "imgs/logo.png",
+        logo: "/imgs/logo.png",
         editLink: {
             pattern:
                 "https://github.com/dcc-bs/documentation/edit/main/markdown/:path",

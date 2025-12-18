@@ -5,10 +5,8 @@ import { createI18n } from "vue-i18n";
 import Layout from "./Layout.vue";
 import en from "../../i18n/en.json";
 
-// Import custom CSS AFTER DefaultTheme to ensure proper cascade order
 import "@dcc-bs/common-ui.bs.js/runtime/assets/kantonbs/colors.css";
 import "./main.css";
-// import "@nuxt/ui/runtime/index.css";
 
 export default {
     extends: DefaultTheme,
@@ -20,9 +18,6 @@ export default {
                 locale: "en",
                 messages: {
                     en: en,
-                    de: {
-                        welcome: "Willkommen zur DCC Dokumentation",
-                    },
                 },
             }),
         );
