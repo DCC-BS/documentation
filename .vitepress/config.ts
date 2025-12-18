@@ -60,6 +60,7 @@ export default withMermaid({
                 items: [
                     {
                         text: "Composables",
+                        link: "/user-interface/composables",
                         items: [
                             {
                                 text: "useUserFeedback",

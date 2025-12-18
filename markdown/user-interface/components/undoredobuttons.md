@@ -22,15 +22,6 @@ import { ref } from \"vue\";
 const canUndo = ref(false);
 const canRedo = ref(false);
 
-
-
-
-
-
-
-
-
-
 function handleUndo() {
     console.log(\"Undo action\");
 }
