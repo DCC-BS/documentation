@@ -12,13 +12,13 @@ hero:
       link: /docker
     - theme: brand
       text: Coding Standards
-      link: /general
+      link: /coding
     - theme: brand
-      text: Python Standards
-      link: /python
+      text: Python
+      link: /coding/python
     - theme: brand
-      text: Nuxt / Vue Standards
-      link: /nuxt
+      text: Nuxt / Vue
+      link: /coding/nuxt
     - theme: brand
       text: Git / GitHub / CI/CD Standards
       link: /git
