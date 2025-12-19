@@ -1,6 +1,7 @@
 ---
 outline: deep
 description: Coding standards and best practices for Python projects.
+editLink: true
 ---
 
 # Python Coding Standards
@@ -466,7 +467,13 @@ async def fast_batch():
 
 ## Configuration Management
 
-We use `.env` files for environment-specific configuration and a Pydantic-based `AppConfig` class that extends `backend_common.config.AbstractAppConfig`.
+We use `.env` files for environment-specific configuration and a Pydantic-based `AppConfig` class from the `backend_common` package.
+
+::: tip Full Documentation
+For detailed documentation on configuration management, including how to use the built-in `AppConfig` or create custom configurations, see the [backend-common Configuration Guide](/backend-common/config).
+:::
+
+**Quick summary:**
 
 - **Do:** Place configuration in `utils/app_config.py`.
 - **Do:** Use `get_env_or_throw()` for required environment variables.
@@ -475,125 +482,13 @@ We use `.env` files for environment-specific configuration and a Pydantic-based 
 - **Do:** Provide a `.env.example` with placeholder values.
 - **Do not:** Log sensitive values; use `log_secret()` to mask them.
 
-```python
-# utils/app_config.py
-import os
-
-from backend_common.config import AbstractAppConfig, get_env_or_throw, log_secret
-from pydantic import Field
-
-
-class AppConfig(AbstractAppConfig):
-    """Application configuration loaded from environment variables."""
-
-    openai_api_key: str = Field(description="The API key for authenticating with OpenAI")
-    llm_model: str = Field(description="The language model to use for text generation")
-    client_url: str = Field(description="The URL for the client application")
-    hmac_secret: str = Field(description="The secret key for HMAC authentication")
-
-    # Optional with defaults
-    optimizer_model: str = Field(
-        default="gpt-4o-mini",
-        description="Model to use for optimization",
-    )
-    debug_mode: bool = Field(
-        default=False,
-        description="Enable debug mode for verbose logging",
-    )
-
-    @classmethod
-    def from_env(cls) -> "AppConfig":
-        """Load configuration from environment variables."""
-        # Required variables - will raise if missing
-        openai_api_key = get_env_or_throw("OPENAI_API_KEY")
-        llm_model = get_env_or_throw("LLM_MODEL")
-        client_url = get_env_or_throw("CLIENT_URL")
-        hmac_secret = get_env_or_throw("HMAC_SECRET")
-
-        # Optional variables with defaults
-        optimizer_model = os.getenv("OPTIMIZER_MODEL", "gpt-4o-mini")
-        debug_raw = os.getenv("DEBUG_MODE", "false").lower()
-        debug_mode = debug_raw in {"1", "true", "yes", "on"}
-
-        return cls(
-            openai_api_key=openai_api_key,
-            llm_model=f"openai/{llm_model}",
-            client_url=client_url,
-            hmac_secret=hmac_secret,
-            optimizer_model=f"openai/{optimizer_model}",
-            debug_mode=debug_mode,
-        )
-
-    def __str__(self) -> str:
-        """Return string representation with secrets masked."""
-        return f"""
-        AppConfig(
-            client_url={self.client_url},
-            llm_model={self.llm_model},
-            openai_api_key={log_secret(self.openai_api_key)},
-            hmac_secret={log_secret(self.hmac_secret)},
-            optimizer_model={self.optimizer_model},
-            debug_mode={self.debug_mode}
-        )
-        """
-```
-
-**Secrets management:** For production deployments, refer to the internal documentation on managing secrets in our Kubernetes ArgoCD GitOps environment.
-
 ## Logging
 
 We use **[structlog](https://www.structlog.org/)** via `backend_common.logger` for structured, consistent logging across all services.
 
-### Setup
-
-Initialize the logger once in `app.py` at application startup:
-
-```python
-# app.py
-from contextlib import asynccontextmanager
-
-from backend_common.logger import init_logger, get_logger
-from fastapi import FastAPI
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """Application lifespan handler."""
-    init_logger()  # Initialize once at startup
-    logger = get_logger(__name__)
-    logger.info("Application started")
-    yield
-    logger.info("Application shutting down")
-
-
-app = FastAPI(lifespan=lifespan)
-```
-
-### Usage
-
-```python
-# In any module
-from backend_common.logger import get_logger
-
-logger = get_logger(__name__)
-
-
-def process_translation(request: TranslationRequest) -> TranslationResult:
-    logger.info(
-        "Processing translation request",
-        source_lang=request.source_lang,
-        target_lang=request.target_lang,
-        text_length=len(request.text),
-    )
-
-    try:
-        result = translate(request)
-        logger.info("Translation completed", result_length=len(result.text))
-        return result
-    except TranslationError as e:
-        logger.error("Translation failed", error=str(e), request_id=request.id)
-        raise
-```
+::: tip Implementation Guide
+For setup instructions and API reference on using the `backend_common.logger` module, see the [backend-common Logger Guide](/backend-common/logger).
+:::
 
 ### Log Levels
 

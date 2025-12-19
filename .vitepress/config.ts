@@ -116,6 +116,28 @@ export default withMermaid({
                 ],
             },
             {
+                text: "Backend Commond Code",
+                link: "/backend-common/index.md",
+                items: [
+                    {
+                        text: "Configuration",
+                        link: "/backend-common/config.md",
+                    },
+                    {
+                        text: "Logger",
+                        link: "/backend-common/logger.md",
+                    },
+                    {
+                        text: "Kubernetes Probes",
+                        link: "/backend-common/probes.md",
+                    },
+                    {
+                        text: "LLM Interaction",
+                        link: "/backend-common/llm.md",
+                    }
+                ],
+            },
+            {
                 text: "How Tos",
                 items: [
                     {
