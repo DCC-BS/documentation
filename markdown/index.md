@@ -12,13 +12,19 @@ hero:
       link: /docker
     - theme: brand
       text: Coding Standards
-      link: /general
+      link: /coding
     - theme: brand
-      text: Python Standards
-      link: /python
+      text: Python
+      link: /coding/python
     - theme: brand
-      text: Nuxt / Vue Standards
-      link: /nuxt
+      text: Nuxt / Vue
+      link: /coding/nuxt
+    - theme: brand
+      text: Backend Common
+      link: /backend-common
+    - theme: brand
+      text: User Interface
+      link: /user-interface
     - theme: brand
       text: Git / GitHub / CI/CD Standards
       link: /git
@@ -55,4 +61,14 @@ features:
     icon: 
       light: https://cdn.simpleicons.org/github
       dark: https://cdn.simpleicons.org/github/white
+  - title: DCC-BS Backend Common
+    details: How to use Backend Common Code and Utilities
+    icon: 
+      light: https://cdn.simpleicons.org/python
+      dark: https://cdn.simpleicons.org/python/white
+  - title: DCC-BS User Interface
+    details: How to use DCC-BS User Interface Components
+    icon: 
+      light: https://cdn.simpleicons.org/nuxt
+      dark: https://cdn.simpleicons.org/nuxt/white
 ---
