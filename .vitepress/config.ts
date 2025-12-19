@@ -10,8 +10,7 @@ import type { Plugin } from "vitepress";
 // https://vitepress.dev/reference/site-config
 export default withMermaid({
     srcDir: "markdown",
-    // base: process.env.NODE_ENV === "production" ? "/documentation/" : "/",
-    base: "/",
+    base: process.env.NODE_ENV === "production" ? "/documentation/" : "/",
     title: "DCC Dev Guidelines",
     description: "Guidelines for the DCC Developers",
     themeConfig: {
