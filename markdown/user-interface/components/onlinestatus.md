@@ -72,9 +72,9 @@ async function customOnlineCheck() {
 </script>
 
 <template>
-  <OnlineStatus 
+   <OnlineStatus 
     :is-online-check-function="customOnlineCheck"
-  />
+  /> 
 </template>
 ```
 

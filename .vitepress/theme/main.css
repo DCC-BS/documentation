@@ -6,7 +6,7 @@
 @import "@dcc-bs/common-ui.bs.js/runtime/assets/kantonbs/base/brand-colors.css";
 
 @source "@nuxt/runtime";
-@source "@dcc-bs/common-ui.bs.js/runtime";
+@source "../../node_modules/@dcc-bs/common-ui.bs.js/dist/runtime";
 @source "./markdown";
 @source "./components";
 @source ".vitepress/theme";

@@ -5,7 +5,9 @@ const { Layout } = DefaultTheme;
 </script>
 
 <template>
-    <UApp>
-        <Layout></Layout>
-    </UApp>
+    <div class="isolate">
+        <UApp>
+            <Layout />
+        </UApp>
+    </div>
 </template>

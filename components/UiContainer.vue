@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { codeToHtml } from "shiki";
-import { computed, nextTick, onMounted, ref } from "vue";
+import { nextTick, onMounted, ref } from "vue";
 
 const props = defineProps<{
     code?: string;
@@ -74,33 +74,12 @@ const slots = defineSlots<{
         <!-- Code Toggle Button -->
         <div class="toggle-section">
             <button @click="showCode = !showCode" class="toggle-button">
-                <svg
-                    v-if="!showCode"
-                    class="icon"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
-                    />
+                <svg v-if="!showCode" class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
                 </svg>
-                <svg
-                    v-else
-                    class="icon"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M6 18L18 6M6 6l12 12"
-                    />
+                <svg v-else class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
                 <span>{{ showCode ? "Hide Code" : "Show Code" }}</span>
             </button>

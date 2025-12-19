@@ -24,11 +24,7 @@ function resetDisclaimer() {
         <div class="flex gap-2">
             <DisclaimerButton />
 
-            <UButton
-                variant="outline"
-                icon="i-lucide-refresh-cw"
-                @click="resetDisclaimer"
-            >
+            <UButton variant="outline" icon="i-lucide-refresh-cw" @click="resetDisclaimer">
                 Reset Disclaimer State
             </UButton>
         </div>

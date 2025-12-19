@@ -4,11 +4,14 @@ import path from "path";
 import { fileURLToPath } from "url";
 import llmstxt from "vitepress-plugin-llms";
 import { withMermaid } from "vitepress-plugin-mermaid";
+import VueI18nPlugin from "@intlify/unplugin-vue-i18n/vite"
+import type { Plugin } from "vitepress";
 
 // https://vitepress.dev/reference/site-config
 export default withMermaid({
     srcDir: "markdown",
-    base: process.env.NODE_ENV === "production" ? "/documentation/" : "/",
+    // base: process.env.NODE_ENV === "production" ? "/documentation/" : "/",
+    base: "/",
     title: "DCC Dev Guidelines",
     description: "Guidelines for the DCC Developers",
     themeConfig: {
@@ -137,13 +140,19 @@ export default withMermaid({
             llmstxt(),
             ui({
                 autoImport: {
-                    dts: "../auto-imports.d.ts",
+                    dts: "../.vitepress/auto-imports.d.ts",
                 },
                 components: {
-                    dts: "../components.d.ts",
+                    dts: "../.vitepress/components.d.ts",
                 },
+                router: false,
+                scanPackages: ['@dcc-bs/common-ui.bs.js/components']
             }),
             tailwindcss(),
+            VueI18nPlugin({
+                include: path.resolve(__dirname, "i18n/**"),
+                ssr: true,
+            }) as Plugin,
         ],
         resolve: {
             alias: {

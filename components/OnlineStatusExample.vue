@@ -12,8 +12,7 @@ function isOnlineCheck() {
 }
 
 // varibles to trigger tailwindcss
-// text-red-500
-// bg-red-500
+
 
 const code = `<template>
   <div>
