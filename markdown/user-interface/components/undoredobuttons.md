@@ -5,6 +5,7 @@ outline: deep
 <script setup lang="ts">
 import { ref } from 'vue';
 import UiContainer from '../../../components/UiContainer.vue';
+import UndoRedoButtonMock from '../../../components/UndoRedoButtonMock.vue';
 import { UndoRedoButtons } from "@dcc-bs/common-ui.bs.js/components";
 
 const canUndo = ref(true);
@@ -63,12 +64,7 @@ Override these keys in your application's localization configuration to customiz
 
 <UiContainer :code="code">
     <template #element>
-        <UndoRedoButtons
-            :can-undo="canUndo"
-            :can-redo="canRedo"
-            @undo="handleUndo"
-            @redo="handleRedo"
-        />
+        <UndoRedoButtonMock />
     </template>
 </UiContainer>
 

@@ -2,6 +2,10 @@
 import { OnlineStatus } from "@dcc-bs/common-ui.bs.js/components";
 import { ref } from "vue";
 import UiContainer from "./UiContainer.vue";
+import ToolTipMock from "./ToolTipMock.vue";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 const showText = ref(true);
 const pollInterval = ref(500);
@@ -48,8 +52,13 @@ const code = `<template>
                     </div>
                 </div>
                 <div class="border rounded-lg p-6 flex flex-col gap-4">
-                    <OnlineStatus :show-text="showText" :isOnlineCheckFunction="isOnlineCheck"
-                        :poll-interval="pollInterval" />
+                    <ToolTipMock>
+                        <OnlineStatus :show-text="showText" :isOnlineCheckFunction="isOnlineCheck"
+                            :poll-interval="pollInterval" />
+                        <template #content>
+                            {{ isOnline ? t('common-ui.health_status.online_description') : t('common-ui.health_status.offline_description') }}
+                        </template>
+                    </ToolTipMock>
                 </div>
             </div>
         </template>
