@@ -45,9 +45,9 @@ The `Disclaimer` component displays a modal disclaimer that users must accept be
 | Prop                | Type     | Required | Description                                                           |
 | ------------------- | -------- | -------- | --------------------------------------------------------------------- |
 | `appName`           | `string` | Yes      | The name of your application, will be used for the default `contentHtml` and `confirmationText` when these props are not set.                                          |
-| `confirmationText`  | `string` | No       | Text users must confirm by checking the box                           |
+| `confirmationText`  | `string` | No       | Text users must confirm by checking the box. When not set, the translation key `disclaimer.confirmation_text` will be used with `{appName}` as a placeholder.                           |
 | `disclaimerVersion` | `string` | No       | Version identifier (e.g., "1.0.0") - changing this re-shows the modal |
-| `contentHtml`       | `string` | No       | Main HTML content for the disclaimer body                             |
+| `contentHtml`       | `string` | No       | Main HTML content for the disclaimer body. When not set, the translation key `disclaimer.content` will be used.                             |
 | `postfixHtml`       | `string` | No       | HTML content displayed after main content (e.g., contact info)        |
 
 ## Usage
@@ -65,6 +65,26 @@ The simplest disclaimer with just text confirmation:
     />
 </template>
 ```
+
+### Using Default Translations
+
+If `confirmationText` and `contentHtml` are not provided, the component will automatically use the translation keys from your i18n configuration:
+
+```vue
+<template>
+    <!-- Uses translations: disclaimer.confirmation_text and disclaimer.content -->
+    <Disclaimer
+        app-name="My Application"
+        disclaimer-version="1.0.0"
+    />
+</template>
+```
+
+The default translations used are:
+- **`disclaimer.confirmation_text`**: Contains the confirmation text with `{appName}` as a placeholder
+- **`disclaimer.content`**: Contains the full HTML disclaimer content
+
+You can customize these translations in your application's i18n files (e.g., `locales/en.json`, `locales/de.json`). See the [Internationalization section](../#internationalization) for the default translation keys.
 
 ## Interactive Example
 

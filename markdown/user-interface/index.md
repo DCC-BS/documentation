@@ -83,6 +83,10 @@ You can customize the following translation keys in your application:
             "online_description": "All services are available",
             "offline_description": "Some services are unavailable, features may be limited"
         }
+    },
+    "disclaimer": {
+        "confirmation_text": "I have read and understood...",
+        "content": "<h2>Disclaimer and Important Usage..."
     }
 }
 ```
