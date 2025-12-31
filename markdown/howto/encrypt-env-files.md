@@ -10,6 +10,11 @@ This guide uses:
 - **[dotenvx](https://dotenvx.com/)** - A tool for encrypting and managing environment variables
 - **[ProtonPass CLI](https://protonpass.github.io/pass-cli/)** - A command-line interface for ProtonPass password manager
 
+This method is also compatible with other password managers like:
+- 1Password ([1Password CLI](https://developer.1password.com/docs/cli/))
+- Bitwarden ([Bitwarden CLI](https://bitwarden.com/help/cli/))
+- Dashlane ([Dashlane CLI](https://cli.dashlane.com/))
+
 ## Prerequisites
 
 Install the required tools:
@@ -198,6 +203,11 @@ envx set API_KEY "new-secret-key-456"
 # View a decrypted value
 envx get API_KEY
 ```
+
+## Best Practices
+- Only encrypt sensitive environment variables. Keep non-sensitive variables in plain text if needed.
+- For open source projects, avoid committing `.env` and `.env.keys` files to version control.
+- For private team project the `.env` file and `.env.keys` file can be commited securely and the private key can be shared via a Pasword Manager.
 
 ## Additional Resources
 
