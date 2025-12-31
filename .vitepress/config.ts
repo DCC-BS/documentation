@@ -146,6 +146,10 @@ export default withMermaid({
                         text: "How to write changelogs",
                         link: "howto/changelogs",
                     },
+                    {
+                        text: "How to Encrypt Environment Files",
+                        link: "howto/encrypt-env-files",
+                    }
                 ],
             },
             {
