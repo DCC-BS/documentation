@@ -116,6 +116,23 @@ export default withMermaid({
                         ],
                     },
                 ],
+            }, {
+                text: "Nuxt Layers",
+                link: "/nuxt-layers/index.md",
+                items: [
+                    {
+                        text: "Auth",
+                        link: "/nuxt-layers/auth.md",
+                    },
+                    {
+                        text: "Backend Communication",
+                        link: "/nuxt-layers/backend_communication.md",
+                    },
+                    {
+                        text: "Health Check",
+                        link: "/nuxt-layers/health_check.md",
+                    },
+                ],
             },
             {
                 text: "Backend Commond Code",
