@@ -7,11 +7,14 @@ editLink: true
 
 > **📦 Repository**: [github.com/DCC-BS/nuxt-layers](https://github.com/DCC-BS/nuxt-layers)
 
-Nuxt Layers are a powerful feature that allows you to share and reuse partial Nuxt applications across multiple projects. This repository contains reusable Nuxt layers specifically designed for DCC-BS applications.
+Nuxt Layers are a powerful feature that allows you to share and reuse partial Nuxt
+applications across multiple projects. This repository contains reusable Nuxt layers
+specifically designed for DCC-BS applications.
 
 ## What are Nuxt Layers?
 
-Nuxt layers enable you to extend the default files, configs, and much more in a Nuxt application. Think of them as composable building blocks that can include:
+Nuxt layers enable you to extend the default files, configs, and much more in a
+Nuxt application. Think of them as composable building blocks that can include:
 
 - Components
 - Composables
@@ -22,7 +25,9 @@ Nuxt layers enable you to extend the default files, configs, and much more in a 
 - Server routes and middleware
 - Configuration
 
-A layer is almost identical to a standard Nuxt application structure, making them easy to author and maintain. When you extend a layer, Nuxt automatically scans and integrates these directories into your application.
+A layer is almost identical to a standard Nuxt application structure, making them
+easy to author and maintain. When you extend a layer, Nuxt automatically scans and
+integrates these directories into your application.
 
 ### How Layers Work
 
@@ -37,38 +42,47 @@ export default defineNuxtConfig({
 })
 ```
 
-When multiple layers define the same files or components, the **priority order** matters:
+When multiple layers define the same files or components, the **priority order**
+matters:
 
 1. **Your project files** - highest priority (always wins)
 2. **First layer in extends** - overrides later layers
 3. **Second layer in extends** - lower priority
 4. And so on...
 
-This means your project can always override layer behavior by defining the same file locally.
+This means your project can always override layer behavior by defining the same
+file locally.
 
 ## When to Use Layers vs NPM Packages
 
 At DCC-BS, we follow these guidelines:
 
-### Use **Nuxt Layers** when:
+### Use **Nuxt Layers** when
+
 - ✅ The code is **dependent on DCC-BS applications** and their specific architecture
-- ✅ The code needs to integrate deeply with Nuxt (components, middleware, server routes)
+- ✅ The code needs to integrate deeply with Nuxt (components, middleware, server
+routes)
 - ✅ You need plug-and-play functionality that can be switched via environment variables
 - ✅ The code is specific to our internal infrastructure (auth, monitoring, etc.)
 
 ### Use **NPM Packages** when:
+
 - ✅ The code is **independent** and framework-agnostic
 - ✅ The code is **generic enough** to be reused in non-Nuxt projects
 - ✅ You want to publish utilities that don't need Nuxt-specific features
 - ✅ The code should be versioned and distributed via npmjs.com
 
-**Example**: Our authentication system uses layers because it's deeply integrated with Nuxt and can be switched between implementations (Azure AD, no-auth) using environment variables. However, a generic date formatting utility would be better as an NPM package.
+**Example**: Our authentication system uses layers because it's deeply integrated
+with Nuxt and can be switched between implementations (Azure AD, no-auth) using
+environment variables. However, a generic date formatting utility would be better
+as an NPM package.
 
 ## Available Layers
 
 ### 🔐 Auth Layer
 
-The base authentication layer that provides plug-and-play authentication switching. Use environment variables to choose between Azure AD authentication or no-auth mode.
+The base authentication layer that provides plug-and-play authentication switching.
+Use environment variables to choose between Azure AD authentication or no-auth mode.
 
 **Key Feature**: Switch authentication implementations without changing code!
 
@@ -76,13 +90,15 @@ The base authentication layer that provides plug-and-play authentication switchi
 
 ### 🔌 Backend Communication
 
-Server-side utilities for communicating with backend APIs. Provides a fluent builder API for creating type-safe API handlers in your Nuxt server routes.
+Server-side utilities for communicating with backend APIs. Provides a fluent builder
+API for creating type-safe API handlers in your Nuxt server routes.
 
 [Learn more about Backend Communication →](./backend_communication.md)
 
 ### 💚 Health Check
 
-Kubernetes-ready health check endpoints for container orchestration. Provides `/health/liveness`, `/health/readiness`, and `/health/startup` endpoints.
+Kubernetes-ready health check endpoints for container orchestration. Provides
+`/health/liveness`, `/health/readiness`, and `/health/startup` endpoints.
 
 [Learn more about Health Checks →](./health_check.md)
 
@@ -116,30 +132,34 @@ AUTH_LAYER_URI=github:DCC-BS/nuxt-layers/azure-auth
 
 ### 3. Use Layer Features
 
-The layers automatically provide composables, server utilities, and endpoints you can use immediately.
+The layers automatically provide composables, server utilities, and endpoints you
+can use immediately.
 
 ## Architecture Overview
 
 Our layers work together in a cohesive system:
 
-```/dev/null/architecture.txt#L1-14
+```txt
 ┌─────────────────────────────────────────┐
 │         Your Nuxt Application           │
 ├─────────────────────────────────────────┤
 │  Auth Layer (base)                      │
 │    ├─ Azure Auth (implementation)       │
 │    └─ No Auth (implementation)          │
-│                                          │
+│                                         │
 │  Backend Communication                  │
 │    └─ Used by auth implementations      │
-│                                          │
+│                                         │
 │  Health Checks                          │
 └─────────────────────────────────────────┘
 ```
 
-- **Auth Layer** provides the interface and dynamically loads an implementation based on `AUTH_LAYER_URI`
-- **Auth Implementations** (azure-auth/no-auth) extend the base and provide `authHandler` for authenticated API calls
-- **Backend Communication** offers utilities used by auth layers and available for custom server routes
+- **Auth Layer** provides the interface and dynamically loads an implementation
+based on `AUTH_LAYER_URI`
+- **Auth Implementations** (azure-auth/no-auth) extend the base and provide
+`authHandler` for authenticated API calls
+- **Backend Communication** offers utilities used by auth layers and available for
+custom server routes
 - **Health Checks** operates independently for monitoring
 
 ## Repository Structure

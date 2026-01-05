@@ -25,7 +25,6 @@
 
 /* Custom layer for VitePress compatibility fixes */
 @layer components {
-
     /* Reset VitePress button styles to allow Tailwind classes to work properly */
     button.VPButton,
     a.VPButton {
@@ -42,7 +41,6 @@
 
 /* Additional utility overrides if needed */
 @layer utilities {
-
     /* Force remove background gradients from VitePress on Tailwind utility classes */
     .bg-primary,
     .bg-secondary,

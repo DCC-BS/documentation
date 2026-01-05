@@ -5,18 +5,22 @@ editLink: true
 
 # Backend Communication Layer
 
-The backend communication layer provides powerful utilities for building type-safe, configurable API handlers in your Nuxt server routes. It simplifies communication between your Nuxt application and backend APIs with a fluent builder interface.
+The backend communication layer provides powerful utilities for building
+type-safe, configurable API handlers in your Nuxt server routes. It simplifies
+communication between your Nuxt application and backend APIs with a fluent
+builder interface.
 
 ## Overview
 
 The backend communication layer offers:
 
 - 🔧 **Fluent Builder API** - Chain methods to configure your handlers
-- 🔒 **Type Safety** - Full TypeScript support for requests and responses
-- 🔄 **Request/Response Transformation** - Pre and post-processing of data
+- 🔒 **Type Safety** - Full TypeScript support with automatic type inference through generics
+- 🔄 **Request/Response Transformation** - Custom body providers and response transformers
 - 🎯 **Flexible Fetch Options** - Extend and customize HTTP requests
-- ⚡ **Error Handling** - Built-in error transformation and handling
+- ⚡ **Error Handling** - Built-in error transformation and handling with proper HTTP status codes
 - 🔌 **Integration Ready** - Works seamlessly with auth layers
+- 🔑 **Method Inheritance** - Automatically inherits HTTP method from incoming requests
 
 ## Quick Start
 
@@ -41,18 +45,19 @@ Create a simple pass-through API handler:
 import { backendHandlerBuilder } from '#backend_communication'
 
 export default backendHandlerBuilder()
-  .build('/users')
+    .build('/users')
 ```
 
-This creates a GET handler that forwards requests to `${API_URL}/users`.
+This creates a handler that forwards requests to `${API_URL}/users`. By default,
+it inherits the HTTP method from the incoming request (GET in this case).
 
 ## Configuration
 
 The layer requires the following environment variable:
 
-| Variable | Required | Description | Example |
-|----------|----------|-------------|---------|
-| `API_URL` | Yes | Base URL of your backend API | `https://api.example.com` |
+| Variable  | Required | Description                  | Example                   |
+| --------- | -------- | ---------------------------- | ------------------------- |
+| `API_URL` | Yes      | Base URL of your backend API | `https://api.example.com` |
 
 ```bash
 # .env
@@ -62,12 +67,214 @@ API_URL=https://api.example.com
 ## Builder API
 
 The `backendHandlerBuilder()` provides a chainable interface for configuring handlers.
+All methods return a new builder instance, making them immutable and composable.
 
-### Methods
+### Immutability and Composition
 
-#### `withMethod(method: string)`
+Each builder method returns a **new** builder instance rather than modifying the
+existing one. This makes builders immutable and allows you to create variations:
 
-Set the HTTP method for the request.
+```typescript
+const baseBuilder = backendHandlerBuilder()
+  .extendFetchOptions(async (options) => ({
+    ...options,
+    headers: {
+      ...options.headers,
+      'X-API-Version': 'v1'
+    }
+  }))
+
+// Create variations without affecting the base
+const getUserHandler = baseBuilder.build('/users')
+const postUserHandler = baseBuilder
+  .withMethod('POST')
+  .withBodyProvider(async (event) => readBody(event))
+  .build('/users')
+```
+
+### Type Safety and Method Availability
+
+The builder maintains type safety by dynamically adjusting which methods are
+available based on the current builder state. This prevents invalid configurations
+and ensures type correctness throughout the chain.
+
+#### Method Availability Rules
+
+1. **After `withBodyProvider`**: The body type changes, so `withBodyProvider` is removed
+   (can't change body type again).
+
+2. **After `withFetcher`**: The response type changes, so:
+   - `withBodyProvider` is removed (can't change body type after fetcher is set)
+   - `withFetcher` is removed (fetcher is already configured)
+
+3. **After `postMap`**: The response type is transformed, so:
+   - `withBodyProvider` is removed (can't change body type after transformations start)
+   - `withFetcher` is removed (can't change fetcher after transformations start)
+
+4. **`withMethod` and `extendFetchOptions`**: Always available for further configuration
+
+```typescript
+// ✅ Valid: Configure body provider, then fetcher, then transform
+const handler1 = backendHandlerBuilder()
+  .withBodyProvider(async (event) => ({ name: 'Test' }))
+  .withFetcher(async (options) => ({ id: 1, name: options.body?.name }))
+  .postMap(async (response) => ({ userId: response.id }))
+  .build('/users')
+
+// ❌ Invalid: Can't call withBodyProvider twice
+// TypeScript error: withBodyProvider does not exist on type
+const handler2 = backendHandlerBuilder()
+  .withBodyProvider(async (event) => ({ name: 'Test' }))
+  .withBodyProvider(async (event) => ({ email: 'test@example.com' })) // Error!
+  .build('/users')
+
+// ❌ Invalid: Can't call withFetcher twice
+// TypeScript error: withFetcher does not exist on type
+const handler3 = backendHandlerBuilder()
+  .withFetcher(async (options) => ({ id: 1 }))
+  .withFetcher(async (options) => ({ id: 2 })) // Error!
+  .build('/users')
+
+// ❌ Invalid: Can't call withBodyProvider after postMap
+// TypeScript error: withBodyProvider does not exist on type
+const handler4 = backendHandlerBuilder()
+  .postMap(async (response) => ({ data: response }))
+  .withBodyProvider(async (event) => ({ name: 'Test' })) // Error!
+  .build('/users')
+
+// ✅ Valid: withMethod and extendFetchOptions are always available
+const handler5 = backendHandlerBuilder()
+  .withBodyProvider(async (event) => ({ name: 'Test' }))
+  .withFetcher(async (options) => ({ id: 1 }))
+  .postMap(async (response) => ({ userId: response.id }))
+  .withMethod('POST') // Still available
+  .extendFetchOptions(async (options) => ({ ...options })) // Still available
+  .build('/users')
+```
+
+#### Why These Restrictions Exist
+
+These restrictions ensure type safety and prevent invalid configurations:
+
+- **`withBodyProvider` changes `TBody`**: Once set, the body type is locked. Calling
+  it again would cause type confusion in the fetcher and subsequent transformations.
+
+- **`withFetcher` locks `TBody` and `TResponse`**: The fetcher is typed for specific
+  body and response types. Changing either after setting the fetcher would break
+  the type contract.
+
+- **`postMap` transforms `TResponse`**: Once you start transforming responses, you
+  can't go back and change the body provider or fetcher, as they produce the
+  original response type.
+
+This design guides you toward the correct configuration order while maintaining
+full type safety throughout the builder chain. Think of it as a one-way flow:
+configure inputs first, then processing, then outputs.
+
+#### Valid Configuration Patterns
+
+```mermaid
+flowchart TD
+    Start([START<br/>backendHandlerBuilder]) --> Option1["withMethod()<br/>always available"]
+    Start --> Option2["extendFetchOptions()<br/>always available"]
+    Start --> Option3["withBodyProvider()"]
+    Start --> Option4["withFetcher()"]
+    Start --> Direct["build()<br/>required"]
+    
+    Option1 -.-> Option3
+    Option2 -.-> Option3
+    Option3 --> Option4
+    Option4 --> PostMap["postMap()<br/>repeatable"]
+    
+    PostMap -.-> PostMap
+    PostMap --> Build["build()<br/>required"]
+    
+    Direct --> End([END])
+    Build --> End
+    
+    style Start fill:#e8f5e9,stroke:#2e7d32,stroke-width:3px,color:#1b5e20
+    style End fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#b71c1c
+    style Option3 fill:#fffde7,stroke:#f9a825,stroke-width:2px,color:#f57f17
+    style Option4 fill:#fffde7,stroke:#f9a825,stroke-width:2px,color:#f57f17
+    style PostMap fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#0d47a1
+    style Build fill:#fce4ec,stroke:#c2185b,stroke-width:2px,color:#880e4f
+    style Option1 fill:#f3e5f5,stroke:#6a1b9a,stroke-width:1px,color:#4a148c
+    style Option2 fill:#f3e5f5,stroke:#6a1b9a,stroke-width:1px,color:#4a148c
+```
+
+**Key points:**
+
+- `withMethod` and `extendFetchOptions` can be called at any point (always available)
+- `withBodyProvider` removes itself from availability after being called
+- `withFetcher` removes both `withBodyProvider` and `withFetcher` from availability
+- `postMap` removes both `withBodyProvider` and `withFetcher` from availability
+- `postMap` can be chained multiple times
+- `build()` must be the final call
+
+### Execution Flow
+
+When a handler built with `backendHandlerBuilder()` is executed, the flow is:
+
+1. **Configuration Phase** (at build time)
+   - Builder methods are chained to configure the handler
+   - Each method returns a new immutable builder instance
+   - Extensions are composed but not executed yet
+
+2. **Execution Phase** (when the handler receives a request)
+   - Validate `API_URL` is configured
+   - Call body provider to get request body
+   - Determine HTTP method (from `withMethod` or inherited)
+   - Apply `extendFetchOptions` extensions in order (each wraps the previous)
+   - Make HTTP request using the fetcher
+   - Apply `postMap` transformations in order (each transforms the previous)
+   - Return the final response or handle errors
+
+```typescript
+// This handler...
+export default backendHandlerBuilder()
+  .withMethod('POST')
+  .withBodyProvider(async (event) => {
+    const body = await readBody(event)
+    return { ...body, timestamp: Date.now() }
+  })
+  .extendFetchOptions(async (options) => ({
+    ...options,
+    headers: { ...options.headers, 'X-Custom': 'value' }
+  }))
+  .postMap(async (response) => ({
+    success: true,
+    data: response
+  }))
+  .build('/users')
+
+// ...executes in this order when called:
+// 1. withBodyProvider: Read and transform body
+// 2. extendFetchOptions: Add custom headers
+// 3. Fetch: Make POST request to backend
+// 4. postMap: Transform response
+// 5. Return: { success: true, data: {...} }
+```
+
+### Type Parameters
+
+The builder uses TypeScript generics to ensure type safety throughout the transformation pipeline:
+
+```typescript
+backendHandlerBuilder<TRequest, TBody, TResponse, TResponseTransformed>()
+```
+
+- `TRequest extends EventHandlerRequest` - Type of the incoming H3 event request
+- `TBody` - Type of the request body sent to the backend
+- `TResponse` - Type of the raw response from the backend
+- `TResponseTransformed` - Type of the transformed response returned to the client
+
+Each builder method can update these type parameters, and TypeScript will infer them automatically.
+
+### Builder Methods
+
+#### `withMethod(method: FetchMethodType)`
+
+Set the HTTP method for the request. Overrides the default method inheritance.
 
 ```typescript
 export default backendHandlerBuilder()
@@ -75,35 +282,131 @@ export default backendHandlerBuilder()
   .build('/users')
 ```
 
-**Default**: Inherits from the incoming request method
+**Parameters:**
+- `method` - One of: `'INHERIT' | 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS'`
 
-#### `preMap(fn: (event) => Promise<any>)`
+**Default**: `'INHERIT'` - Inherits from the incoming request method
 
-Transform the request body before sending to the backend.
+#### `extendFetchOptions(fn: (options) => Promise<FetcherOptions>)`
+
+Extend or modify fetch options before making the request. Multiple calls to
+`extendFetchOptions` chain together, with each extension receiving the output
+of the previous one.
 
 ```typescript
 export default backendHandlerBuilder()
-  .withMethod('POST')
-  .preMap(async (event) => {
-    const body = await readBody(event)
+  .extendFetchOptions(async (options) => {
     return {
-      ...body,
-      timestamp: Date.now(),
-      source: 'nuxt-app'
+      ...options,
+      headers: {
+        ...options.headers,
+        'X-API-Key': process.env.API_KEY,
+        'X-Request-ID': generateRequestId()
+      },
+      // Note: ofetch options like timeout can be added here
     }
   })
   .build('/users')
 ```
 
+**Parameters:**
+- `fn(options)` - Receives `FetcherOptions<TBody>` containing:
+  - `url` - Full URL (API_URL + path)
+  - `method` - HTTP method
+  - `body` - Request body
+  - `headers` - Headers object
+  - `event` - H3 event object
+  - Returns `Promise<FetcherOptions<TBody>>` - Extended options
+
 **Use cases:**
-- Add timestamps or metadata
-- Validate request data
-- Transform data structure
-- Filter sensitive fields
 
-#### `postMap(fn: (response) => Promise<any>)`
+- Add authentication headers (done automatically by auth layers)
+- Add custom headers
+- Set timeouts and other ofetch options
+- Configure retries
+- Add query parameters to the URL
 
-Transform the response from the backend before returning to client.
+**Note:** Extensions are chained in the order they're called. Each extension
+wraps the previous one, allowing for layered configuration.
+
+#### `withBodyProvider(fn: (event) => Promise<TNewBody>)`
+
+Configure a custom function to provide the request body. The body provider
+receives the H3 event and returns the body to send to the backend. This allows
+you to read, transform, and completely change the body type.
+
+```typescript
+export default backendHandlerBuilder()
+  .withMethod('POST')
+  .withBodyProvider(async (event) => {
+    const body = await readBody(event)
+    return {
+      ...body,
+      processedAt: new Date().toISOString(),
+      source: 'api-gateway'
+    }
+  })
+  .build('/users')
+```
+
+**Parameters:**
+- `fn(event)` - A function that receives the H3 event and returns the body
+  - `event` - H3 event object
+  - Returns `Promise<TNewBody>` - The body to send (can transform the type)
+
+**Use cases:**
+
+- Read and prepare the request body for POST/PUT requests
+- Transform request data structure
+- Add computed fields to requests
+- Validate and sanitize input
+- Convert between API versions
+- Add metadata to requests
+- Extract body from different sources (cookies, headers, etc.)
+
+**Note:** This is primarily used for POST/PUT/PATCH requests where you need to
+read and transform the request body. The default body provider returns `undefined`
+for GET requests.
+
+**Important:** Calling `withBodyProvider` removes `withFetcher` from subsequent
+calls because the body type has changed and the fetcher must match the new body type.
+
+#### `withFetcher<TNewResponse>(fn: Fetcher<TBody, TNewResponse>)`
+
+Configure a custom fetch implementation for making HTTP requests. This replaces
+the default `ofetch`-based fetcher with your own implementation.
+
+```typescript
+export default backendHandlerBuilder()
+  .withFetcher(async (options) => {
+    // Custom fetch logic with retry, logging, etc.
+    return customFetch(options.url, options)
+  })
+  .build('/users')
+```
+
+**Parameters:**
+- `fn(options)` - A fetcher function that receives `FetcherOptions<TBody>`
+  - Returns `Promise<TNewResponse>` - The response from your custom fetcher
+
+**Use cases:**
+
+- Implement custom retry logic
+- Add request/response logging
+- Integrate with external HTTP clients (axios, node-fetch, etc.)
+- Implement circuit breaker patterns
+- Add request caching
+- Mock responses for testing
+
+**Note:** Using a custom fetcher changes the response type, which:
+- Removes `withBodyProvider` from subsequent calls (body type is locked)
+- Removes `withFetcher` from subsequent calls (fetcher is already set)
+
+#### `postMap<TMap>(fn: (response) => Promise<TMap>)`
+
+Transform the response from the backend before returning to the client. Multiple
+`postMap` calls chain together, with each transformation receiving the output
+of the previous one.
 
 ```typescript
 export default backendHandlerBuilder()
@@ -117,42 +420,31 @@ export default backendHandlerBuilder()
   .build('/users')
 ```
 
+**Parameters:**
+- `fn(response)` - A transformer function
+  - `response` - The response from the previous transformation or fetcher
+  - Returns `Promise<TMap>` - The transformed response
+
 **Use cases:**
+
 - Normalize response format
 - Add computed fields
 - Filter sensitive data
 - Transform data structure
+- Enrich responses with additional data
+- Format dates and numbers
 
-#### `extendFetchOptions(fn: (options, event) => Promise<FetchOptions>)`
+**Note:** Transformations are chained in order. Each `postMap` receives the
+output of the previous one, allowing for layered transformations.
 
-Extend or modify fetch options before making the request.
+**Important:** Once you call `postMap`, both `withBodyProvider` and `withFetcher`
+are removed from availability because transformations are tied to the response type
+produced by the current fetcher configuration.
 
-```typescript
-export default backendHandlerBuilder()
-  .extendFetchOptions(async (options, event) => {
-    return {
-      ...options,
-      headers: {
-        ...options.headers,
-        'X-API-Key': process.env.API_KEY,
-        'X-Request-ID': generateRequestId()
-      },
-      timeout: 5000
-    }
-  })
-  .build('/users')
-```
+#### `build(path: string): EventHandler`
 
-**Use cases:**
-- Add authentication headers (done automatically by auth layers)
-- Add custom headers
-- Set timeouts
-- Configure retries
-- Add query parameters
-
-#### `build(path: string)`
-
-Build and return the configured handler. Must be called last.
+Build and return the configured event handler. Must be called last in the
+builder chain.
 
 ```typescript
 export default backendHandlerBuilder()
@@ -162,6 +454,19 @@ export default backendHandlerBuilder()
 
 **Parameters:**
 - `path` - The backend API endpoint path (relative to `API_URL`)
+
+**Returns:**
+- `EventHandler<TRequest, Promise<TResponseTransformed>>` - A H3 event handler
+  that can be exported from your server route file
+
+**Behavior:**
+1. Validates that `API_URL` is configured in runtime config
+2. Calls the body provider to get the request body
+3. Determines the HTTP method (from `withMethod` or inherited from request)
+4. Applies all `extendFetchOptions` extensions
+5. Makes the request using the configured fetcher
+6. Applies all `postMap` transformations
+7. Handles errors and converts them to proper HTTP error responses
 
 ## Common Patterns
 
@@ -185,7 +490,7 @@ Transform the request before sending:
 // server/api/users.post.ts
 export default backendHandlerBuilder()
   .withMethod('POST')
-  .preMap(async (event) => {
+  .withBodyProvider(async (event) => {
     const body = await readBody(event)
     return {
       firstName: body.first_name,
@@ -229,10 +534,11 @@ export default backendHandlerBuilder()
       ...options,
       headers: {
         ...options.headers,
-        'X-API-Key': process.env.EXTERNAL_API_KEY,
+        'X-API-Key': process.env.EXTERNAL_API_KEY!,
         'Accept': 'application/json'
       },
-      timeout: 10000 // 10 seconds
+      // ofetch timeout option (in milliseconds)
+      timeout: 10000
     }
   })
   .build('/external/data')
@@ -246,7 +552,7 @@ Use multiple transformations together:
 // server/api/orders.post.ts
 export default backendHandlerBuilder()
   .withMethod('POST')
-  .preMap(async (event) => {
+  .withBodyProvider(async (event) => {
     const body = await readBody(event)
     // Validate and transform request
     return {
@@ -278,7 +584,9 @@ export default backendHandlerBuilder()
 
 ## Integration with Auth Layer
 
-When used with the [auth layer](./auth.md), the authentication implementation automatically extends the backend handler to add authentication headers.
+When used with the [auth layer](./auth.md), the authentication implementation
+automatically extends the backend handler to add authentication headers using
+`extendFetchOptions`.
 
 ### Azure Auth Integration
 
@@ -294,9 +602,11 @@ export default authHandler.build('/protected-data')
 This is equivalent to:
 
 ```typescript
+import { backendHandlerBuilder } from '#backend_communication'
+
 export default backendHandlerBuilder()
-  .extendFetchOptions(async (options, event) => {
-    const token = await getTokenFromSession(event)
+  .extendFetchOptions(async (options) => {
+    const token = await getTokenFromSession(options.event)
     return {
       ...options,
       headers: {
@@ -319,39 +629,73 @@ export default authHandler.build('/data')
 
 ## Error Handling
 
-The builder includes built-in error handling that transforms backend errors into proper HTTP responses.
+The builder includes comprehensive built-in error handling that transforms
+backend errors into proper HTTP error responses with appropriate status codes.
 
-### Default Error Handling
+### Automatic Error Handling
+
+All handlers automatically handle:
+
+- **Network errors** - Connection failures, DNS errors
+- **HTTP error status codes** - 4xx and 5xx responses from backend
+- **Timeout errors** - Request timeouts
+- **Invalid responses** - Malformed or unexpected responses
+- **Error objects with statusCode** - Preserves original error structure
+
+The error handler:
+
+1. Extracts error message from strings or Error objects
+2. Preserves `statusCode` and `statusMessage` from error objects
+3. Wraps errors in a consistent format using H3's `createError`
+4. Includes the original error in the `data` field for debugging
 
 ```typescript
-// Automatically handles:
-// - Network errors
-// - HTTP error status codes
-// - Timeout errors
-// - Invalid responses
-
+// No additional error handling needed - it's automatic
 export default backendHandlerBuilder()
   .build('/users')
 ```
 
-### Custom Error Handling
+### Error Response Format
 
-Add custom error handling with `postMap`:
+Errors are returned in this format:
 
 ```typescript
-export default backendHandlerBuilder()
-  .postMap(async (response) => {
-    return response
-  })
+{
+  statusCode: number,      // HTTP status code
+  statusMessage: string,   // HTTP status message
+  message: string,         // Error message
+  data: {
+    originalError: unknown // The original error for debugging
+  }
+}
+```
+
+### Custom Error Handling
+
+While the built-in error handling is comprehensive, you can add custom logic
+by wrapping the handler:
+
+```typescript
+import { backendHandlerBuilder } from '#backend_communication'
+import { createError } from 'h3'
+
+const handler = backendHandlerBuilder()
   .build('/users')
-  .catch((error) => {
+
+export default defineEventHandler(async (event) => {
+  try {
+    return await handler(event)
+  } catch (error) {
     // Custom error transformation
-    throw createError({
-      statusCode: error.statusCode || 500,
-      message: 'Failed to fetch users',
-      data: { originalError: error.message }
-    })
-  })
+    if (isSpecificError(error)) {
+      throw createError({
+        statusCode: 422,
+        message: 'Custom validation error'
+      })
+    }
+    throw error // Re-throw for default handling
+  }
+})
 ```
 
 ## Advanced Usage
@@ -380,7 +724,7 @@ Apply transformations based on conditions:
 
 ```typescript
 export default backendHandlerBuilder()
-  .preMap(async (event) => {
+  .withBodyProvider(async (event) => {
     const body = await readBody(event)
     const query = getQuery(event)
     
@@ -409,7 +753,7 @@ const userSchema = z.object({
 
 export default backendHandlerBuilder()
   .withMethod('POST')
-  .preMap(async (event) => {
+  .withBodyProvider(async (event) => {
     const body = await readBody(event)
     
     // Validate with Zod
@@ -460,11 +804,40 @@ export default backendHandlerBuilder()
 
 ## Type Safety
 
-The builder supports TypeScript generics for type-safe transformations:
+The builder uses TypeScript generics to provide full type safety throughout the
+transformation pipeline. Types are automatically inferred as you chain methods.
+
+### Automatic Type Inference
+
+TypeScript automatically tracks types through each transformation:
+
+```typescript
+// TypeScript knows:
+// - TBody = { name: string }
+// - TResponse = { id: number, name: string } (from backend)
+// - TResponseTransformed = { data: User[], count: number }
+
+export default backendHandlerBuilder()
+  .withBodyProvider(async () => ({ name: 'Test' }))
+  .postMap(async (response) => ({
+    data: response.items,
+    count: response.items.length
+  }))
+  .build('/users')
+```
+
+### Explicit Type Annotations
+
+You can also specify types explicitly for better documentation and tooling:
 
 ```typescript
 interface User {
   id: number
+  name: string
+  email: string
+}
+
+interface CreateUserRequest {
   name: string
   email: string
 }
@@ -474,8 +847,18 @@ interface UserResponse {
   total: number
 }
 
+interface NormalizedResponse {
+  data: User[]
+  count: number
+  hasMore: boolean
+}
+
 export default backendHandlerBuilder()
-  .postMap(async (response: UserResponse) => {
+  .withBodyProvider<CreateUserRequest>(async (event) => {
+    const body = await readBody(event)
+    return { name: body.name, email: body.email }
+  })
+  .postMap<NormalizedResponse>(async (response: UserResponse) => {
     return {
       data: response.users,
       count: response.total,
@@ -484,6 +867,13 @@ export default backendHandlerBuilder()
   })
   .build('/users')
 ```
+
+### Type Safety Benefits
+
+- **Catch errors at compile time** - Invalid transformations are caught before runtime
+- **Better autocomplete** - IDE knows the shape of your data at each step
+- **Self-documenting** - Types serve as inline documentation
+- **Refactor confidently** - Changes to types propagate through the chain
 
 ## Performance Considerations
 
@@ -508,7 +898,7 @@ Use async operations efficiently:
 
 ```typescript
 export default backendHandlerBuilder()
-  .preMap(async (event) => {
+  .withBodyProvider(async (event) => {
     const [body, session] = await Promise.all([
       readBody(event),
       getSession(event)
@@ -528,99 +918,11 @@ export default backendHandlerBuilder()
   .build('/large-file')
 ```
 
-## Testing
-
-### Unit Testing Handlers
-
-```typescript
-import { describe, it, expect } from 'vitest'
-import { backendHandlerBuilder } from '#backend_communication'
-
-describe('User Handler', () => {
-  it('transforms request body', async () => {
-    const handler = backendHandlerBuilder()
-      .preMap(async (event) => {
-        const body = await readBody(event)
-        return { ...body, processed: true }
-      })
-      .build('/users')
-    
-    // Test handler with mock event
-    const mockEvent = createMockEvent({ body: { name: 'Test' } })
-    const result = await handler(mockEvent)
-    
-    expect(result.processed).toBe(true)
-  })
-})
-```
-
-### Integration Testing
-
-```typescript
-import { setup, $fetch } from '@nuxt/test-utils'
-
-describe('API Integration', async () => {
-  await setup()
-  
-  it('forwards request to backend', async () => {
-    const response = await $fetch('/api/users')
-    expect(response).toBeDefined()
-  })
-})
-```
-
-## Troubleshooting
-
-### "API_URL is not defined"
-
-Make sure you've set the environment variable:
-
-```bash
-# .env
-API_URL=https://api.example.com
-```
-
-### CORS Errors
-
-The handler runs server-side, so CORS shouldn't be an issue. If you see CORS errors:
-- Check your backend CORS configuration
-- Verify the backend URL is correct
-- Ensure you're not making client-side fetch calls
-
-### Request Body is Empty
-
-Make sure to use `preMap` to read the body:
-
-```typescript
-// ❌ Wrong
-export default backendHandlerBuilder()
-  .build('/users')
-
-// ✅ Correct for POST/PUT
-export default backendHandlerBuilder()
-  .withMethod('POST')
-  .preMap(async (event) => readBody(event))
-  .build('/users')
-```
-
-### Timeout Errors
-
-Increase timeout in fetch options:
-
-```typescript
-export default backendHandlerBuilder()
-  .extendFetchOptions(async (options) => ({
-    ...options,
-    timeout: 30000 // 30 seconds
-  }))
-  .build('/slow-endpoint')
-```
-
 ## Best Practices
 
 ### 1. Use Descriptive File Names
 
-```
+```txt
 server/api/
   ├── users/
   │   ├── index.get.ts      # GET /api/users
@@ -635,12 +937,12 @@ server/api/
 ```typescript
 // ✅ Good - single responsibility
 export default backendHandlerBuilder()
-  .preMap(async (event) => addTimestamp(await readBody(event)))
+  .withBodyProvider(async (event) => addTimestamp(await readBody(event)))
   .build('/users')
 
 // ❌ Bad - too much logic
 export default backendHandlerBuilder()
-  .preMap(async (event) => {
+  .withBodyProvider(async (event) => {
     // 50 lines of complex logic
   })
   .build('/users')
@@ -650,19 +952,21 @@ export default backendHandlerBuilder()
 
 ```typescript
 // utils/transformations.ts
-export const addTimestamp = (body) => ({
+export const addTimestamp = (body: any) => ({
   ...body,
   timestamp: Date.now()
 })
 
-export const normalizeResponse = (response) => ({
+export const normalizeResponse = (response: any) => ({
   success: true,
   data: response
 })
 
 // server/api/users.post.ts
 export default backendHandlerBuilder()
-  .preMap(async (event) => addTimestamp(await readBody(event)))
+  .withBodyProvider(async (event) => 
+    addTimestamp(await readBody(event))
+  )
   .postMap(normalizeResponse)
   .build('/users')
 ```
@@ -678,9 +982,32 @@ export default backendHandlerBuilder()
  */
 export default backendHandlerBuilder()
   .withMethod('POST')
-  .preMap(async (event) => {
+  .withBodyProvider(async (event) => {
     const body = await readBody(event)
     return { ...body, timestamp: Date.now() }
+  })
+  .build('/users')
+```
+
+### 5. Handle Errors Appropriately
+
+The built-in error handling is comprehensive, but you should still validate
+inputs early:
+
+```typescript
+import { z } from 'zod'
+
+const schema = z.object({
+  email: z.string().email(),
+  name: z.string().min(2)
+})
+
+export default backendHandlerBuilder()
+  .withMethod('POST')
+  .withBodyProvider(async (event) => {
+    const body = await readBody(event)
+    // Validate before sending to backend
+    return schema.parse(body)
   })
   .build('/users')
 ```

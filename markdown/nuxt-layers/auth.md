@@ -5,7 +5,10 @@ editLink: true
 
 # Authentication Layer
 
-The authentication layer provides a flexible, plug-and-play authentication system for DCC-BS Nuxt applications. It enables switching between different authentication implementations (Azure AD, no-auth) using environment variables, without changing your application code.
+The authentication layer provides a flexible, plug-and-play authentication system
+for DCC-BS Nuxt applications. It enables switching between different authentication
+implementations (Azure AD, no-auth) using environment variables, without changing
+your application code.
 
 ## Overview
 
@@ -201,6 +204,7 @@ export default authHandler.build('/users')
 ```
 
 This handler will:
+
 - Extract the user's access token from their session
 - Add `Authorization: Bearer <token>` header to the backend request
 - Forward the request to `${API_URL}/users`
@@ -391,10 +395,13 @@ AUTH_LAYER_URI=github:DCC-BS/nuxt-layers/no-auth
 ### Creating Custom Auth Implementations
 
 Create a layer
+
 ```sh
 bun create nuxt -- --template layer nuxt-layer 
 ```
+
 Edit `.nuxt.config.ts`
+
 ```ts{3}
 export default defineNuxtConfig({
   extends: [
@@ -403,7 +410,9 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
 });
 ```
-run 
+
+run
+
 ```sh
 bun i
 bun dev:prepare
@@ -412,6 +421,7 @@ bun dev:prepare
 Remove the generate code in the `app/` directory and implement your own authentication logic:
 
 add `app/composables/useAuth.ts`
+
 ```ts
 import type { AuthData } from "#layers/auth/app/types/authData";
 import type { UseAppAuthReturns } from "#layers/auth/app/types/composableTypes";
@@ -445,6 +455,7 @@ export function useAppAuth(): UseAppAuthReturns {
 ````
 
 add `server/utils/authHandler.ts`
+
 ```ts
 export const authHandler = backendHandlerBuilder().extendFetchOptions(
     async (options) => {
@@ -466,7 +477,7 @@ implement middlewares, endpoints, etc. as needed.
 
 Example structure:
 
-```
+```txt
 my-custom-auth/
 ├── .playground/
 │   └──nuxt.config.ts
