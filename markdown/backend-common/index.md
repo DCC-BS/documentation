@@ -5,7 +5,7 @@ editLink: true
 
 # Backend Common
 
-`backend-common` is our shared Python package that provides reusable components for building FastAPI-based backend services. It standardizes logging, configuration, health probes, and LLM integrations across all our projects.
+`backend-common` is our shared Python package that provides reusable components for building FastAPI-based backend services. It standardizes logging, configuration, and health probes across all our projects.
 
 ## Why Use It?
 
@@ -18,15 +18,15 @@ editLink: true
 
 Install the package using [uv](https://docs.astral.sh/uv/):
 
-```bash
+bash
 uv add backend-common
-```
+
 
 ## Quick Start
 
 Here's a minimal FastAPI application using `backend-common`:
 
-```python
+python
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -68,7 +68,7 @@ app.include_router(health_probe_router(service_dependencies))
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
-```
+
 
 ## Modules
 
@@ -77,7 +77,6 @@ async def root():
 | [Configuration](/backend-common/config) | Type-safe configuration management with Pydantic |
 | [Logger](/backend-common/logger) | Structured logging with structlog |
 | [Health Probes](/backend-common/probes) | Kubernetes liveness, readiness, and startup probes |
-| [DSPy Utilities](/backend-common/llm) | Base classes and utilities for DSPy LLM applications |
 
 ## Environment Variables
 
@@ -94,7 +93,7 @@ Module-specific environment variables are documented in their respective pages.
 
 When using `backend-common`, your project structure typically looks like:
 
-```
+
 my-service/
 ├── src/
 │   └── my_service/
@@ -111,7 +110,7 @@ my-service/
 ├── .env.example
 ├── pyproject.toml
 └── Dockerfile
-```
+
 
 ## Best Practices
 
@@ -119,20 +118,20 @@ my-service/
 
 Always initialize the logger and load configuration in the FastAPI lifespan handler:
 
-```python
+python
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_logger()  # Initialize logging first
     config = AppConfig.from_env()  # Then load config
     # ... rest of startup
     yield
-```
+
 
 ### 2. Use Custom AppConfig
 
 For project-specific configuration, extend `AbstractAppConfig`:
 
-```python
+python
 from backend_common.config import AbstractAppConfig, get_env_or_throw
 
 class AppConfig(AbstractAppConfig):
@@ -145,23 +144,23 @@ class AppConfig(AbstractAppConfig):
             my_custom_setting=get_env_or_throw("MY_CUSTOM_SETTING"),
             # ...
         )
-```
+
 
 ### 3. Register Health Probes
 
 Always include health probes for Kubernetes deployments:
 
-```python
+python
 app.include_router(health_probe_router(service_dependencies))
-```
+
 
 ### 4. Use Structured Logging
 
 Always use key-value pairs instead of string interpolation:
 
-```python
+python
 logger.info("User created", user_id=user.id, email=user.email)
-```
+
 
 ## Contributing to Backend Common
 
@@ -184,7 +183,6 @@ Add code to `backend-common` when it is:
 - FastAPI middleware (authentication, rate limiting, request logging)
 - Base classes and protocols (abstract services, repository patterns)
 - Utility functions (string normalization, date helpers, validation)
-- DSPy adapters and listeners
 - Pydantic validators and custom types
 - Common API response models
 
@@ -198,23 +196,22 @@ Add code to `backend-common` when it is:
 
 1. **Clone the repository:**
 
-   ```bash
+   bash
    git clone https://github.com/DCC-BS/backend-common.git
    cd backend-common
-   ```
+   
 
 2. **Create a new module** in the appropriate location:
 
-   ```
+   
    src/backend_common/
    ├── config/           # Configuration utilities
    ├── logger/           # Logging utilities
    ├── fastapi_health_probes/  # Health check endpoints
-   ├── dspy_common/      # DSPy utilities
    └── your_module/      # Your new module
        ├── __init__.py
        └── implementation.py
-   ```
+   
 
 3. **Follow the existing patterns:**
    - Use type hints everywhere
@@ -232,16 +229,16 @@ Add code to `backend-common` when it is:
 
 Each module should follow this structure:
 
-```python
+python
 # src/backend_common/your_module/__init__.py
 """Your module description."""
 
 from .implementation import YourClass, your_function
 
 __all__ = ["YourClass", "your_function"]
-```
 
-```python
+
+python
 # src/backend_common/your_module/implementation.py
 """Implementation details."""
 
@@ -265,7 +262,7 @@ class YourClass:
             A useful result.
         """
         ...
-```
+
 
 ## Source Code
 
