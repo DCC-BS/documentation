@@ -33,7 +33,7 @@ integrates these directories into your application.
 
 Layers are extended in your `nuxt.config.ts`:
 
-```/dev/null/example.ts#L1-7
+```ts
 export default defineNuxtConfig({
   extends: [
     ['github:DCC-BS/nuxt-layers/auth', { install: true }],
@@ -95,6 +95,14 @@ API for creating type-safe API handlers in your Nuxt server routes.
 
 [Learn more about Backend Communication →](./backend_communication.md)
 
+### 📝 Logger
+
+Universal logging layer with pluggable implementations. Switch between console-based logging for development and Winston-based logging for production using environment variables.
+
+**Key Feature**: Type-safe logging interface that works in both browser and server environments!
+
+[Learn more about Logger →](./logger.md)
+
 ### 💚 Health Check
 
 Kubernetes-ready health check endpoints for container orchestration. Provides
@@ -108,9 +116,10 @@ Kubernetes-ready health check endpoints for container orchestration. Provides
 
 In your `nuxt.config.ts`:
 
-```/dev/null/nuxt.config.ts#L1-10
+```ts
 export default defineNuxtConfig({
   extends: [
+    ['github:DCC-BS/nuxt-layers/logger', { install: true }],
     ['github:DCC-BS/nuxt-layers/auth', { install: true }],
     ['github:DCC-BS/nuxt-layers/backend_communication', { install: true }],
     ['github:DCC-BS/nuxt-layers/health_check', { install: true }]
@@ -122,12 +131,15 @@ export default defineNuxtConfig({
 
 Create a `.env` file:
 
-```/dev/null/.env#L1-5
+```sh
 # Backend API URL
 API_URL=https://api.example.com
 
 # Choose authentication implementation
 AUTH_LAYER_URI=github:DCC-BS/nuxt-layers/azure-auth
+
+# Choose logger implementation
+LOGGER_LAYER_URI=github:DCC-BS/nuxt-layers/winston-logger
 ```
 
 ### 3. Use Layer Features
@@ -143,6 +155,10 @@ Our layers work together in a cohesive system:
 ┌─────────────────────────────────────────┐
 │         Your Nuxt Application           │
 ├─────────────────────────────────────────┤
+│  Logger Layer (base)                    │
+│    ├─ Winston Logger (implementation)   │
+│    └─ (future: other loggers)           │
+│                                         │
 │  Auth Layer (base)                      │
 │    ├─ Azure Auth (implementation)       │
 │    └─ No Auth (implementation)          │
@@ -154,6 +170,10 @@ Our layers work together in a cohesive system:
 └─────────────────────────────────────────┘
 ```
 
+- **Logger Layer** provides the interface and dynamically loads an implementation
+based on `LOGGER_LAYER_URI`
+- **Logger Implementations** (winston-logger) extend the base and provide logging
+functionality for both client and server
 - **Auth Layer** provides the interface and dynamically loads an implementation
 based on `AUTH_LAYER_URI`
 - **Auth Implementations** (azure-auth/no-auth) extend the base and provide
@@ -166,16 +186,18 @@ custom server routes
 
 The [nuxt-layers repository](https://github.com/DCC-BS/nuxt-layers) contains:
 
-```/dev/null/structure.txt#L1-12
+```txt
 nuxt-layers/
-├── auth/                    # Base auth layer
-├── azure-auth/              # Azure AD implementation
-├── no-auth/                 # No-auth implementation
-├── backend_communication/   # API communication utilities
-├── health_check/            # Health check endpoints
-├── package.json            # Workspace configuration
-├── tsconfig.json           # TypeScript config
-└── biome.json              # Code formatting config
+├── logger/                 # Base logger layer
+├── winston-logger/         # Winston implementation
+├── auth/                   # Base auth layer
+├── azure-auth/             # Azure AD implementation
+├── no-auth/                # No-auth implementation
+├── backend_communication/  # API communication utilities
+├── health_check/           # Health check endpoints
+├── package.json           # Workspace configuration
+├── tsconfig.json          # TypeScript config
+└── biome.json             # Code formatting config
 ```
 
 Each directory is a standalone layer that can be extended independently.
@@ -184,7 +206,7 @@ Each directory is a standalone layer that can be extended independently.
 
 The repository uses Bun as a monorepo workspace. To develop layers locally:
 
-```/dev/null/terminal.sh#L1-8
+```sh
 # Clone the repository
 git clone https://github.com/DCC-BS/nuxt-layers.git
 
@@ -198,6 +220,7 @@ cd auth && bun dev
 ## Learn More
 
 - [Nuxt Layers Documentation](https://nuxt.com/docs/guide/going-further/layers) - Official Nuxt documentation
+- [Logger Layer](./logger.md) - Universal logging with pluggable implementations
 - [Auth Layer Details](./auth.md) - Learn about authentication switching
 - [Backend Communication](./backend_communication.md) - API communication utilities
 - [Health Checks](./health_check.md) - Monitoring endpoints

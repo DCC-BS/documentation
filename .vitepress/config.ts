@@ -4,8 +4,9 @@ import path from "path";
 import { fileURLToPath } from "url";
 import llmstxt from "vitepress-plugin-llms";
 import { withMermaid } from "vitepress-plugin-mermaid";
-import VueI18nPlugin from "@intlify/unplugin-vue-i18n/vite"
+import VueI18nPlugin from "@intlify/unplugin-vue-i18n/vite";
 import type { Plugin } from "vitepress";
+import { link } from "fs/promises";
 
 // https://vitepress.dev/reference/site-config
 export default withMermaid({
@@ -116,21 +117,26 @@ export default withMermaid({
                         ],
                     },
                 ],
-            }, {
+            },
+            {
                 text: "Nuxt Layers",
                 link: "/nuxt-layers/index.md",
                 items: [
                     {
+                        text: "Logger",
+                        link: "/nuxt-layers/logger",
+                    },
+                    {
                         text: "Auth",
-                        link: "/nuxt-layers/auth.md",
+                        link: "/nuxt-layers/auth",
                     },
                     {
                         text: "Backend Communication",
-                        link: "/nuxt-layers/backend_communication.md",
+                        link: "/nuxt-layers/backend_communication",
                     },
                     {
                         text: "Health Check",
-                        link: "/nuxt-layers/health_check.md",
+                        link: "/nuxt-layers/health_check",
                     },
                 ],
             },
@@ -153,7 +159,7 @@ export default withMermaid({
                     {
                         text: "LLM Interaction",
                         link: "/backend-common/llm.md",
-                    }
+                    },
                 ],
             },
             {
@@ -166,7 +172,7 @@ export default withMermaid({
                     {
                         text: "How to Encrypt Environment Files",
                         link: "howto/encrypt-env-files",
-                    }
+                    },
                 ],
             },
             {
@@ -188,7 +194,7 @@ export default withMermaid({
                     dts: "../.vitepress/components.d.ts",
                 },
                 router: false,
-                scanPackages: ['@dcc-bs/common-ui.bs.js/components']
+                scanPackages: ["@dcc-bs/common-ui.bs.js/components"],
             }),
             tailwindcss(),
             VueI18nPlugin({

@@ -27,7 +27,7 @@ orchestration platform (Docker Swarm, ECS, etc.).
 
 Add the layer to your `nuxt.config.ts`:
 
-```/dev/null/nuxt.config.ts#L1-7
+```ts
 export default defineNuxtConfig({
   extends: [
     ['github:DCC-BS/nuxt-layers/health_check', { install: true }]
@@ -43,7 +43,7 @@ That's it! The health check endpoints are immediately available at:
 
 ### Test the Endpoints
 
-```/dev/null/terminal.sh#L1-11
+```sh
 # Start your Nuxt app
 npm run dev
 
@@ -73,7 +73,7 @@ curl http://localhost:3000/api/health/startup
 
 **Response**:
 
-```/dev/null/response.json#L1-4
+```json
 {
   "status": "ok",
   "timestamp": 1234567890
@@ -87,7 +87,7 @@ curl http://localhost:3000/api/health/startup
 
 **Kubernetes Configuration**:
 
-```/dev/null/deployment.yaml#L1-10
+```yaml
 livenessProbe:
   httpGet:
     path: api/health/liveness
@@ -114,7 +114,7 @@ livenessProbe:
 
 **Response**:
 
-```/dev/null/response.json#L1-5
+```json
 {
   "status": "ready",
   "timestamp": 1234567890,
@@ -129,7 +129,7 @@ livenessProbe:
 
 **Kubernetes Configuration**:
 
-```/dev/null/deployment.yaml#L1-10
+```yaml
 readinessProbe:
   httpGet:
     path: api/health/readiness
@@ -156,7 +156,7 @@ readinessProbe:
 
 **Response**:
 
-```/dev/null/response.json#L1-4
+```json
 {
   "status": "started",
   "timestamp": 1234567890
@@ -170,7 +170,7 @@ readinessProbe:
 
 **Kubernetes Configuration**:
 
-```/dev/null/deployment.yaml#L1-10
+```yaml
 startupProbe:
   httpGet:
     path: api/health/startup
@@ -186,7 +186,7 @@ startupProbe:
 
 ### Complete Deployment Example
 
-```/dev/null/deployment.yaml#L1-60
+```yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -259,7 +259,7 @@ spec:
 3. **Liveness** probe continues checking if app is alive
 4. **Readiness** probe continues checking if app can serve traffic
 
-```/dev/null/flow.txt#L1-15
+```txt
 Application Start
     ↓
 Startup Probe (running)
@@ -281,7 +281,7 @@ Application Running
 
 Health checks work with Docker Compose too:
 
-```/dev/null/docker-compose.yml#L1-20
+```yml
 version: '3.8'
 
 services:
