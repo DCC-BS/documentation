@@ -5,7 +5,7 @@ editLink: true
 
 # Backend Common
 
-`backend-common` is our shared Python package that provides reusable components for building FastAPI-based backend services. It standardizes logging, configuration, health probes, and LLM integrations across all our projects.
+`backend-common` is our shared Python package that provides reusable components for building FastAPI-based backend services. It standardizes logging, configuration, and health probes across all our projects.
 
 ## Why Use It?
 
@@ -77,7 +77,6 @@ async def root():
 | [Configuration](/backend-common/config) | Type-safe configuration management with Pydantic |
 | [Logger](/backend-common/logger) | Structured logging with structlog |
 | [Health Probes](/backend-common/probes) | Kubernetes liveness, readiness, and startup probes |
-| [DSPy Utilities](/backend-common/llm) | Base classes and utilities for DSPy LLM applications |
 
 ## Environment Variables
 
@@ -184,7 +183,6 @@ Add code to `backend-common` when it is:
 - FastAPI middleware (authentication, rate limiting, request logging)
 - Base classes and protocols (abstract services, repository patterns)
 - Utility functions (string normalization, date helpers, validation)
-- DSPy adapters and listeners
 - Pydantic validators and custom types
 - Common API response models
 
@@ -210,7 +208,6 @@ Add code to `backend-common` when it is:
    ├── config/           # Configuration utilities
    ├── logger/           # Logging utilities
    ├── fastapi_health_probes/  # Health check endpoints
-   ├── dspy_common/      # DSPy utilities
    └── your_module/      # Your new module
        ├── __init__.py
        └── implementation.py
