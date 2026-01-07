@@ -12,8 +12,7 @@ The logger layer provides a universal, type-safe logging interface for DCC-BS Nu
 The logging system is designed with a similar pattern to the authentication layer:
 
 1. **`logger`** - Base layer that defines the logging interface and types
-2. **`winston-logger`** - Production implementation using Winston
-3. **`pino-logger`** - Implementation using Pino (low overhead)
+2. **`pino-logger`** - Implementation using Pino (low overhead)
 
 ## How It Works
 
@@ -33,9 +32,9 @@ Your Nuxt App
     ↓
   LOGGER_LAYER_URI environment variable
     ↓
-  ┌─────────────────┬─────────────────┐
-  ↓                 ↓                 ↓
-winston-logger    pino-logger    (future: other)
+  ┌──────────────────┐
+  ↓                  ↓
+pino-logger    (future: other)
 ```
 
 ## Quick Start
@@ -55,11 +54,6 @@ export default defineNuxtConfig({
 ### 2. Configure Logger Implementation
 
 Set the `LOGGER_LAYER_URI` environment variable to choose your implementation:
-
-**For production (Winston):**
-```bash
-LOGGER_LAYER_URI=github:DCC-BS/nuxt-layers/winston-logger
-```
 
 **For production (Pino):**
 ```bash
@@ -130,9 +124,6 @@ The layer reads the following environment variable:
 **Example:**
 
 ```bash
-# Use Winston logger
-LOGGER_LAYER_URI=github:DCC-BS/nuxt-layers/winston-logger
-
 # Use Pino logger
 LOGGER_LAYER_URI=github:DCC-BS/nuxt-layers/pino-logger
 
@@ -241,58 +232,6 @@ The Pino logger includes automatic request/response logging middleware. Its beha
 - **If `logAllRequests` is `true`**: Logs all incoming requests at `info` level.
 - **If `logAllRequests` is `false`** (default): Logs only failed requests (status code >= 400) at `error` level.
 
-## Winston Logger Implementation (`winston-logger`)
-
-Production-ready logging using Winston, providing robust logging capabilities for both browser and server environments.
-
-### Features
-
-- ✅ Universal logging interface (works in browser and server)
-- ✅ Multiple log levels with priorities
-- ✅ Colored console output in development
-- ✅ Stack trace support for debugging
-- ✅ Configurable log levels
-
-### Configuration
-
-Set these environment variables:
-
-| Variable | Required | Description | Example |
-|----------|----------|-------------|---------|
-| `LOGGER_LAYER_URI` | Yes | Points to winston-logger layer | `github:DCC-BS/nuxt-layers/winston-logger` |
-
-### Client-Side Usage
-
-```vue
-<script setup lang="ts">
-const logger = useLogger();
-
-onMounted(() => {
-  logger.debug('Component mounted');
-  logger.info('Application ready');
-  logger.warn('Deprecated feature used', { feature: 'oldAPI' });
-  logger.error('Failed to load data', { error: 'Network timeout' });
-});
-</script>
-```
-
-### Server-Side Usage
-
-```typescript
-export default eventHandler(async (event) => {
-  const logger = getEventLogger(event);
-  logger.info('Handling request');
-  
-  try {
-    const data = await fetchData();
-    return data;
-  } catch (error) {
-    logger.error('Request failed', { error: error.message });
-    throw error;
-  }
-});
-```
-
 ## Switching Between Implementations
 
 The power of this layer system is seamless switching:
@@ -306,7 +245,7 @@ Use different `.env` files:
 LOGGER_LAYER_URI=github:DCC-BS/nuxt-layers/pino-logger
 
 # .env.production (Production)
-LOGGER_LAYER_URI=github:DCC-BS/nuxt-layers/winston-logger
+LOGGER_LAYER_URI=your_custom_logger_layer
 ```
 
 ### Per Developer
