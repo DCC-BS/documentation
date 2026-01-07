@@ -97,7 +97,7 @@ API for creating type-safe API handlers in your Nuxt server routes.
 
 ### 📝 Logger
 
-Universal logging layer with pluggable implementations. Switch between console-based logging for development and Winston-based logging for production using environment variables.
+Universal logging layer with pluggable implementations. Switch between console-based logging for development and production-ready implementations like Pino using environment variables.
 
 **Key Feature**: Type-safe logging interface that works in both browser and server environments!
 
@@ -138,8 +138,8 @@ API_URL=https://api.example.com
 # Choose authentication implementation
 AUTH_LAYER_URI=github:DCC-BS/nuxt-layers/azure-auth
 
-# Choose logger implementation
-LOGGER_LAYER_URI=github:DCC-BS/nuxt-layers/winston-logger
+# Choose logger implementation (e.g., pino-logger)
+LOGGER_LAYER_URI=github:DCC-BS/nuxt-layers/pino-logger
 ```
 
 ### 3. Use Layer Features
@@ -156,7 +156,7 @@ Our layers work together in a cohesive system:
 │         Your Nuxt Application           │
 ├─────────────────────────────────────────┤
 │  Logger Layer (base)                    │
-│    ├─ Winston Logger (implementation)   │
+│    ├─ Pino Logger (implementation)      │
 │    └─ (future: other loggers)           │
 │                                         │
 │  Auth Layer (base)                      │
@@ -172,7 +172,7 @@ Our layers work together in a cohesive system:
 
 - **Logger Layer** provides the interface and dynamically loads an implementation
 based on `LOGGER_LAYER_URI`
-- **Logger Implementations** (winston-logger) extend the base and provide logging
+- **Logger Implementations** (pino-logger) extend the base and provide logging
 functionality for both client and server
 - **Auth Layer** provides the interface and dynamically loads an implementation
 based on `AUTH_LAYER_URI`
@@ -189,7 +189,7 @@ The [nuxt-layers repository](https://github.com/DCC-BS/nuxt-layers) contains:
 ```txt
 nuxt-layers/
 ├── logger/                 # Base logger layer
-├── winston-logger/         # Winston implementation
+├── pino-logger/            # Pino implementation
 ├── auth/                   # Base auth layer
 ├── azure-auth/             # Azure AD implementation
 ├── no-auth/                # No-auth implementation
