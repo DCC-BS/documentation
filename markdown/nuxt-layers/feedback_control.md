@@ -120,11 +120,12 @@ To create a GitHub token for the feedback control:
 
 ### Component Props
 
-The `FeedbackControl` component accepts the following optional prop:
+The `FeedbackControl` component accepts the following optional props:
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `defaultMail` | `string` | `""` | Pre-fill the email address field |
+| `inline` | `boolean` | `false` | Removes fixed positioning to allow placement inline with other elements (e.g., in a footer) |
 
 **Example:**
 
@@ -273,11 +274,25 @@ You can customize the appearance using CSS overrides:
 
 ### Position Customization
 
-The feedback button is positioned at `bottom-4 right-4` (16px from bottom and right). You can modify this by:
+By default, the feedback button is fixed at `bottom-4 right-4` (16px from bottom and right). You can customize the position in two ways:
 
-1. Forking the layer
-2. Editing the position classes in `feedback-control/app/components/feedback-control.vue`
-3. Or using CSS to override the position:
+#### 1. Using the `inline` Prop
+
+To place the component inline with other elements (e.g., in a footer or a grid), set the `inline` prop to `true`. This removes the fixed positioning entirely, allowing standard layout flow to dictate placement.
+
+```vue
+<template>
+  <footer class="flex justify-between p-4">
+    <p>&copy; 2024 My App</p>
+    <!-- Button sits inline in the footer -->
+    <FeedbackControl :inline="true" />
+  </footer>
+</template>
+```
+
+#### 2. Using CSS Overrides
+
+If you need to keep the fixed positioning but change the coordinates, use CSS overrides:
 
 ```css
 #feedback-control {
@@ -382,6 +397,18 @@ const userEmail = computed(() => data?.user?.email || '');
   <div>
     <!-- Pre-fill with authenticated user's email -->
     <FeedbackControl :defaultMail="userEmail" />
+  </div>
+</template>
+```
+
+### Inline Usage
+
+```vue
+<template>
+  <div class="flex items-center gap-4">
+    <span>Need help? Give us feedback.</span>
+    <!-- Component is placed inline, not fixed -->
+    <FeedbackControl :inline="true" />
   </div>
 </template>
 ```
