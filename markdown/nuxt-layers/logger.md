@@ -46,9 +46,9 @@ In your `nuxt.config.ts`:
 ```typescript
 export default defineNuxtConfig({
   extends: [
-    ['github:DCC-BS/nuxt-layers/logger', { install: true }]
+    'github:DCC-BS/nuxt-layers/logger'
   ]
-})
+});
 ```
 
 ### 2. Configure Logger Implementation
@@ -59,6 +59,15 @@ Set the `LOGGER_LAYER_URI` environment variable to choose your implementation:
 ```bash
 LOGGER_LAYER_URI=github:DCC-BS/nuxt-layers/pino-logger
 ```
+
+::: tip Required Dependencies
+For the Pino logger implementation, install the following packages:
+
+```bash
+bun add pino
+bun add -D pino-pretty
+```
+:::
 
 ### 3. Use Logger in Your App
 
