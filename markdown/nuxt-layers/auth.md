@@ -133,6 +133,25 @@ AUTH_LAYER_URI=github:DCC-BS/nuxt-layers/no-auth
 AUTH_LAYER_URI=./layers/custom-auth
 ```
 
+::: warning Docker Build-Time Configuration
+The `AUTH_LAYER_URI` variable is resolved during `nuxt build`, meaning the authentication implementation is compiled into the application. When building Docker images, you must pass this value as a **build argument (ARG)**, not a runtime environment variable.
+
+```dockerfile
+# In your Dockerfile (after FROM, within the build stage)
+ARG AUTH_LAYER_URI
+```
+
+Docker injects `ARG` values into the shell environment during `RUN` commands, so `nuxt build` can read it via `process.env`. No `ENV` instruction needed — the value won't persist into the final image.
+
+```bash
+# When building
+docker build --build-arg AUTH_LAYER_URI=github:DCC-BS/nuxt-layers/azure-auth -t my-app .
+```
+
+::: tip Related Documentation
+For more details on Docker standards and best practices, see [Internal Docker Standards](/docker).
+:::
+
 ## Azure Auth Implementation (`azure-auth`)
 
 Production-ready authentication using Microsoft Azure Active Directory (Azure AD / Entra ID).

@@ -140,6 +140,25 @@ LOGGER_LAYER_URI=github:DCC-BS/nuxt-layers/pino-logger
 LOGGER_LAYER_URI=./layers/custom-logger
 ```
 
+::: warning Docker Build-Time Configuration
+The `LOGGER_LAYER_URI` variable is resolved during `nuxt build`, meaning the logger implementation is compiled into the application. When building Docker images, you must pass this value as a **build argument (ARG)**, not a runtime environment variable.
+
+```dockerfile
+# In your Dockerfile (after FROM, within the build stage)
+ARG LOGGER_LAYER_URI
+```
+
+Docker injects `ARG` values into the shell environment during `RUN` commands, so `nuxt build` can read it via `process.env`. No `ENV` instruction needed — the value won't persist into the final image.
+
+```bash
+# When building
+docker build --build-arg LOGGER_LAYER_URI=github:DCC-BS/nuxt-layers/pino-logger -t my-app .
+```
+
+::: tip Related Documentation
+For more details on Docker standards and best practices, see [Internal Docker Standards](/docker).
+:::
+
 ### App Configuration
 
 Configure the logger behavior in your `app.config.ts`:

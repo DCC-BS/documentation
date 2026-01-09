@@ -68,11 +68,85 @@ Use multi-stage builds to separate build dependencies (compilers, headers, full 
 
 * Kubernetes pod security standards prohibit "run as root" containers.
 
+## Nuxt Layer Configuration with Build Arguments
+
+When building Nuxt applications that use our [Nuxt Layers](/nuxt-layers/), some layers require environment variables that specify which implementation to use (e.g., `AUTH_LAYER_URI`, `LOGGER_LAYER_URI`). These variables are resolved at **build time** during `nuxt build`, not at runtime.
+
+::: warning Important
+Layer URI environment variables must be passed as Docker **build arguments (ARG)**, not runtime environment variables. If you only set them at runtime, the layer will already be compiled with the wrong (or missing) implementation.
+:::
+
+### Required Build Arguments for Nuxt Layers
+
+| Build Argument | Description | Example Value |
+|----------------|-------------|---------------|
+| `AUTH_LAYER_URI` | Authentication implementation layer | `github:DCC-BS/nuxt-layers/azure-auth` |
+| `LOGGER_LAYER_URI` | Logger implementation layer | `github:DCC-BS/nuxt-layers/pino-logger` |
+
+### Dockerfile Pattern
+
+Add these lines to your Nuxt Dockerfile **after `FROM`** and **before** the build step:
+
+```dockerfile
+# Define build arguments (available as env vars during RUN commands)
+ARG AUTH_LAYER_URI
+ARG LOGGER_LAYER_URI
+
+# ... then run the build (ARGs are injected into the shell environment)
+RUN bun x nuxi build
+```
+
+::: tip No ENV Needed
+Docker injects `ARG` values into the shell environment during `RUN` commands. There's no need to duplicate them with `ENV` — the values are available to `nuxt build` via `process.env` and won't persist into the final image.
+:::
+
+### Building the Image
+
+Pass the values using `--build-arg`:
+
+```bash
+docker build \
+  --build-arg AUTH_LAYER_URI=github:DCC-BS/nuxt-layers/azure-auth \
+  --build-arg LOGGER_LAYER_URI=github:DCC-BS/nuxt-layers/pino-logger \
+  -t my-nuxt-app:latest .
+```
+
+### Docker Compose Configuration
+
+In your `docker-compose.yml` or `docker/services.compose.yml`:
+
+```yaml
+services:
+  app-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        AUTH_LAYER_URI: ${AUTH_LAYER_URI:-github:DCC-BS/nuxt-layers/no-auth}
+        LOGGER_LAYER_URI: ${LOGGER_LAYER_URI:-github:DCC-BS/nuxt-layers/pino-logger}
+```
+
+Then create a `.env` file with your desired values or set them in your shell before running `docker compose build`.
+
+### Key Differences: ARG vs ENV
+
+| Aspect | ARG (Build Argument) | ENV (Environment Variable) |
+|--------|---------------------|---------------------------|
+| **Available during** | `RUN` commands in build stage | Build and runtime |
+| **Accessible to processes** | ✅ Injected into shell env during `RUN` | ✅ Always in `process.env` |
+| **Set via** | `--build-arg` flag | `-e` flag, `environment:` in compose, or `ENV` instruction |
+| **Persisted in image** | ❌ No | ✅ Yes |
+| **Use for Layer URIs** | ✅ Yes (build-time only, not persisted) | ❌ Unnecessary duplication |
+
+::: tip Full Documentation
+For comprehensive documentation on Nuxt layer configuration and all available layers, see [Nuxt Layers - Environment Configuration in Docker](/nuxt-layers/#environment-configuration-in-docker).
+:::
+
 ## Examples
 
 ### Node.js / Nuxt (Bun)
 
-```
+```dockerfile
 # Stage 1: Build
 FROM node:24-alpine AS build
 
@@ -81,16 +155,20 @@ RUN npm install -g bun
 
 WORKDIR /app
 
+# Build arguments for Nuxt layer configuration (see section above)
+ARG AUTH_LAYER_URI
+ARG LOGGER_LAYER_URI
+
 # Dependency caching layer
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
 
-# Build layer
+# Build layer - ARGs are injected as env vars, Nuxt reads via process.env
 COPY . .
 RUN bun x nuxi prepare
 RUN bun x nuxi build
 
-# Stage 2: Runtime
+# Stage 2: Runtime (ARGs not needed - layers compiled into .output)
 FROM node:24-alpine
 
 WORKDIR /app

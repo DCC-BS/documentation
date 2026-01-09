@@ -162,6 +162,22 @@ GITHUB_TOKEN=ghp_xxxxxxxxxxxx
 The layers automatically provide composables, server utilities, and endpoints you
 can use immediately.
 
+## Environment Configuration in Docker
+
+Some Nuxt layers rely on environment variables that point to specific layer implementations (e.g., `AUTH_LAYER_URI`, `LOGGER_LAYER_URI`). These variables determine which implementation layer is loaded **at build time** when Nuxt compiles the application.
+
+::: warning Build-Time Configuration
+Layer URI environment variables like `AUTH_LAYER_URI` and `LOGGER_LAYER_URI` are resolved during `nuxt build`. This means the layer implementation is baked into the Docker image at build time, not runtime.
+:::
+
+### Using Docker Build Arguments (ARG)
+
+In Docker, we use `ARG` (build arguments) to pass these values during the image build process. During `RUN` commands, Docker injects `ARG` values into the container's environment, making them available to processes via `process.env`.
+
+::: tip Related Documentation
+For more details on Docker standards and best practices, see [Internal Docker Standards](/docker).
+:::
+
 ## Architecture Overview
 
 Our layers work together in a cohesive system:

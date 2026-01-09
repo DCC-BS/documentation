@@ -70,6 +70,8 @@ FEEDBACK_PROJECT=Test # Project name used in the title of the issue
 GITHUB_TOKEN=your_github_token # GitHub token with read & wirte access to issues and content
 ```
 
+Those variables are only used during runtime, they do not need to be set during build time.
+
 ### 3. Use Feedback Control in Your App
 
 Add the `FeedbackControl` component to your layout or a specific page:
