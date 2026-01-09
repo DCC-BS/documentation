@@ -6,7 +6,6 @@ import llmstxt from "vitepress-plugin-llms";
 import { withMermaid } from "vitepress-plugin-mermaid";
 import VueI18nPlugin from "@intlify/unplugin-vue-i18n/vite";
 import type { Plugin } from "vitepress";
-import { link } from "fs/promises";
 
 // https://vitepress.dev/reference/site-config
 export default withMermaid({
@@ -138,6 +137,10 @@ export default withMermaid({
                         text: "Health Check",
                         link: "/nuxt-layers/health_check",
                     },
+                    {
+                        text: "Feedback Control",
+                        link: "/nuxt-layers/feedback_control",
+                    }
                 ],
             },
             {

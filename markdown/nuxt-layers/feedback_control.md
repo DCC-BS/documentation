@@ -61,6 +61,7 @@ export default defineNuxtConfig({
 
 ### 2. Configure GitHub Integration
 
+** Local **
 Set the required environment variables in your `.env` file:
 
 ```bash
@@ -68,6 +69,28 @@ FEEDBACK_REPO=Feedback # Repository name where the issue will be created
 FEEDBACK_REPO_OWNER=DCC-BS # Repository owner name where the issue will be created
 FEEDBACK_PROJECT=Test # Project name used in the title of the issue
 GITHUB_TOKEN=your_github_token # GitHub token with read & wirte access to issues and content
+```
+
+** Production **
+To set the variables at runtime and not build time you need to prefix the variables with `NUXT_`:
+
+```bash
+NUXT_FEEDBACK_REPO=Feedback # Repository name where the issue will be created
+NUXT_FEEDBACK_REPO_OWNER=DCC-BS # Repository owner name where the issue will be created
+NUXT_FEEDBACK_PROJECT=Test # Project name used in the title of the issue
+NUXT_GITHUB_TOKEN=your_github_token # GitHub token with read & wirte access to issues and content
+```
+
+the variables are set in the runtime config of nuxt:
+```ts
+runtimeConfig: {
+        feedback: {
+            repo: process.env.FEEDBACK_REPO,
+            repoOwner: process.env.FEEDBACK_REPO_OWNER,
+            project: process.env.FEEDBACK_PROJECT,
+            githubToken: process.env.GITHUB_TOKEN,
+        },
+    },
 ```
 
 ### 3. Use Feedback Control in Your App
