@@ -140,8 +140,7 @@ The `FeedbackControl` component accepts the following optional prop:
 
 The feedback control includes a 5-level emoji-based rating system:
 
-| Emoji |
- Value | Description |
+| Emoji | Value | Description |
 |-------|-------|-------------|
 | 😕 | `poor` | Very unsatisfied |
 | 😐 | `okay` | Somewhat satisfied |
