@@ -103,6 +103,14 @@ Universal logging layer with pluggable implementations. Switch between console-b
 
 [Learn more about Logger →](./logger.md)
 
+### 💬 Feedback Control
+
+A plug-and-play feedback widget that collects user feedback and posts it directly to GitHub as issues. Features emoji ratings, file attachments, and multi-language support (DE/EN).
+
+**Key Feature**: No backend required for storage—leverages the GitHub API directly!
+
+[Learn more about Feedback Control →](./feedback_control.md)
+
 ### 💚 Health Check
 
 Kubernetes-ready health check endpoints for container orchestration. Provides
@@ -122,7 +130,8 @@ export default defineNuxtConfig({
     ['github:DCC-BS/nuxt-layers/logger', { install: true }],
     ['github:DCC-BS/nuxt-layers/auth', { install: true }],
     ['github:DCC-BS/nuxt-layers/backend_communication', { install: true }],
-    ['github:DCC-BS/nuxt-layers/health_check', { install: true }]
+    ['github:DCC-BS/nuxt-layers/health_check', { install: true }],
+    ['github:DCC-BS/nuxt-layers/feedback-control', { install: true }]
   ]
 })
 ```
@@ -140,6 +149,12 @@ AUTH_LAYER_URI=github:DCC-BS/nuxt-layers/azure-auth
 
 # Choose logger implementation (e.g., pino-logger)
 LOGGER_LAYER_URI=github:DCC-BS/nuxt-layers/pino-logger
+
+# Feedback Control Configuration
+FEEDBACK_REPO=your-repo-name
+FEEDBACK_REPO_OWNER=your-username
+FEEDBACK_PROJECT=your-project-name
+GITHUB_TOKEN=ghp_xxxxxxxxxxxx
 ```
 
 ### 3. Use Layer Features
@@ -167,6 +182,8 @@ Our layers work together in a cohesive system:
 │    └─ Used by auth implementations      │
 │                                         │
 │  Health Checks                          │
+│                                         │
+│  Feedback Control                       │
 └─────────────────────────────────────────┘
 ```
 
@@ -181,6 +198,8 @@ based on `AUTH_LAYER_URI`
 - **Backend Communication** offers utilities used by auth layers and available for
 custom server routes
 - **Health Checks** operates independently for monitoring
+- **Feedback Control** provides a `<FeedbackControl />` component and server API
+to send feedback to GitHub
 
 ## Repository Structure
 
@@ -194,6 +213,7 @@ nuxt-layers/
 ├── azure-auth/             # Azure AD implementation
 ├── no-auth/                # No-auth implementation
 ├── backend_communication/  # API communication utilities
+├── feedback-control/       # Feedback widget & GitHub integration
 ├── health_check/           # Health check endpoints
 ├── package.json           # Workspace configuration
 ├── tsconfig.json          # TypeScript config
@@ -223,4 +243,5 @@ cd auth && bun dev
 - [Logger Layer](./logger.md) - Universal logging with pluggable implementations
 - [Auth Layer Details](./auth.md) - Learn about authentication switching
 - [Backend Communication](./backend_communication.md) - API communication utilities
+- [Feedback Control](./feedback_control.md) - User feedback widget integration
 - [Health Checks](./health_check.md) - Monitoring endpoints
