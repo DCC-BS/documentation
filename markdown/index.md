@@ -3,72 +3,79 @@
 layout: home
 
 hero:
-  name: "Guidelines"
-  text: "How do we do things around here?"
-  tagline: Data Competence Center Dev Guidelines
+  name: "DCC Guidelines"
+  text: "How we do things around here"
+  tagline: Development standards, best practices, and shared packages for the Data Competence Center
   actions:
     - theme: brand
-      text: Docker Standards
-      link: /docker
-    - theme: brand
-      text: Coding Standards
-      link: /coding
-    - theme: brand
-      text: Python
-      link: /coding/python
-    - theme: brand
-      text: Nuxt / Vue
-      link: /coding/nuxt
-    - theme: brand
-      text: Backend Common
-      link: /backend-common
-    - theme: brand
-      text: User Interface
-      link: /user-interface
-    - theme: brand
-      text: Git / GitHub / CI/CD Standards
-      link: /git
-    - theme: brand
-      text: Dev Setup
+      text: Get Started
       link: /dev-setup
-    - theme: brand
-      text: Team
+    - theme: alt
+      text: Meet the Team
       link: /team
 
 features:
   - title: Docker
-    details: Docker Standards
+    details: Container standards, best practices for Dockerfiles, and deployment configurations.
     icon: 
       light: https://cdn.simpleicons.org/docker
       dark: https://cdn.simpleicons.org/docker/white
-  - title: Coding
-    details: General Coding Standards
-    icon: 
-      light: https://cdn.simpleicons.org/githubsponsors
-      dark: https://cdn.simpleicons.org/githubsponsors/white
-  - title: Python
-    details: Python Standards
-    icon: 
-      light: https://cdn.simpleicons.org/python
-      dark: https://cdn.simpleicons.org/python/white
-  - title: Nuxt / Vue
-    details: Nuxt / Vue Standards
-    icon: 
-      light: https://cdn.simpleicons.org/nuxt
-      dark: https://cdn.simpleicons.org/nuxt/white
-  - title: Git / GitHub / CI/CD
-    details: Git / GitHub / CI/CD Standards
+    link: /docker
+    linkText: View Docker Standards
+
+  - title: Git & CI/CD
+    details: Version control workflows, branching strategies, and continuous integration pipelines.
     icon: 
       light: https://cdn.simpleicons.org/github
       dark: https://cdn.simpleicons.org/github/white
-  - title: DCC-BS Backend Common
-    details: How to use Backend Common Code and Utilities
+    link: /git
+    linkText: View Git Standards
+
+  - title: Python
+    details: Coding conventions, linting rules, and project structure for Python applications.
     icon: 
       light: https://cdn.simpleicons.org/python
       dark: https://cdn.simpleicons.org/python/white
-  - title: DCC-BS User Interface
-    details: How to use DCC-BS User Interface Components
+    link: /coding/python
+    linkText: View Python Standards
+
+  - title: Nuxt / Vue
+    details: Frontend architecture, component patterns, and Vue.js best practices.
     icon: 
       light: https://cdn.simpleicons.org/nuxt
       dark: https://cdn.simpleicons.org/nuxt/white
+    link: /coding/nuxt
+    linkText: View Nuxt Standards
+
+  - title: Backend Common
+    details: Shared Python utilities for configuration, logging, LLM integration, and health probes.
+    icon: 
+      light: https://cdn.simpleicons.org/fastapi
+      dark: https://cdn.simpleicons.org/fastapi/white
+    link: /backend-common
+    linkText: Explore Package
+
+  - title: User Interface
+    details: Reusable Vue components, composables, and Nuxt layers for consistent UI across projects.
+    icon: 
+      light: https://cdn.simpleicons.org/vuedotjs
+      dark: https://cdn.simpleicons.org/vuedotjs/white
+    link: /user-interface
+    linkText: Explore Components
+
+  - title: Nuxt Layers
+    details: Modular Nuxt layers for authentication, logging, health checks, and backend communication.
+    icon: 
+      light: https://cdn.simpleicons.org/nuxt
+      dark: https://cdn.simpleicons.org/nuxt/white
+    link: /nuxt-layers
+    linkText: Explore Layers
+
+  - title: How-To Guides
+    details: Step-by-step tutorials for common tasks like changelogs and encrypting environment files.
+    icon: 
+      light: https://cdn.simpleicons.org/readthedocs
+      dark: https://cdn.simpleicons.org/readthedocs/white
+    link: /howto/changelogs
+    linkText: View Guides
 ---
