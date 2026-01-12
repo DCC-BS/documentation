@@ -154,7 +154,7 @@ LOGGER_LAYER_URI=github:DCC-BS/nuxt-layers/pino-logger
 FEEDBACK_REPO=your-repo-name
 FEEDBACK_REPO_OWNER=your-username
 FEEDBACK_PROJECT=your-project-name
-GITHUB_TOKEN=ghp_xxxxxxxxxxxx
+FEEDBACK_GITHUB_TOKEN=ghp_xxxxxxxxxxxx
 ```
 
 ### 3. Use Layer Features

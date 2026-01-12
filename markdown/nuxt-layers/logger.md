@@ -159,18 +159,19 @@ docker build --build-arg LOGGER_LAYER_URI=github:DCC-BS/nuxt-layers/pino-logger 
 For more details on Docker standards and best practices, see [Internal Docker Standards](/docker).
 :::
 
-### App Configuration
+### Runtime Configuration
 
-Configure the logger behavior in your `app.config.ts`:
+Configure the logger behavior in your `nuxt.config.ts`. The `pino-logger` layer provides defaults which can be overridden:
 
 ```typescript
-export default defineAppConfig({
-  logger: {
-    loglevel: "info" as LogLevel,
-    meta: [] as unknown[],
-    includeStackTrace: false,
-    stackTraceLimit: 5,
-    logAllRequests: false,
+export default defineNuxtConfig({
+  runtimeConfig: {
+    logger: {
+      loglevel: "info",
+      includeStackTrace: true,
+      stackTraceLimit: 5,
+      logAllRequests: false,
+    },
   },
 });
 ```
@@ -255,7 +256,7 @@ export default eventHandler(async (event) => {
 
 ### Request Logging Middleware
 
-The Pino logger includes automatic request/response logging middleware. Its behavior is controlled by the `logAllRequests` configuration in `app.config.ts`.
+The Pino logger includes automatic request/response logging middleware. Its behavior is controlled by the `logAllRequests` configuration in `runtimeConfig`.
 
 - **If `logAllRequests` is `true`**: Logs all incoming requests at `info` level.
 - **If `logAllRequests` is `false`** (default): Logs only failed requests (status code >= 400) at `error` level.

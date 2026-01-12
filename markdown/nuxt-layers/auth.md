@@ -163,6 +163,7 @@ Production-ready authentication using Microsoft Azure Active Directory (Azure AD
 - ✅ User profile integration with Azure AD
 - ✅ Bearer token injection for backend API calls
 - ✅ Secure session management
+- ✅ Configuration validation on startup
 
 ### Prerequisites
 
@@ -179,9 +180,12 @@ Set these environment variables:
 | Variable | Required | Description | Example |
 |----------|----------|-------------|---------|
 | `AUTH_LAYER_URI` | Yes | Points to azure-auth layer | `github:DCC-BS/nuxt-layers/azure-auth` |
-| `AZURE_AD_CLIENT_ID` | Yes | Azure AD application client ID | `12345678-1234-...` |
-| `AZURE_AD_TENANT_ID` | Yes | Azure AD tenant ID | `87654321-4321-...` |
-| `AZURE_AD_REDIRECT_URI` | Yes | OAuth redirect URI | `https://app.example.com/auth/callback` |
+| `AUTH_AZURE_AD_CLIENT_ID` | Yes | Azure AD application client ID | `12345678-1234-...` |
+| `AUTH_AZURE_AD_TENANT_ID` | Yes | Azure AD tenant ID | `87654321-4321-...` |
+| `AUTH_AZURE_AD_CLIENT_SECRET` | Yes | Azure AD client secret | `abc123...` |
+| `AUTH_AZURE_AD_API_CLIENT_ID` | Yes | Azure AD API Client ID (for backend access) | `12345678-1234-...` |
+| `AUTH_AUTH_SECRET` | Yes | Secret for encrypting session tokens | `a-long-random-string` |
+| `AUTH_ORIGIN` | Yes | Base URL of the application (used for redirects) | `https://app.example.com` |
 | `API_URL` | Yes | Backend API base URL | `https://api.example.com` |
 
 ### Azure AD Setup
@@ -198,8 +202,10 @@ Set these environment variables:
    - Enable ID tokens and access tokens
 
 3. **Note the Application Details**:
-   - Copy the "Application (client) ID" → `AZURE_AD_CLIENT_ID`
-   - Copy the "Directory (tenant) ID" → `AZURE_AD_TENANT_ID`
+   - Copy the "Application (client) ID" → `AUTH_AZURE_AD_CLIENT_ID`
+   - Copy the "Directory (tenant) ID" → `AUTH_AZURE_AD_TENANT_ID`
+   - Create a client secret → `AUTH_AZURE_AD_CLIENT_SECRET`
+   - Copy the "Application (client) ID" of the backend API → `AUTH_AZURE_AD_API_CLIENT_ID`
 
 4. **Configure API Permissions** (if accessing Azure APIs):
    - Add required Microsoft Graph permissions
@@ -371,9 +377,12 @@ AUTH_LAYER_URI=github:DCC-BS/nuxt-layers/no-auth
 # .env.production
 API_URL=https://api.example.com
 AUTH_LAYER_URI=github:DCC-BS/nuxt-layers/azure-auth
-AZURE_AD_CLIENT_ID=...
-AZURE_AD_TENANT_ID=...
-AZURE_AD_REDIRECT_URI=https://app.example.com/auth/callback
+AUTH_AZURE_AD_CLIENT_ID=...
+AUTH_AZURE_AD_TENANT_ID=...
+AUTH_AZURE_AD_CLIENT_SECRET=...
+AUTH_AZURE_AD_API_CLIENT_ID=...
+AUTH_AUTH_SECRET=...
+AUTH_ORIGIN=https://app.example.com
 ```
 
 ### Limitations
@@ -403,7 +412,7 @@ Each developer can use their own `.env.local`:
 ```bash
 # Alice's .env.local (has Azure access)
 AUTH_LAYER_URI=github:DCC-BS/nuxt-layers/azure-auth
-AZURE_AD_CLIENT_ID=...
+AUTH_AZURE_AD_CLIENT_ID=...
 
 # Bob's .env.local (no Azure access)
 AUTH_LAYER_URI=github:DCC-BS/nuxt-layers/no-auth
