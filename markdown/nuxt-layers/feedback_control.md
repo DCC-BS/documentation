@@ -63,14 +63,30 @@ export default defineNuxtConfig({
 
 Set the required environment variables in your `.env` file:
 
-```bash
-FEEDBACK_REPO=Feedback # Repository name where the issue will be created
-FEEDBACK_REPO_OWNER=DCC-BS # Repository owner name where the issue will be created
-FEEDBACK_PROJECT=Test # Project name used in the title of the issue
-GITHUB_TOKEN=your_github_token # GitHub token with read & wirte access to issues and content
-```
+| Variable | Required | Description | Example |
+|----------|----------|-------------|---------|
+| `FEEDBACK_REPO` | Yes | Name of the GitHub repository for feedback issues | `Feedback` |
+| `FEEDBACK_REPO_OWNER` | Yes | GitHub organization or username that owns the repository | `DCC-BS` |
+| `FEEDBACK_PROJECT` | Yes | GitHub project name for organization | `Test` |
+| `FEEDBACK_GITHUB_TOKEN` | Yes | Personal access token with `content` and `issues` read & write permissions | `ghp_xxxxxxxxxxxx` |
 
-Those variables are only used during runtime, they do not need to be set during build time.
+::: tip
+To set the env variables at runtime prefix the variables with `NUXT_` for example `NUXT_FEEDBACK_REPO`
+:::
+
+**GitHub Token Setup**
+
+To create a GitHub token for the feedback control:
+
+1. Go to **Settings** → **Developer settings** → **Personal access tokens** → **Fine-grained tokens**
+2. Click **Generate new token**
+3. Give it a descriptive name (e.g., "Feedback Control")
+4. Select only repositories and add you repository
+5. Select the following permissions:
+   - ✅ `contents` (read and write content)
+   - ✅ `issues` (read and write issues)
+5. Click **Generate token**
+6. Copy the token immediately (you won't see it again)
 
 ### 3. Use Feedback Control in Your App
 
@@ -90,33 +106,6 @@ Add the `FeedbackControl` component to your layout or a specific page:
   </div>
 </template>
 ```
-
-## Configuration
-
-The feedback control layer requires several environment variables to function correctly.
-
-### Environment Variables
-
-| Variable | Required | Description | Example |
-|----------|----------|-------------|---------|
-| `FEEDBACK_REPO` | Yes | Name of the GitHub repository for feedback issues | `Feedback` |
-| `FEEDBACK_REPO_OWNER` | Yes | GitHub organization or username that owns the repository | `DCC-BS` |
-| `FEEDBACK_PROJECT` | Yes | GitHub project name for organization | `Test` |
-| `GITHUB_TOKEN` | Yes | Personal access token with `content` and `issues` read & write permissions | `ghp_xxxxxxxxxxxx` |
-
-### GitHub Token Setup
-
-To create a GitHub token for the feedback control:
-
-1. Go to **Settings** → **Developer settings** → **Personal access tokens** → **Fine-grained tokens**
-2. Click **Generate new token**
-3. Give it a descriptive name (e.g., "Feedback Control")
-4. Select only repositories and add you repository
-5. Select the following permissions:
-   - ✅ `contents` (read and write content)
-   - ✅ `issues` (read and write issues)
-5. Click **Generate token**
-6. Copy the token immediately (you won't see it again)
 
 ### Component Props
 
