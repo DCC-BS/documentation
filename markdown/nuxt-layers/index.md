@@ -238,6 +238,44 @@ nuxt-layers/
 
 Each directory is a standalone layer that can be extended independently.
 
+## CI/CD with GitHub Actions
+
+When building applications that use these Nuxt layers, you'll need to configure
+your CI/CD pipeline to set the layer environment variables at build time. Below
+is an example GitHub Actions workflow for a project that uses the layers.
+
+### Example Workflow
+
+Here's a complete example workflow configuration for a project using the layers:
+
+```yaml{11-13}
+name: Build & Test
+
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+        branches:
+            - main
+
+env:
+    AUTH_LAYER_URI: github:DCC-BS/nuxt-layers/no-auth
+    LOGGER_LAYER_URI: github:DCC-BS/nuxt-layers/pino-logger
+
+jobs:
+    build-and-test:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: '20'
+            - run: bun install
+            - run: bun run build
+            - run: bun run test
+```
+
 ## Development
 
 The repository uses Bun as a monorepo workspace. To develop layers locally:
