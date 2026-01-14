@@ -19,7 +19,7 @@ editLink: true
 Install the package using [uv](https://docs.astral.sh/uv/):
 
 ```bash
-uv add backend-common
+uv add ddc-backend-common
 ```
 
 ## Quick Start

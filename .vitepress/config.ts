@@ -1,11 +1,11 @@
+import VueI18nPlugin from "@intlify/unplugin-vue-i18n/vite";
 import ui from "@nuxt/ui/vite";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import { fileURLToPath } from "url";
+import type { Plugin } from "vitepress";
 import llmstxt from "vitepress-plugin-llms";
 import { withMermaid } from "vitepress-plugin-mermaid";
-import VueI18nPlugin from "@intlify/unplugin-vue-i18n/vite";
-import type { Plugin } from "vitepress";
 
 // https://vitepress.dev/reference/site-config
 export default withMermaid({
@@ -140,11 +140,11 @@ export default withMermaid({
                     {
                         text: "Feedback Control",
                         link: "/nuxt-layers/feedback_control",
-                    }
+                    },
                 ],
             },
             {
-                text: "Backend Commond Code",
+                text: "Backend Common Code",
                 link: "/backend-common/index.md",
                 items: [
                     {
@@ -154,6 +154,10 @@ export default withMermaid({
                     {
                         text: "Logger",
                         link: "/backend-common/logger.md",
+                    },
+                    {
+                        text: "Error Handler",
+                        link: "/backend-common/error_handler.md",
                     },
                     {
                         text: "Kubernetes Probes",

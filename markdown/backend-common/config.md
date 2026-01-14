@@ -21,7 +21,7 @@ The module provides:
 The config module is part of the `backend-common` package:
 
 ```bash
-uv add backend-common
+uv add ddc-backend-common
 ```
 
 ## Quick Start
