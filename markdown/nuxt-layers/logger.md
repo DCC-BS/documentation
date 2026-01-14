@@ -45,9 +45,7 @@ In your `nuxt.config.ts`:
 
 ```typescript
 export default defineNuxtConfig({
-  extends: [
-    'github:DCC-BS/nuxt-layers/logger'
-  ]
+    extends: ["github:DCC-BS/nuxt-layers/logger"],
 });
 ```
 
@@ -56,6 +54,7 @@ export default defineNuxtConfig({
 Set the `LOGGER_LAYER_URI` environment variable to choose your implementation:
 
 **For production (Pino):**
+
 ```bash
 LOGGER_LAYER_URI=github:DCC-BS/nuxt-layers/pino-logger
 ```
@@ -67,6 +66,7 @@ For the Pino logger implementation, install the following packages:
 bun add pino
 bun add -D pino-pretty
 ```
+
 :::
 
 ### 3. Use Logger in Your App
@@ -77,9 +77,9 @@ The logger layer provides a type-safe logging utility:
 // In a component
 const logger = useLogger();
 
-logger.info('Application started');
-logger.warn('This is a warning');
-logger.error('An error occurred', { details: 'additional context' });
+logger.info("Application started");
+logger.warn("This is a warning");
+logger.error("An error occurred", { details: "additional context" });
 ```
 
 ## Base Logger Layer (`logger`)
@@ -91,27 +91,34 @@ The base logger layer defines the contract that all implementations must follow.
 **LogLevel Type:**
 
 ```typescript
-type LogLevel = 'silent' | 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace';
+type LogLevel =
+    | "silent"
+    | "fatal"
+    | "error"
+    | "warn"
+    | "info"
+    | "debug"
+    | "trace";
 ```
 
 **BaseLogger Interface:**
 
 ```typescript
 interface BaseLogger {
-  /**
-   * Set this property to the desired logging level.
-   * Available levels: 'silent', 'fatal', 'error', 'warn', 'info', 'debug', 'trace'
-   */
-  level: LogLevel;
+    /**
+     * Set this property to the desired logging level.
+     * Available levels: 'silent', 'fatal', 'error', 'warn', 'info', 'debug', 'trace'
+     */
+    level: LogLevel;
 
-  // Logging methods
-  silent: LogFn;
-  fatal: LogFn;
-  error: LogFn;
-  warn: LogFn;
-  info: LogFn;
-  debug: LogFn;
-  trace: LogFn;
+    // Logging methods
+    silent: LogFn;
+    fatal: LogFn;
+    error: LogFn;
+    warn: LogFn;
+    info: LogFn;
+    debug: LogFn;
+    trace: LogFn;
 }
 ```
 
@@ -126,9 +133,9 @@ interface BaseLogger {
 
 The layer reads the following environment variable:
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `LOGGER_LAYER_URI` | Yes | URI to the logging implementation layer |
+| Variable           | Required | Description                             |
+| ------------------ | -------- | --------------------------------------- |
+| `LOGGER_LAYER_URI` | Yes      | URI to the logging implementation layer |
 
 **Example:**
 
@@ -140,28 +147,51 @@ LOGGER_LAYER_URI=github:DCC-BS/nuxt-layers/pino-logger
 LOGGER_LAYER_URI=./layers/custom-logger
 ```
 
-### App Configuration
+::: warning Docker Build-Time Configuration
+The `LOGGER_LAYER_URI` variable is resolved during `nuxt build`, meaning the logger implementation is compiled into the application. When building Docker images, you must pass this value as a **build argument (ARG)**, not a runtime environment variable.
 
-Configure the logger behavior in your `app.config.ts`:
+```dockerfile
+# In your Dockerfile (after FROM, within the build stage)
+ARG LOGGER_LAYER_URI
+```
+
+Docker injects `ARG` values into the shell environment during `RUN` commands, so `nuxt build` can read it via `process.env`. No `ENV` instruction needed — the value won't persist into the final image.
+
+```bash
+# When building
+docker build --build-arg LOGGER_LAYER_URI=github:DCC-BS/nuxt-layers/pino-logger -t my-app .
+```
+
+::: tip Related Documentation
+For more details on Docker standards and best practices, see [Internal Docker Standards](/docker).
+:::
+
+### Runtime Configuration
+
+Configure the logger behavior in your `nuxt.config.ts`. The `pino-logger` layer provides defaults which can be overridden:
 
 ```typescript
-export default defineAppConfig({
-  logger: {
-    loglevel: "info" as LogLevel,
-    meta: [] as unknown[],
-    includeStackTrace: false,
-    stackTraceLimit: 5,
-    logAllRequests: false,
-  },
+export default defineNuxtConfig({
+    runtimeConfig: {
+        public: {
+            logger: {
+                loglevel: (import.meta.dev ? "debug" : "warn") as LogLevel,
+                includeStackTrace: true,
+                stackTraceLimit: 5,
+                logAllRequests: false,
+            },
+        },
+    },
 });
 ```
 
 ::: info Configuration Options
+
 - `loglevel`: Minimum log level to display (e.g., `'info'`, `'debug'`).
 - `includeStackTrace`: Whether to include stack traces in error logs.
 - `stackTraceLimit`: Number of stack frames to include.
 - `logAllRequests`: If `true`, logs all HTTP requests. If `false`, logs only failed requests (4xx/5xx).
-:::
+  :::
 
 ## Pino Logger Implementation (`pino-logger`)
 
@@ -180,9 +210,9 @@ Production-ready logging using Pino, providing low-overhead JSON logging for bot
 
 Set these environment variables:
 
-| Variable | Required | Description | Example |
-|----------|----------|-------------|---------|
-| `LOGGER_LAYER_URI` | Yes | Points to pino-logger layer | `github:DCC-BS/nuxt-layers/pino-logger` |
+| Variable           | Required | Description                 | Example                                 |
+| ------------------ | -------- | --------------------------- | --------------------------------------- |
+| `LOGGER_LAYER_URI` | Yes      | Points to pino-logger layer | `github:DCC-BS/nuxt-layers/pino-logger` |
 
 ### Client-Side Usage
 
@@ -193,19 +223,19 @@ Use the logger in your Vue components:
 const logger = useLogger();
 
 onMounted(() => {
-  logger.trace('Component mounted');
-  logger.info('Application ready');
+    logger.trace("Component mounted");
+    logger.info("Application ready");
 
-  // Log with metadata
-  logger.warn('Deprecated feature used', { feature: 'oldAPI' });
-  logger.error('Failed to load data', { error: 'Network timeout' });
+    // Log with metadata
+    logger.warn("Deprecated feature used", { feature: "oldAPI" });
+    logger.error("Failed to load data", { error: "Network timeout" });
 });
 </script>
 
 <template>
-  <div>
-    <!-- Your component template -->
-  </div>
+    <div>
+        <!-- Your component template -->
+    </div>
 </template>
 ```
 
@@ -215,28 +245,28 @@ On the server side, use the `getEventLogger(event)` function.
 
 ```typescript
 export default eventHandler(async (event) => {
-  const logger = getEventLogger(event);
+    const logger = getEventLogger(event);
 
-  logger.info('Handling request');
+    logger.info("Handling request");
 
-  try {
-    const data = await fetchData();
-    logger.info('Data fetched successfully', { itemCount: data.length });
-    return data;
-  } catch (error) {
-    logger.error('Request failed', {
-      error: error.message,
-      path: event.path,
-      method: event.method
-    });
-    throw error;
-  }
+    try {
+        const data = await fetchData();
+        logger.info("Data fetched successfully", { itemCount: data.length });
+        return data;
+    } catch (error) {
+        logger.error("Request failed", {
+            error: error.message,
+            path: event.path,
+            method: event.method,
+        });
+        throw error;
+    }
 });
 ```
 
 ### Request Logging Middleware
 
-The Pino logger includes automatic request/response logging middleware. Its behavior is controlled by the `logAllRequests` configuration in `app.config.ts`.
+The Pino logger includes automatic request/response logging middleware. Its behavior is controlled by the `logAllRequests` configuration in `runtimeConfig`.
 
 - **If `logAllRequests` is `true`**: Logs all incoming requests at `info` level.
 - **If `logAllRequests` is `false`** (default): Logs only failed requests (status code >= 400) at `error` level.
@@ -303,19 +333,19 @@ import { useNuxtApp } from "#app";
 import type { BaseLogger } from "#layers/logger/shared/types/logger";
 
 export function useLogger(): BaseLogger {
-  // Your implementation
-  const logger: BaseLogger = {
-    level: 'info',
-    info: (msg: string, ...args: unknown[]) => {
-      console.log(`[INFO] ${msg}`, ...args);
-    },
-    error: (msg: string, ...args: unknown[]) => {
-      console.error(`[ERROR] ${msg}`, ...args);
-    },
-    // ... implement other methods (fatal, warn, debug, trace, silent)
-  };
+    // Your implementation
+    const logger: BaseLogger = {
+        level: "info",
+        info: (msg: string, ...args: unknown[]) => {
+            console.log(`[INFO] ${msg}`, ...args);
+        },
+        error: (msg: string, ...args: unknown[]) => {
+            console.error(`[ERROR] ${msg}`, ...args);
+        },
+        // ... implement other methods (fatal, warn, debug, trace, silent)
+    };
 
-  return logger;
+    return logger;
 }
 ```
 
@@ -323,8 +353,8 @@ Add `app/plugins/loggerPlugin.client.ts`
 
 ```ts
 export default defineNuxtPlugin((nuxtApp) => {
-  const logger = useLogger();
-  nuxtApp.provide('logger', logger);
+    const logger = useLogger();
+    nuxtApp.provide("logger", logger);
 });
 ```
 
@@ -332,14 +362,14 @@ Add `server/plugins/loggerPlugin.server.ts`
 
 ```ts
 export default defineNuxtPlugin((nuxtApp) => {
-  const logger = useLogger();
+    const logger = useLogger();
 
-  // Add logger to event context
-  nuxtApp.hooks.hook('request', (event) => {
-    event.context.logger = logger;
-  });
+    // Add logger to event context
+    nuxtApp.hooks.hook("request", (event) => {
+        event.context.logger = logger;
+    });
 
-  nuxtApp.provide('logger', logger);
+    nuxtApp.provide("logger", logger);
 });
 ```
 
@@ -350,10 +380,10 @@ import type { H3Event } from "h3";
 import type { BaseLogger } from "#layers/logger/shared/types/logger";
 
 export function getEventLogger(event: H3Event): BaseLogger {
-  if (!event.context.logger) {
-    throw new Error("Logger not found in event context");
-  }
-  return event.context.logger as BaseLogger;
+    if (!event.context.logger) {
+        throw new Error("Logger not found in event context");
+    }
+    return event.context.logger as BaseLogger;
 }
 ```
 

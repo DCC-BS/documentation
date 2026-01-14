@@ -134,6 +134,10 @@ export default withMermaid({
                         link: "/nuxt-layers/backend_communication",
                     },
                     {
+                        text: "Feedback Control",
+                        link: "/nuxt-layers/feedback_control",
+                    },
+                    {
                         text: "Health Check",
                         link: "/nuxt-layers/health_check",
                     },

@@ -64,12 +64,30 @@ export default defineNuxtConfig({
 ** Local **
 Set the required environment variables in your `.env` file:
 
-```bash
-FEEDBACK_REPO=Feedback # Repository name where the issue will be created
-FEEDBACK_REPO_OWNER=DCC-BS # Repository owner name where the issue will be created
-FEEDBACK_PROJECT=Test # Project name used in the title of the issue
-GITHUB_TOKEN=your_github_token # GitHub token with read & wirte access to issues and content
-```
+| Variable | Required | Description | Example |
+|----------|----------|-------------|---------|
+| `FEEDBACK_REPO` | Yes | Name of the GitHub repository for feedback issues | `Feedback` |
+| `FEEDBACK_REPO_OWNER` | Yes | GitHub organization or username that owns the repository | `DCC-BS` |
+| `FEEDBACK_PROJECT` | Yes | GitHub project name for organization | `Test` |
+| `FEEDBACK_GITHUB_TOKEN` | Yes | Personal access token with `content` and `issues` read & write permissions | `ghp_xxxxxxxxxxxx` |
+
+::: tip
+To set the env variables at runtime prefix the variables with `NUXT_` for example `NUXT_FEEDBACK_REPO`
+:::
+
+**GitHub Token Setup**
+
+To create a GitHub token for the feedback control:
+
+1. Go to **Settings** → **Developer settings** → **Personal access tokens** → **Fine-grained tokens**
+2. Click **Generate new token**
+3. Give it a descriptive name (e.g., "Feedback Control")
+4. Select only repositories and add you repository
+5. Select the following permissions:
+   - ✅ `contents` (read and write content)
+   - ✅ `issues` (read and write issues)
+5. Click **Generate token**
+6. Copy the token immediately (you won't see it again)
 
 ** Production **
 To set the variables at runtime and not build time you need to prefix the variables with `NUXT_`:
@@ -112,40 +130,14 @@ Add the `FeedbackControl` component to your layout or a specific page:
 </template>
 ```
 
-## Configuration
-
-The feedback control layer requires several environment variables to function correctly.
-
-### Environment Variables
-
-| Variable | Required | Description | Example |
-|----------|----------|-------------|---------|
-| `FEEDBACK_REPO` | Yes | Name of the GitHub repository for feedback issues | `Feedback` |
-| `FEEDBACK_REPO_OWNER` | Yes | GitHub organization or username that owns the repository | `DCC-BS` |
-| `FEEDBACK_PROJECT` | Yes | GitHub project name for organization | `Test` |
-| `GITHUB_TOKEN` | Yes | Personal access token with `content` and `issues` read & write permissions | `ghp_xxxxxxxxxxxx` |
-
-### GitHub Token Setup
-
-To create a GitHub token for the feedback control:
-
-1. Go to **Settings** → **Developer settings** → **Personal access tokens** → **Fine-grained tokens**
-2. Click **Generate new token**
-3. Give it a descriptive name (e.g., "Feedback Control")
-4. Select only repositories and add you repository
-5. Select the following permissions:
-   - ✅ `contents` (read and write content)
-   - ✅ `issues` (read and write issues)
-5. Click **Generate token**
-6. Copy the token immediately (you won't see it again)
-
 ### Component Props
 
-The `FeedbackControl` component accepts the following optional prop:
+The `FeedbackControl` component accepts the following optional props:
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `defaultMail` | `string` | `""` | Pre-fill the email address field |
+| `inline` | `boolean` | `false` | Removes fixed positioning to allow placement inline with other elements (e.g., in a footer) |
 
 **Example:**
 
@@ -161,8 +153,7 @@ The `FeedbackControl` component accepts the following optional prop:
 
 The feedback control includes a 5-level emoji-based rating system:
 
-| Emoji |
- Value | Description |
+| Emoji | Value | Description |
 |-------|-------|-------------|
 | 😕 | `poor` | Very unsatisfied |
 | 😐 | `okay` | Somewhat satisfied |
@@ -295,11 +286,25 @@ You can customize the appearance using CSS overrides:
 
 ### Position Customization
 
-The feedback button is positioned at `bottom-4 right-4` (16px from bottom and right). You can modify this by:
+By default, the feedback button is fixed at `bottom-4 right-4` (16px from bottom and right). You can customize the position in two ways:
 
-1. Forking the layer
-2. Editing the position classes in `feedback-control/app/components/feedback-control.vue`
-3. Or using CSS to override the position:
+#### 1. Using the `inline` Prop
+
+To place the component inline with other elements (e.g., in a footer or a grid), set the `inline` prop to `true`. This removes the fixed positioning entirely, allowing standard layout flow to dictate placement.
+
+```vue
+<template>
+  <footer class="flex justify-between p-4">
+    <p>&copy; 2024 My App</p>
+    <!-- Button sits inline in the footer -->
+    <FeedbackControl :inline="true" />
+  </footer>
+</template>
+```
+
+#### 2. Using CSS Overrides
+
+If you need to keep the fixed positioning but change the coordinates, use CSS overrides:
 
 ```css
 #feedback-control {
@@ -404,6 +409,18 @@ const userEmail = computed(() => data?.user?.email || '');
   <div>
     <!-- Pre-fill with authenticated user's email -->
     <FeedbackControl :defaultMail="userEmail" />
+  </div>
+</template>
+```
+
+### Inline Usage
+
+```vue
+<template>
+  <div class="flex items-center gap-4">
+    <span>Need help? Give us feedback.</span>
+    <!-- Component is placed inline, not fixed -->
+    <FeedbackControl :inline="true" />
   </div>
 </template>
 ```

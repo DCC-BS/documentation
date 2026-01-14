@@ -154,13 +154,29 @@ LOGGER_LAYER_URI=github:DCC-BS/nuxt-layers/pino-logger
 FEEDBACK_REPO=your-repo-name
 FEEDBACK_REPO_OWNER=your-username
 FEEDBACK_PROJECT=your-project-name
-GITHUB_TOKEN=ghp_xxxxxxxxxxxx
+FEEDBACK_GITHUB_TOKEN=ghp_xxxxxxxxxxxx
 ```
 
 ### 3. Use Layer Features
 
 The layers automatically provide composables, server utilities, and endpoints you
 can use immediately.
+
+## Environment Configuration in Docker
+
+Some Nuxt layers rely on environment variables that point to specific layer implementations (e.g., `AUTH_LAYER_URI`, `LOGGER_LAYER_URI`). These variables determine which implementation layer is loaded **at build time** when Nuxt compiles the application.
+
+::: warning Build-Time Configuration
+Layer URI environment variables like `AUTH_LAYER_URI` and `LOGGER_LAYER_URI` are resolved during `nuxt build`. This means the layer implementation is baked into the Docker image at build time, not runtime.
+:::
+
+### Using Docker Build Arguments (ARG)
+
+In Docker, we use `ARG` (build arguments) to pass these values during the image build process. During `RUN` commands, Docker injects `ARG` values into the container's environment, making them available to processes via `process.env`.
+
+::: tip Related Documentation
+For more details on Docker standards and best practices, see [Internal Docker Standards](/docker).
+:::
 
 ## Architecture Overview
 
@@ -221,6 +237,44 @@ nuxt-layers/
 ```
 
 Each directory is a standalone layer that can be extended independently.
+
+## CI/CD with GitHub Actions
+
+When building applications that use these Nuxt layers, you'll need to configure
+your CI/CD pipeline to set the layer environment variables at build time. Below
+is an example GitHub Actions workflow for a project that uses the layers.
+
+### Example Workflow
+
+Here's a complete example workflow configuration for a project using the layers:
+
+```yaml{11-13}
+name: Build & Test
+
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+        branches:
+            - main
+
+env:
+    AUTH_LAYER_URI: github:DCC-BS/nuxt-layers/no-auth
+    LOGGER_LAYER_URI: github:DCC-BS/nuxt-layers/pino-logger
+
+jobs:
+    build-and-test:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: '20'
+            - run: bun install
+            - run: bun run build
+            - run: bun run test
+```
 
 ## Development
 
