@@ -22,6 +22,7 @@ The backend communication layer offers:
 - 🔌 **Integration Ready** - Works seamlessly with auth layers
 - 🔑 **Method Inheritance** - Automatically inherits HTTP method from incoming requests
 - 🎭 **Dummy Data Mode** - Mock API responses for development and testing
+- 🔗 **Dynamic Path Construction** - Build URLs dynamically using router and query parameters
 
 ## Quick Start
 
@@ -249,6 +250,7 @@ When a handler built with `backendHandlerBuilder()` is executed, the flow is:
    - Extensions are composed but not executed yet
 
 2. **Execution Phase** (when the handler receives a request)
+   - Parse and build the URL based on `build()` input
    - Validate `API_URL` is configured
    - Call body provider to get request body
    - Determine HTTP method (from `withMethod` or inherited)
@@ -276,11 +278,12 @@ export default backendHandlerBuilder()
   .build('/users')
 
 // ...executes in this order when called:
-// 1. withBodyProvider: Read and transform body
-// 2. extendFetchOptions: Add custom headers
-// 3. Fetch: Make POST request to backend
-// 4. postMap: Transform response
-// 5. Return: { success: true, data: {...} }
+// 1. Build URL: Parse '/users'
+// 2. withBodyProvider: Read and transform body
+// 3. extendFetchOptions: Add custom headers
+// 4. Fetch: Make POST request to backend
+// 5. postMap: Transform response
+// 6. Return: { success: true, data: {...} }
 ```
 
 ### Type Parameters
@@ -550,7 +553,7 @@ output of the previous one, allowing for layered transformations.
 are removed from availability because transformations are tied to the response type
 produced by the current fetcher configuration.
 
-#### `build(path: string): EventHandler`
+#### `build(path: string | ((event: H3Event) => string)): EventHandler`
 
 Build and return the configured event handler. Must be called last in the
 builder chain.
@@ -562,20 +565,27 @@ export default backendHandlerBuilder()
 ```
 
 **Parameters:**
-- `path` - The backend API endpoint path (relative to `API_URL`)
+- `path` - The backend API endpoint path (relative to `API_URL`). Can be a static string, a function returning a string based on the event, or a string containing dynamic placeholders.
+
+**Dynamic Placeholders**
+
+<!--When passing a string, you can use dynamic placeholders to inject values from the request context:-->
+- `[r:paramName]` - Injects a router parameter (e.g., `[r:id]`).
+- `[q:paramName]` - Injects a query parameter (e.g., `[q:sort]`).
 
 **Returns:**
 - `EventHandler<TRequest, Promise<TResponseTransformed>>` - A H3 event handler
   that can be exported from your server route file
 
 **Behavior:**
-1. Validates that `API_URL` is configured in runtime config
-2. Calls the body provider to get the request body
-3. Determines the HTTP method (from `withMethod` or inherited from request)
-4. Applies all `extendFetchOptions` extensions
-5. Makes the request using the configured fetcher
-6. Applies all `postMap` transformations
-7. Handles errors and converts them to proper HTTP error responses
+1. Parses the URL path (resolving any dynamic placeholders or executing the path function)
+2. Validates that `API_URL` is configured in runtime config
+3. Calls the body provider to get the request body
+4. Determines the HTTP method (from `withMethod` or inherited from request)
+5. Applies all `extendFetchOptions` extensions
+6. Makes the request using the configured fetcher
+7. Applies all `postMap` transformations
+8. Handles errors and converts them to proper HTTP error responses
 
 ## Common Patterns
 
@@ -879,22 +889,47 @@ export default defineEventHandler(async (event) => {
 
 ## Advanced Usage
 
-### Dynamic Path Construction
+### Dynamic Path Construction 
+The `build` method supports flexible path construction to handle dynamic routes and query parameters without needing to wrap the handler in `defineEventHandler`.
 
-Build paths dynamically based on request:
+#### Using Placeholders
+
+Inject router and query parameters directly into the path string using `[r:...]` and `[q:...]` syntax.
 
 ```typescript
 // server/api/users/[id].get.ts
-import { backendHandlerBuilder } from '#backend_communication'
+export default backendHandlerBuilder()
+  .build('/users/[r:id]')
 
-export default defineEventHandler(async (event) => {
-  const id = getRouterParam(event, 'id')
-  
-  const handler = backendHandlerBuilder()
-    .build(`/users/${id}`)
-  
-  return handler(event)
-})
+// Request: /api/users/123 -> Forwards to ${API_URL}/users/123
+```
+
+You can combine router and query parameters:
+
+```typescript
+// server/api/search/[category].get.ts
+export default backendHandlerBuilder()
+  .build('/items/[r:category]?sort=[q:order]&limit=[q:size]')
+
+// Request: /api/search/books?order=asc&size=10
+// -> Forwards to ${API_URL}/items/books?sort=asc&limit=10
+```
+
+::: tip Note
+If a router parameter is missing, it is replaced with an empty string. If a query parameter is missing, a warning is logged.
+:::
+
+#### Using Callback Function
+
+For complex logic, provide a function that receives the `H3Event` and returns the full path string:
+
+```typescript
+export default backendHandlerBuilder()
+  .build((event) => {
+    const id = getRouterParam(event, 'id')
+    const version = getHeader(event, 'api-version')
+    return `/users/${id}?v=${version}`
+  })
 ```
 
 ### Conditional Transformations
