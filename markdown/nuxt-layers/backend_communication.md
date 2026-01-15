@@ -22,7 +22,7 @@ The backend communication layer offers:
 - 🔌 **Integration Ready** - Works seamlessly with auth layers
 - 🔑 **Method Inheritance** - Automatically inherits HTTP method from incoming requests
 - 🎭 **Dummy Data Mode** - Mock API responses for development and testing
-- 🔗 **Dynamic Path Construction** - Build URLs dynamically using router and query parameters <Badge type="new" text="New" />
+- 🔗 **Dynamic Path Construction** - Build URLs dynamically using router and query parameters
 
 ## Quick Start
 
@@ -567,9 +567,9 @@ export default backendHandlerBuilder()
 **Parameters:**
 - `path` - The backend API endpoint path (relative to `API_URL`). Can be a static string, a function returning a string based on the event, or a string containing dynamic placeholders.
 
-**Dynamic Placeholders <Badge type="new" text="New" />**
+**Dynamic Placeholders**
 
-When passing a string, you can use dynamic placeholders to inject values from the request context:
+<!--When passing a string, you can use dynamic placeholders to inject values from the request context:-->
 - `[r:paramName]` - Injects a router parameter (e.g., `[r:id]`).
 - `[q:paramName]` - Injects a query parameter (e.g., `[q:sort]`).
 
@@ -889,8 +889,7 @@ export default defineEventHandler(async (event) => {
 
 ## Advanced Usage
 
-### Dynamic Path Construction <Badge type="new" text="New" />
-
+### Dynamic Path Construction 
 The `build` method supports flexible path construction to handle dynamic routes and query parameters without needing to wrap the handler in `defineEventHandler`.
 
 #### Using Placeholders
