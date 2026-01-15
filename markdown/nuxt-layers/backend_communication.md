@@ -21,6 +21,7 @@ The backend communication layer offers:
 - ⚡ **Error Handling** - Built-in error transformation and handling with proper HTTP status codes
 - 🔌 **Integration Ready** - Works seamlessly with auth layers
 - 🔑 **Method Inheritance** - Automatically inherits HTTP method from incoming requests
+- 🎭 **Dummy Data Mode** - Mock API responses for development and testing
 
 ## Quick Start
 
@@ -53,16 +54,43 @@ it inherits the HTTP method from the incoming request (GET in this case).
 
 ## Configuration
 
-The layer requires the following environment variable:
+The layer requires the following environment variables:
 
-| Variable  | Required | Description                  | Example                   |
-| --------- | -------- | ---------------------------- | ------------------------- |
-| `API_URL` | Yes      | Base URL of your backend API | `https://api.example.com` |
+| Variable           | Required | Description                                    | Example                                   |
+| ----------------- | -------- | ---------------------------------------------- | ----------------------------------------- |
+| `API_URL`        | Yes      | Base URL of your backend API                    | `https://api.example.com`                  |
+| `LOGGER_LAYER_URI` | No      | URI to logger implementation layer               | `github:DCC-BS/nuxt-layers/pino-logger`  |
+| `DUMMY`          | No      | Enable dummy data mode (set to "true")         | `true` or empty string                     |
 
 ```bash
 # .env
 API_URL=https://api.example.com
+LOGGER_LAYER_URI=github:DCC-BS/nuxt-layers/pino-logger
+DUMMY=true
 ```
+
+### Runtime Configuration
+
+The backend communication layer supports the following runtime configuration options in your `nuxt.config.ts`:
+
+```typescript
+export default defineNuxtConfig({
+    runtimeConfig: {
+        apiUrl: process.env.API_URL,
+        useDummyData: process.env.DUMMY || "",
+    },
+});
+```
+
+| Option       | Type    | Default | Description                                    |
+| ------------ | ------- | -------- | ---------------------------------------------- |
+| `apiUrl`     | string  | -        | Base URL of backend API                         |
+| `useDummyData` | string | `""`    | Set to `"true"` to use dummy data fetcher instead of real backend |
+
+When `useDummyData` is set to `"true"`, all backend handlers will use the dummy fetcher (if configured) instead of making real HTTP requests. This is useful for:
+- Frontend development without a running backend
+- Testing and debugging
+- Offline development
 
 ## Builder API
 
@@ -326,8 +354,10 @@ export default backendHandlerBuilder()
 - Configure retries
 - Add query parameters to the URL
 
-**Note:** Extensions are chained in the order they're called. Each extension
+::: info Note
+Extensions are chained in the order they're called. Each extension
 wraps the previous one, allowing for layered configuration.
+:::
 
 #### `withBodyProvider(fn: (event) => Promise<TNewBody>)`
 
@@ -364,9 +394,11 @@ export default backendHandlerBuilder()
 - Add metadata to requests
 - Extract body from different sources (cookies, headers, etc.)
 
-**Note:** This is primarily used for POST/PUT/PATCH requests where you need to
+::: tip Note
+This is primarily used for POST/PUT/PATCH requests where you need to
 read and transform the request body. The default body provider returns `undefined`
 for GET requests.
+:::
 
 **Important:** Calling `withBodyProvider` removes `withFetcher` from subsequent
 calls because the body type has changed and the fetcher must match the new body type.
@@ -398,9 +430,84 @@ export default backendHandlerBuilder()
 - Add request caching
 - Mock responses for testing
 
-**Note:** Using a custom fetcher changes the response type, which:
+::: info Note
+Using a custom fetcher changes the response type, which:
+
 - Removes `withBodyProvider` from subsequent calls (body type is locked)
 - Removes `withFetcher` from subsequent calls (fetcher is already set)
+:::
+
+#### `withDummyFetcher<TNewResponse extends TResponse = TResponse>(dummyData: DummyFetcherData<TBody, TNewResponse>)`
+
+Configure a dummy fetcher that returns mock data instead of making real HTTP requests. This is useful for development and testing when you don't have a backend available.
+
+**Parameters:**
+- `dummyData` - Can be:
+  - **Static value**: A value or object to return directly
+  - **Function**: A function that receives `FetcherOptions<TBody>` and returns mock data
+
+::: info Note
+`withDummyFetcher` does not change the response type - it uses the type from `withFetcher`. If you need to change the response type, use `withFetcher<TNewResponseType>()` instead.
+:::
+
+**Use cases:**
+
+- Frontend development without backend
+- Mock API responses for testing
+- Demo/prototype development
+- Integration testing with predictable responses
+
+**Static dummy data:**
+
+```typescript
+export default backendHandlerBuilder()
+  .withDummyFetcher({
+    id: 1,
+    name: "Test User",
+    email: "test@example.com"
+  })
+  .build('/users')
+```
+
+**Dynamic dummy data:**
+
+```typescript
+export default backendHandlerBuilder()
+  .withDummyFetcher((options) => {
+    return {
+      url: options.url,
+      method: options.method,
+      data: {
+        mock: true,
+        timestamp: Date.now()
+      }
+    }
+  })
+  .build('/users')
+```
+
+**Combined with real fetcher:**
+
+```typescript
+export default backendHandlerBuilder()
+  .withFetcher(async (options) => {
+    // Real fetcher for production
+    return await $fetch(options.url, options)
+  })
+  .withDummyFetcher({
+    // Fallback dummy data for development
+    mock: true,
+    data: []
+  })
+  .build('/users')
+```
+
+::: info Note
+Using `withDummyFetcher` removes the following methods from subsequent calls:
+- `withBodyProvider` (body type is locked)
+- `withFetcher` (fetcher is already configured)
+- `withDummyFetcher` (dummy fetcher is already configured)
+:::
 
 #### `postMap<TMap>(fn: (response) => Promise<TMap>)`
 
@@ -434,8 +541,10 @@ export default backendHandlerBuilder()
 - Enrich responses with additional data
 - Format dates and numbers
 
-**Note:** Transformations are chained in order. Each `postMap` receives the
+::: info Note
+Transformations are chained in order. Each `postMap` receives the
 output of the previous one, allowing for layered transformations.
+:::
 
 **Important:** Once you call `postMap`, both `withBodyProvider` and `withFetcher`
 are removed from availability because transformations are tied to the response type
@@ -584,6 +693,10 @@ export default backendHandlerBuilder()
 
 ## Integration with Auth Layer
 
+::: tip Logger Integration
+The backend communication layer extends [logger layer](./logger.md) for logging. You can configure logging implementation using the `LOGGER_LAYER_URI` environment variable.
+:::
+
 When used with the [auth layer](./auth.md), the authentication implementation
 automatically extends the backend handler to add authentication headers using
 `extendFetchOptions`.
@@ -625,6 +738,72 @@ With `no-auth`, the `authHandler` is a simple pass-through:
 ```typescript
 // Same code works without authentication in dev mode
 export default authHandler.build('/data')
+```
+
+## Using Dummy Data Mode
+
+The backend communication layer supports dummy data mode for development and testing. When enabled, handlers use mock data instead of making real HTTP requests.
+
+### Enabling Dummy Data Mode
+
+Set to `DUMMY` environment variable to `"true"`:
+
+```bash
+# .env
+DUMMY=true
+API_URL=http://localhost:8000
+```
+
+Or configure in `nuxt.config.ts`:
+
+```typescript
+export default defineNuxtConfig({
+    runtimeConfig: {
+        useDummyData: "true",
+        apiUrl: process.env.API_URL,
+    },
+});
+```
+
+### How It Works
+
+When `useDummyData` is set to `"true"`:
+
+1. **With dummy fetcher configured**: Uses the mock data from `withDummyFetcher()`
+2. **Without dummy fetcher configured**: Throws an error requiring you to provide dummy data
+
+### Example: Testing Without Backend
+
+```typescript
+// server/api/test.get.ts
+export default backendHandlerBuilder()
+    .withDummyFetcher({
+        users: [
+            { id: 1, name: "Alice" },
+            { id: 2, name: "Bob" }
+        ]
+    })
+    .build('/users')
+
+// When DUMMY=true: Returns mock data
+// When DUMMY=false: Makes real request to API_URL/users
+```
+
+### Example: Dynamic Dummy Data
+
+```typescript
+// server/api/test2.get.ts
+export default backendHandlerBuilder()
+    .withDummyFetcher((options) => {
+        return {
+            url: options.url,
+            method: options.method,
+            mock: true,
+        }
+    })
+    .build('/some/path')
+
+// Returns dynamic response based on request options
 ```
 
 ## Error Handling
