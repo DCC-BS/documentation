@@ -5,7 +5,7 @@ editLink: true
 
 # Health Probes
 
-The `backend_common.fastapi_health_probes` module provides Kubernetes-ready health check endpoints that follow best practices for container orchestration.
+The `dcc_backend_common.fastapi_health_probes` module provides Kubernetes-ready health check endpoints that follow best practices for container orchestration.
 
 ## Overview
 
@@ -19,7 +19,7 @@ The module provides:
 
 ## Installation
 
-The health probes module is part of the `backend-common` package:
+The health probes module is part of the `dcc-backend-common` package:
 
 ```bash
 uv add ddc-backend-common
@@ -29,7 +29,7 @@ uv add ddc-backend-common
 
 ```python
 from fastapi import FastAPI
-from backend_common.fastapi_health_probes import health_probe_router
+from dcc_backend_common.fastapi_health_probes import health_probe_router
 
 app = FastAPI()
 
@@ -133,7 +133,7 @@ app.include_router(health_probe_router(service_dependencies))
 Define the external services your application depends on:
 
 ```python
-from backend_common.fastapi_health_probes import ServiceDependency
+from dcc_backend_common.fastapi_health_probes import ServiceDependency
 
 service_dependencies: list[ServiceDependency] = [
     {
@@ -230,9 +230,9 @@ spec:
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-from backend_common.config import AppConfig
-from backend_common.logger import init_logger, get_logger
-from backend_common.fastapi_health_probes import health_probe_router
+from dcc_backend_common.config import AppConfig
+from dcc_backend_common.logger import init_logger, get_logger
+from dcc_backend_common.fastapi_health_probes import health_probe_router
 
 
 @asynccontextmanager
@@ -266,5 +266,5 @@ app.include_router(health_probe_router(service_dependencies))
 ```
 
 ::: tip Source Code
-The full implementation is available on GitHub: [backend_common/fastapi_health_probes/router.py](https://github.com/DCC-BS/backend-common/blob/main/src/backend_common/fastapi_health_probes/router.py)
+The full implementation is available on GitHub: [dcc_backend_common/fastapi_health_probes/router.py](https://github.com/DCC-BS/backend-common/blob/main/src/dcc_backend_common/fastapi_health_probes/router.py)
 :::

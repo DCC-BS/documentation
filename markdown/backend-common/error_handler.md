@@ -5,7 +5,7 @@ editLink: true
 
 # Error Handler
 
-The `backend_common.fastapi_error_handling` module provides a standardized way to handle and format API errors across all FastAPI services.
+The `dcc_backend_common.fastapi_error_handling` module provides a standardized way to handle and format API errors across all FastAPI services.
 
 ## Overview
 
@@ -20,7 +20,7 @@ The module provides:
 
 ## Installation
 
-The error handler module is part of the `backend-common` package:
+The error handler module is part of the `dcc-backend-common` package:
 
 ```bash
 uv add ddc-backend-common

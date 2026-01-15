@@ -168,8 +168,8 @@ export default withMermaid({
                         link: "/backend-common/probes.md",
                     },
                     {
-                        text: "LLM Interaction",
-                        link: "/backend-common/llm.md",
+                        text: "Usage Tracking",
+                        link: "/backend-common/usage_tracking.md",
                     },
                 ],
             },

@@ -5,7 +5,7 @@ editLink: true
 
 # Structured Logging
 
-The `backend_common.logger` module provides structured, consistent logging across all services using [structlog](https://www.structlog.org/).
+The `dcc_backend_common.logger` module provides structured, consistent logging across all services using [structlog](https://www.structlog.org/).
 
 ::: tip Logging Standards
 For general logging best practices and standards, see the [Python Coding Standards - Logging](/coding/python#logging) section.
@@ -22,7 +22,7 @@ The module provides:
 
 ## Installation
 
-The logger module is part of the `backend-common` package:
+The logger module is part of the `dcc-backend-common` package:
 
 ```bash
 uv add ddc-backend-common
@@ -36,7 +36,7 @@ Initialize the logger **once** at your application's entry point:
 # app.py
 from contextlib import asynccontextmanager
 
-from backend_common.logger import init_logger, get_logger
+from dcc_backend_common.logger import init_logger, get_logger
 from fastapi import FastAPI
 
 
@@ -74,7 +74,7 @@ The logger is configured via environment variables:
 Use `get_logger()` in any module to get a structured logger:
 
 ```python
-from backend_common.logger import get_logger
+from dcc_backend_common.logger import get_logger
 
 # Pass the module name for context
 logger = get_logger(__name__)
@@ -136,7 +136,7 @@ from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 import time
 
-from backend_common.logger import get_logger
+from dcc_backend_common.logger import get_logger
 
 logger = get_logger(__name__)
 
@@ -170,7 +170,7 @@ app.add_middleware(RequestLoggingMiddleware)
 Initialize the logger configuration. Must be called once at application startup.
 
 ```python
-from backend_common.logger import init_logger
+from dcc_backend_common.logger import init_logger
 
 init_logger()
 ```
@@ -180,7 +180,7 @@ init_logger()
 Get a structured logger instance.
 
 ```python
-from backend_common.logger import get_logger
+from dcc_backend_common.logger import get_logger
 
 logger = get_logger(__name__)  # Pass module name for context
 logger = get_logger()  # Or get anonymous logger
@@ -193,5 +193,5 @@ logger = get_logger()  # Or get anonymous logger
 - `BoundLogger`: A structlog bound logger instance
 
 ::: tip Source Code
-The full implementation is available on GitHub: [backend_common/logger/logger.py](https://github.com/DCC-BS/backend-common/blob/main/src/backend_common/logger/logger.py)
+The full implementation is available on GitHub: [dcc_backend_common/logger/logger.py](https://github.com/DCC-BS/backend-common/blob/main/src/dcc_backend_common/logger/logger.py)
 :::

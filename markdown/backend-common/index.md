@@ -5,7 +5,7 @@ editLink: true
 
 # Backend Common
 
-`backend-common` is our shared Python package that provides reusable components for building FastAPI-based backend services. It standardizes logging, configuration, and health probes across all our projects.
+`dcc-backend-common` is our shared Python package that provides reusable components for building FastAPI-based backend services. It standardizes logging, configuration, and health probes across all our projects.
 
 ## Why Use It?
 
@@ -24,15 +24,15 @@ uv add ddc-backend-common
 
 ## Quick Start
 
-Here's a minimal FastAPI application using `backend-common`:
+Here's a minimal FastAPI application using `dcc-backend-common`:
 
 ```python
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-from backend_common.config import AppConfig
-from backend_common.logger import init_logger, get_logger
-from backend_common.fastapi_health_probes import health_probe_router
+from dcc_backend_common.config import AppConfig
+from dcc_backend_common.logger import init_logger, get_logger
+from dcc_backend_common.fastapi_health_probes import health_probe_router
 
 
 @asynccontextmanager
@@ -43,6 +43,9 @@ async def lifespan(app: FastAPI):
     
     # Load configuration
     config = AppConfig.from_env()
+
+    # Inject error handler
+    inject_api_error_handler(app)
     
     logger = get_logger(__name__)
     logger.info("Application started", config=str(config))
@@ -53,6 +56,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+
 
 # Add Kubernetes health probes
 service_dependencies = [
@@ -77,6 +82,8 @@ async def root():
 | [Configuration](/backend-common/config) | Type-safe configuration management with Pydantic |
 | [Logger](/backend-common/logger) | Structured logging with structlog |
 | [Health Probes](/backend-common/probes) | Kubernetes liveness, readiness, and startup probes |
+| [Error Handler](/backend-common/error_handler) | Standardized API error handling |
+| [Usage Tracking](/backend-common/usage_tracking) | Usage tracking for the application |
 
 ## Environment Variables
 
@@ -91,7 +98,7 @@ Module-specific environment variables are documented in their respective pages.
 
 ## Project Structure
 
-When using `backend-common`, your project structure typically looks like:
+When using `dcc-backend-common`, your project structure typically looks like:
 
 ```
 my-service/
@@ -132,7 +139,7 @@ async def lifespan(app: FastAPI):
 For project-specific configuration, extend `AbstractAppConfig`:
 
 ```python
-from backend_common.config import AbstractAppConfig, get_env_or_throw
+from dcc_backend_common.config import AbstractAppConfig, get_env_or_throw
 
 class AppConfig(AbstractAppConfig):
     # Add your project-specific fields
@@ -164,11 +171,11 @@ logger.info("User created", user_id=user.id, email=user.email)
 
 ## Contributing to Backend Common
 
-If you find yourself writing the same code across multiple FastAPI applications, consider adding it to `backend-common` for reuse.
+If you find yourself writing the same code across multiple FastAPI applications, consider adding it to `dcc-backend-common` for reuse.
 
 ### When to Add Code
 
-Add code to `backend-common` when it is:
+Add code to `dcc-backend-common` when it is:
 
 | Criteria | Example |
 |----------|---------|
@@ -197,14 +204,14 @@ Add code to `backend-common` when it is:
 1. **Clone the repository:**
 
    ```bash
-   git clone https://github.com/DCC-BS/backend-common.git
-   cd backend-common
+   git clone https://github.com/DCC-BS/dcc-backend-common.git
+   cd dcc-backend-common
    ```
 
 2. **Create a new module** in the appropriate location:
 
    ```
-   src/backend_common/
+   src/dcc_backend_common/
    ├── config/           # Configuration utilities
    ├── logger/           # Logging utilities
    ├── fastapi_health_probes/  # Health check endpoints
