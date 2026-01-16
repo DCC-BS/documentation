@@ -5,7 +5,7 @@ editLink: true
 
 # Configuration Management
 
-The `backend_common.config` module provides a robust, type-safe way to manage application configuration using Pydantic and environment variables.
+The `dcc_backend_common.config` module provides a robust, type-safe way to manage application configuration using Pydantic and environment variables.
 
 ## Overview
 
@@ -18,7 +18,7 @@ The module provides:
 
 ## Installation
 
-The config module is part of the `backend-common` package:
+The config module is part of the `dcc-backend-common` package:
 
 ```bash
 uv add ddc-backend-common
@@ -31,7 +31,7 @@ Initialize the configuration **once** at your application's entry point (e.g., i
 ```python
 from contextlib import asynccontextmanager
 
-from backend_common.config import AppConfig
+from dcc_backend_common.config import AppConfig
 from fastapi import FastAPI
 
 
@@ -51,7 +51,7 @@ app = FastAPI(lifespan=lifespan)
 The package provides a default `AppConfig` class with commonly used settings:
 
 ```python
-from backend_common.config import AppConfig
+from dcc_backend_common.config import AppConfig
 
 # Load configuration from environment variables
 config = AppConfig.from_env()
@@ -82,7 +82,7 @@ For project-specific configuration, create your own class by inheriting from `Ab
 import os
 from typing import override
 
-from backend_common.config import AbstractAppConfig, get_env_or_throw, log_secret
+from dcc_backend_common.config import AbstractAppConfig, get_env_or_throw, log_secret
 from pydantic import Field
 
 
@@ -150,7 +150,7 @@ class AppConfig(AbstractAppConfig):
 Use this for **required** environment variables. Raises `AppConfigError` if the variable is not set:
 
 ```python
-from backend_common.config import get_env_or_throw
+from dcc_backend_common.config import get_env_or_throw
 
 # Raises AppConfigError if OPENAI_API_KEY is not set
 api_key = get_env_or_throw("OPENAI_API_KEY")
@@ -161,7 +161,7 @@ api_key = get_env_or_throw("OPENAI_API_KEY")
 Use this to safely log sensitive values. Returns `"****"` for non-empty secrets and `"None"` for empty/null values:
 
 ```python
-from backend_common.config import log_secret
+from dcc_backend_common.config import log_secret
 
 # Safe to log - will print "****" instead of the actual key
 print(f"API Key: {log_secret(config.openai_api_key)}")
@@ -216,5 +216,5 @@ For production deployments, refer to the internal documentation on managing secr
 ## API Reference
 
 ::: tip Source Code
-The full implementation is available on GitHub: [backend_common/config/app_config.py](https://github.com/DCC-BS/backend-common/blob/main/src/backend_common/config/app_config.py)
+The full implementation is available on GitHub: [dcc_backend_common/config/app_config.py](https://github.com/DCC-BS/backend-common/blob/main/src/dcc_backend_common/config/app_config.py)
 :::
