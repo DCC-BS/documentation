@@ -27,6 +27,8 @@ We use the following tools to maintain high quality and performance:
 - **[Astral ty](https://docs.astral.sh/ty/):** For type checking.
 - **[Astral uv](https://docs.astral.sh/uv/):** For Python package and project management.
 - **[Astral ruff](https://docs.astral.sh/ruff/):** For linting and code formatting.
+- **[HTTPX](https://www.python-httpx.org/):** For synchronous and asynchronous HTTP requests.
+- **[Returns](https://github.com/dry-python/returns):** For making functions return something meaningful, typed, and safe.
 - **[Dependency Injector](https://python-dependency-injector.ets-labs.org/):** For dependency injection.
 - **FastAPI:** For API creation.
 
@@ -331,6 +333,89 @@ def process_file_bad(path):
         raise
 ```
 
+## Functional Error Handling (Returns)
+
+We use the **[Returns](https://github.com/dry-python/returns)** library to make our functions return meaningful, typed, and safe values. This helps avoid side effects and makes error handling explicit.
+
+### Result Container
+
+Use `Result` (`Success` or `Failure`) for pure functions that can fail.
+
+- **Do:** Return `Success(value)` for successful operations.
+- **Do:** Return `Failure(exception)` for failed operations.
+- **Do:** Use `@safe` decorator to automatically wrap functions that might raise exceptions.
+
+```python
+from returns.result import Result, Success, Failure, safe
+
+@safe
+def divide(a: int, b: int) -> float:
+    return a / b
+
+# Usage
+result = divide(10, 2) # Success(5.0)
+result = divide(10, 0) # Failure(ZeroDivisionError)
+
+if isinstance(result, Success):
+    print(f"Result: {result.unwrap()}")
+else:
+    print(f"Error: {result.failure()}")
+```
+
+### IO and IOResult
+
+Use `IO` for functions with side effects and `IOResult` for impure functions that can fail.
+
+- **Do:** Use `IOResult` for operations like HTTP requests or filesystem access.
+- **Do:** Use `@impure_safe` to wrap impure functions.
+
+```python
+from returns.io import IOResult, impure_safe
+import requests
+
+@impure_safe
+def fetch_user_data(user_id: int) -> dict:
+    response = requests.get(f"https://api.example.com/users/{user_id}")
+    response.raise_for_status()
+    return response.json()
+```
+
+### Future and FutureResult
+
+Use `Future` and `FutureResult` for asynchronous operations.
+
+- **Do:** Use `FutureResult` for async operations that can fail (e.g., async HTTP calls).
+- **Do:** Use `@future_safe` to wrap async functions.
+
+```python
+from returns.future import future_safe, FutureResult
+import httpx
+
+@future_safe
+async def fetch_user_async(user_id: int) -> dict:
+    async with httpx.AsyncClient() as client:
+        response = await client.get(f"https://api.example.com/users/{user_id}")
+        response.raise_for_status()
+        return response.json()
+```
+
+### Pipelines and Composition
+
+Use `flow`, `bind`, and `map` to compose functions without manual error checking.
+
+```python
+from returns.pipeline import flow
+from returns.pointfree import bind
+
+def process_user(user_id: int) -> FutureResult:
+    return flow(
+        user_id,
+        fetch_user_async,
+        bind(validate_user),
+        bind(save_user_locally)
+    )
+```
+
 ## Imports
 
 - **Do:** Group imports: Standard Library first, then Third Party, then Local Application.
@@ -452,6 +537,75 @@ async def slow_batch():
 async def fast_batch():
     return await asyncio.gather(fetch_data(1), fetch_data(2))
 ```
+
+## HTTP Clients (HTTPX)
+
+We use **[HTTPX](https://www.python-httpx.org/)** as our primary HTTP client. It provides a modern, fully featured API for both synchronous and asynchronous requests.
+
+### Sync vs Async Usage
+
+**Always prefer `AsyncClient` (async) over `Client` (sync)** whenever possible, as it provides better scalability and allows for concurrent execution without blocking.
+
+Choose the appropriate client based on your execution context:
+
+- **Use `httpx.Client`** for synchronous code, scripts, or when performing sequential requests in a blocking environment.
+- **Use `httpx.AsyncClient`** for asynchronous code, especially within FastAPI routers or when you need to perform multiple requests concurrently.
+
+```python
+# ✅ Right - Synchronous usage
+import httpx
+
+def fetch_data_sync(url: str) -> dict:
+    """Fetch data from a URL synchronously."""
+    with httpx.Client(timeout=10.0) as client:
+        response = client.get(url)
+        response.raise_for_status()
+        return response.json()
+
+
+# ✅ Right - Asynchronous usage
+import httpx
+
+async def fetch_data_async(url: str) -> dict:
+    """Fetch data from a URL asynchronously."""
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        response = await client.get(url)
+        response.raise_for_status()
+        return response.json()
+```
+
+### Best Practices
+
+- **Do: Reuse client instances.** Creating a new client for every request is expensive as it requires setting up a new connection pool and SSL context. In services, inject the client or manage it as a long-lived object.
+- **Do: Always use context managers.** Use `with` or `async with` to ensure connections are properly closed and returned to the pool.
+- **Do: Set explicit timeouts.** Never use default timeouts (which can be infinite in some clients). Always specify a reasonable timeout for your use case.
+- **Do: Use `response.raise_for_status()`.** This ensures that HTTP errors (4xx and 5xx) are raised as exceptions, preventing your code from proceeding with invalid data.
+- **Do: Enable HTTP/2 for performance.** If the server supports it, HTTP/2 can significantly improve performance through multiplexing.
+- **Do: Configure limits for high-concurrency.** Use `httpx.Limits` to control the maximum number of open connections and keep-alive connections.
+
+```python
+# ✅ Right - Efficient concurrent requests with shared client
+import asyncio
+import httpx
+
+async def fetch_all(urls: list[str]) -> list[dict]:
+    """Fetch data from multiple URLs concurrently using a single client."""
+    # Configure limits and timeouts globally for the client
+    limits = httpx.Limits(max_connections=100, max_keepalive_connections=20)
+    timeout = httpx.Timeout(10.0, connect=5.0)
+
+    async with httpx.AsyncClient(timeout=timeout, limits=limits, http2=True) as client:
+        tasks = [client.get(url) for url in urls]
+        responses = await asyncio.gather(*tasks)
+
+        for response in responses:
+            response.raise_for_status()
+
+        return [response.json() for response in responses]
+```
+
+- **Do not: Mix sync and async clients.** Avoid using `httpx.Client` inside `async def` functions, as it will block the event loop. Use `httpx.AsyncClient` instead.
+- **Do not: Create clients in "hot loops".** Move client instantiation outside of loops that perform many requests.
 
 ## Dependency Injection
 
