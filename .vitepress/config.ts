@@ -27,7 +27,6 @@ export default withMermaid({
         footer: {
             message:
                 "Developed with ❤️ by the DCC. Documentation released under the MIT License.",
-            copyright: "Copyright © 2025 DCC",
         },
 
         search: {
