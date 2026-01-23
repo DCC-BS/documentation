@@ -1,3 +1,4 @@
+```typescript
 import VueI18nPlugin from "@intlify/unplugin-vue-i18n/vite";
 import ui from "@nuxt/ui/vite";
 import tailwindcss from "@tailwindcss/vite";
@@ -170,6 +171,10 @@ export default withMermaid({
                         text: "Usage Tracking",
                         link: "/backend-common/usage_tracking.md",
                     },
+                    {
+                        text: "LLM Agent",
+                        link: "/backend-common/llm_agent.md",
+                    },
                 ],
             },
             {
@@ -226,3 +231,4 @@ export default withMermaid({
     },
     lastUpdated: true,
 });
+```
