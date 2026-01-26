@@ -13,7 +13,7 @@ editLink: true
 - **Less Boilerplate**: Common functionality is already implemented and tested
 - **Best Practices**: Built-in support for Kubernetes, structured logging, and type safety
 - **Faster Development**: Focus on business logic instead of infrastructure code
-- **LLM Integration**: Comprehensive Pydantic AI agent framework with streaming and debugging support :badge[New]
+- **LLM Integration**: Comprehensive Pydantic AI agent framework with streaming and debugging support 
 
 ## Installation
 
@@ -91,7 +91,7 @@ async def root():
 | [Health Probes](/backend-common/probes) | Kubernetes liveness, readiness, and startup probes |
 | [Error Handler](/backend-common/error_handler) | Standardized API error handling |
 | [Usage Tracking](/backend-common/usage_tracking) | Usage tracking for the application |
-| [LLM Agent](/backend-common/llm_agent) | Pydantic AI agent framework with streaming, postprocessing, and debugging :badge[New] |
+| [LLM Agent](/backend-common/llm_agent) | Pydantic AI agent framework with streaming, postprocessing, and debugging |
 
 ## Environment Variables
 
