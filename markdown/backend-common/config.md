@@ -15,6 +15,7 @@ The module provides:
 - **`AppConfig`**: A ready-to-use configuration class with common settings
 - **`get_env_or_throw()`**: Helper to retrieve required environment variables
 - **`log_secret()`**: Helper to safely log sensitive values
+- **`.env.example` Generator**: CLI tool to automatically generate environment variable templates
 
 ## Installation
 
@@ -167,13 +168,52 @@ from dcc_backend_common.config import log_secret
 print(f"API Key: {log_secret(config.openai_api_key)}")
 ```
 
+## Generating .env.example
+
+The module includes a CLI tool to automatically generate a `.env.example` file based on your Pydantic configuration class. This helps keep your environment documentation in sync with your code.
+
+### Usage
+
+Run the module as a script, providing the Python path to your config class:
+
+```bash
+python -m dcc_backend_common.config.generate_env_example \
+    myapp.utils.app_config \
+    AppConfig \
+    -o .env.example
+```
+
+**Arguments:**
+
+- `model_path`: The Python import path to the module (e.g., `myapp.utils.app_config`).
+- `class_name`: The name of the Pydantic model class (e.g., `AppConfig`).
+- `-o, --output`: The output file path (defaults to `.env.example`).
+
+### Behavior
+
+- **Required Fields**: Marked with `TODO` in the generated file.
+- **Optional Fields**: Populated with their defined default values.
+- **Descriptions**: Added as comments based on the `Field` description.
+- **Exclusions**: Fields marked with `json_schema_extra={"exclude_from_env": True}` are skipped.
+
+### Excluding Fields
+
+If you have fields that should not appear in the environment file (e.g., constants or computed values), mark them for exclusion:
+
+```python
+internal_setting: str = Field(
+    default="static_value",
+    json_schema_extra={"exclude_from_env": True}
+)
+```
+
 ## Best Practices
 
 - **Do:** Place custom configuration in `utils/app_config.py`.
 - **Do:** Use `get_env_or_throw()` for required environment variables.
 - **Do:** Use `os.getenv()` with defaults for optional variables.
 - **Do:** Never commit secrets to version control; use `.env` files locally.
-- **Do:** Provide a `.env.example` with placeholder values.
+- **Do:** Provide a `.env.example` with placeholder values. Use the included CLI tool to generate it automatically from your Pydantic model.
 - **Do not:** Log sensitive values; use `log_secret()` to mask them.
 
 ### Example .env File
