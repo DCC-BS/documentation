@@ -194,7 +194,7 @@ The module includes a CLI tool to automatically generate a `.env.example` file b
 Run the module as a script, providing the Python path to your config class:
 
 ```bash
-python -m dcc_backend_common.config.generate_env_example \
+uv run -m dcc_backend_common.config.generate_env_example \
     myapp.utils.app_config \
     AppConfig \
     -o .env.example
