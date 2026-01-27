@@ -13,6 +13,7 @@ The module provides:
 
 - **`AbstractAppConfig`**: Base class for creating custom configuration classes
 - **`AppConfig`**: A ready-to-use configuration class with common settings
+- **`LlmConfig`**: A base configuration class for LLM API settings
 - **`get_env_or_throw()`**: Helper to retrieve required environment variables
 - **`log_secret()`**: Helper to safely log sensitive values
 - **`.env.example` Generator**: CLI tool to automatically generate environment variable templates
@@ -73,6 +74,22 @@ print(config.llm_url)
 | `docling_url` | `DOCLING_URL` | The URL for the Docling service |
 | `whisper_url` | `WHISPER_URL` | The URL for the Whisper API |
 | `ocr_url` | `OCR_URL` | The URL for the OCR API |
+
+## Using LlmConfig
+
+The module also provides `LlmConfig`, a base class specifically for LLM-related configuration. It is designed to be extended or used to type-check configuration objects passed to LLM agents.
+
+::: tip
+`LlmConfig` does not implement `from_env` by default. You should inherit from it to define how your specific environment variables are mapped, or instantiate it manually.
+:::
+
+### Available Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `llm_model` | `str` | The model identifier for the LLM API (e.g., `gpt-4o`) |
+| `llm_url` | `str` | The URL for the LLM API endpoint |
+| `llm_api_key` | `str` | The API key for authenticating with the LLM provider |
 
 ## Creating a Custom AppConfig
 

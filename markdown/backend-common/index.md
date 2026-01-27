@@ -5,7 +5,7 @@ editLink: true
 
 # Backend Common
 
-`dcc-backend-common` is our shared Python package that provides reusable components for building FastAPI-based backend services. It standardizes logging, configuration, and health probes across all our projects.
+`dcc-backend-common` is our shared Python package that provides reusable components for building FastAPI-based backend services. It standardizes logging, configuration, health probes, and LLM integration across all our projects.
 
 ## Why Use It?
 
@@ -13,13 +13,20 @@ editLink: true
 - **Less Boilerplate**: Common functionality is already implemented and tested
 - **Best Practices**: Built-in support for Kubernetes, structured logging, and type safety
 - **Faster Development**: Focus on business logic instead of infrastructure code
+- **LLM Integration**: Comprehensive Pydantic AI agent framework with streaming and debugging support 
 
 ## Installation
 
-Install the package using [uv](https://docs.astral.sh/uv/):
+Install the base package using [uv](https://docs.astral.sh/uv/):
 
 ```bash
 uv add ddc-backend-common
+```
+
+For **LLM Agent** support, install the optional dependencies:
+
+```bash
+uv add ddc-backend-common[pydantic_ai]
 ```
 
 ## Quick Start
@@ -84,6 +91,7 @@ async def root():
 | [Health Probes](/backend-common/probes) | Kubernetes liveness, readiness, and startup probes |
 | [Error Handler](/backend-common/error_handler) | Standardized API error handling |
 | [Usage Tracking](/backend-common/usage_tracking) | Usage tracking for the application |
+| [LLM Agent](/backend-common/llm_agent) | Pydantic AI agent framework with streaming, postprocessing, and debugging |
 
 ## Environment Variables
 

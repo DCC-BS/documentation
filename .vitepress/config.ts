@@ -170,6 +170,10 @@ export default withMermaid({
                         text: "Usage Tracking",
                         link: "/backend-common/usage_tracking.md",
                     },
+                    {
+                        text: "LLM Agent",
+                        link: "/backend-common/llm_agent.md",
+                    },
                 ],
             },
             {
