@@ -86,7 +86,7 @@ async def root():
 
 | Module | Description |
 |--------|-------------|
-| [Configuration](/backend-common/config) | Type-safe configuration management with Pydantic |
+| [Configuration](/backend-common/config) | Type-safe configuration management with Pydantic and CLI tools |
 | [Logger](/backend-common/logger) | Structured logging with structlog |
 | [Health Probes](/backend-common/probes) | Kubernetes liveness, readiness, and startup probes |
 | [Error Handler](/backend-common/error_handler) | Standardized API error handling |

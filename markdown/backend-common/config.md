@@ -17,6 +17,7 @@ The module provides:
 - **`get_env_or_throw()`**: Helper to retrieve required environment variables
 - **`log_secret()`**: Helper to safely log sensitive values
 - **`.env.example` Generator**: CLI tool to automatically generate environment variable templates
+- **`.env` Sync Tool**: CLI tool to synchronize local `.env` with `.env.example`
 
 ## Installation
 
@@ -191,10 +192,10 @@ The module includes a CLI tool to automatically generate a `.env.example` file b
 
 ### Usage
 
-Run the module as a script, providing the Python path to your config class:
+Run the CLI script, providing the Python path to your config class:
 
 ```bash
-uv run -m dcc_backend_common.config.generate_env_example \
+generate-env-example \
     myapp.utils.app_config \
     AppConfig \
     -o .env.example
@@ -224,6 +225,40 @@ internal_setting: str = Field(
 )
 ```
 
+## Syncing .env with .env.example
+
+To ensure your local `.env` file contains all variables defined in `.env.example`, you can use the `sync-env-with-example` CLI tool. This tool identifies missing variables in your local file and appends them, preserving comments and defaults.
+
+### Usage
+
+Run the tool to sync your environment files:
+
+```bash
+sync-env-with-example
+```
+
+**Options:**
+
+- `--example-path`: Path to the `.env.example` file (default: `.env.example`).
+- `--env-path`: Path to the `.env` file (default: `.env`).
+- `-d, --dry-run`: Preview changes without modifying files.
+
+### Behavior
+
+1. **Missing Variables**: If variables exist in `.env.example` but are missing in `.env`, they are appended to `.env`.
+2. **Extra Variables**: If variables exist in `.env` but not in `.env.example`, a warning is printed (they are not removed).
+3. **Preservation**: Comments from `.env.example` are preserved when appending new variables.
+
+### Example
+
+```bash
+# Check what would be changed without applying them
+sync-env-with-example --dry-run
+
+# Apply the changes
+sync-env-with-example
+```
+
 ## Best Practices
 
 - **Do:** Place custom configuration in `utils/app_config.py`.
@@ -231,6 +266,7 @@ internal_setting: str = Field(
 - **Do:** Use `os.getenv()` with defaults for optional variables.
 - **Do:** Never commit secrets to version control; use `.env` files locally.
 - **Do:** Provide a `.env.example` with placeholder values. Use the included CLI tool to generate it automatically from your Pydantic model.
+- **Do:** Use `sync-env-with-example` to keep your local development environment in sync with the template.
 - **Do not:** Log sensitive values; use `log_secret()` to mask them.
 
 ### Example .env File
