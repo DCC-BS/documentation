@@ -200,6 +200,10 @@ generate-env-example \
     AppConfig \
     -o .env.example
 ```
+or with uvx
+```bash
+uvx --from dcc-backend-common generate-env-example
+```
 
 **Arguments:**
 
@@ -235,6 +239,10 @@ Run the tool to sync your environment files:
 
 ```bash
 sync-env-with-example
+```
+or with uvx
+```bash
+uvx --from dcc-backend-common sync-env-with-example
 ```
 
 **Options:**
