@@ -17,6 +17,8 @@ The module provides:
 
 - **`init_logger()`**: Initialize the logging system (call once at startup)
 - **`get_logger()`**: Get a structured logger instance for any module
+- **`FocusedTracebackFormatter`**: Advanced traceback rendering for development that highlights user code
+- **`DevTracebackStyle`**: Configuration options for traceback styles in development mode
 - **Automatic context**: Request IDs, timestamps, module names, and line numbers
 - **Environment-aware rendering**: JSON in production (fluentbit compatible), colored console in development
 
@@ -61,11 +63,16 @@ The logger is configured via environment variables:
 |----------|---------|-------------|
 | `LOG_LEVEL` | `INFO` | Logging level (`DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`) |
 | `IS_PROD` | - | Set to `true` for JSON output (fluentbit compatible) |
+| `DEV_TRACEBACK_STYLE` | `focused` | Traceback style in development: `focused` (user code locals) or `rich` (all locals) |
+| `LOGGER_USER_CODE_PATHS` | `dcc_backend_common, src/, app/, tests/` | Comma-separated paths to identify user code for detailed tracebacks |
 
 ### Development vs Production
 
-- **Development** (`IS_PROD` not `true`): Colored console output for readability
-- **Production** (`IS_PROD=true`): JSON output for log aggregation tools like fluentbit
+- **Development** (`IS_PROD` not `true`): Colored console output for readability.
+  - **Traceback Styles**:
+    - **`focused` (default)**: Shows the full Rich traceback but only displays local variables for frames identified as "user code" (based on `LOGGER_USER_CODE_PATHS`). This reduces noise from library internals.
+    - **`rich`**: Shows the full Rich traceback with local variables displayed for **all** frames, including third-party libraries. This is more verbose but useful for deep debugging.
+- **Production** (`IS_PROD=true`): JSON output for log aggregation tools like fluentbit. Tracebacks are handled structurally within the JSON output.
 
 ## Usage
 
@@ -165,6 +172,23 @@ app.add_middleware(RequestLoggingMiddleware)
 
 ## API Reference
 
+### DevTracebackStyle
+
+Enum defining the available traceback styles for development mode.
+
+| Value | Description |
+|-------|-------------|
+| `FOCUSED` | Rich traceback + focused locals for user code only (default) |
+| `RICH` | Default Rich traceback with full locals for all frames (verbose) |
+
+### FocusedTracebackFormatter
+
+A custom exception formatter used in development mode.
+
+- Shows detailed tracebacks for user code (based on `LOGGER_USER_CODE_PATHS`).
+- Keeps library code traces dense and minimal.
+- Appends a specific "Local variables in your code" section for user frames.
+
 ### init_logger()
 
 Initialize the logger configuration. Must be called once at application startup.
@@ -174,6 +198,12 @@ from dcc_backend_common.logger import init_logger
 
 init_logger()
 ```
+
+**Environment Variables:**
+- `IS_PROD`: "true" for production (JSON output), "false" for development (console output).
+- `LOG_LEVEL`: Logging level (default: "INFO").
+- `DEV_TRACEBACK_STYLE`: Traceback style in dev mode ("focused" or "rich").
+- `LOGGER_USER_CODE_PATHS`: Comma-separated paths to consider as user code.
 
 ### get_logger(name)
 
