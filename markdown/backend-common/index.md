@@ -101,6 +101,8 @@ The package uses environment variables for configuration. Here are the common on
 |----------|----------|-------------|
 | `IS_PROD` | Yes | Set to `true` for production (enables JSON logging) |
 | `LOG_LEVEL` | No | Logging level (`DEBUG`, `INFO`, `WARNING`, `ERROR`). Default: `INFO` |
+| `DEV_TRACEBACK_STYLE` | No | Traceback style in dev mode (`focused` or `rich`). Default: `focused` |
+| `LOGGER_USER_CODE_PATHS` | No | Comma-separated paths to consider as user code for focused tracebacks. Default: `dcc_backend_common,src/,app/,tests/` |
 
 Module-specific environment variables are documented in their respective pages.
 
