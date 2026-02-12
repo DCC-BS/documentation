@@ -88,6 +88,109 @@ The base logger layer defines the contract that all implementations must follow.
 
 ### Type Definitions
 
+**Breadcrumb Type:**
+
+The breadcrumb type defines the structure of breadcrumbs used to track events leading up to a log message.
+
+```typescript
+interface Breadcrumb {
+    /**
+     * Unix timestamp in seconds (auto-set if not provided)
+     */
+    timestamp?: number;
+
+    /**
+     * Type of breadcrumb - influences display/UI
+     * @default "default"
+     */
+    type?: BreadcrumbType;
+
+    /**
+     * Dotted string for categorization (e.g., "ui.click", "xhr", "auth")
+     */
+    category?: string;
+
+    /**
+     * Human-readable message describing the breadcrumb
+     */
+    message?: string;
+
+    /**
+     * Severity level of the breadcrumb
+     * @default "info"
+     */
+    level?: BreadcrumbLevel;
+
+    /**
+     * Arbitrary data associated with this breadcrumb
+     */
+    data?: Record<string, unknown>;
+
+    /**
+     * Source identifier for the breadcrumb
+     */
+    origin?: string;
+}
+
+type BreadcrumbType =
+    | "default"
+    | "debug"
+    | "error"
+    | "navigation"
+    | "http"
+    | "info"
+    | "query"
+    | "transaction"
+    | "ui"
+    | "user";
+
+type BreadcrumbLevel = "fatal" | "error" | "warning" | "info" | "debug";
+```
+
+**BreadcrumbConfig Type:**
+
+```typescript
+interface BreadcrumbConfig {
+    /**
+     * Maximum number of breadcrumbs to keep in memory
+     * @default 20
+     */
+    maxBreadcrumbs: number;
+
+    /**
+     * Whether breadcrumb collection is enabled
+     * @default true
+     */
+    enabled: boolean;
+
+    /**
+     * Automatic breadcrumb collection settings
+     */
+    autoCollect: {
+        /**
+         * Automatically collect navigation events (route changes)
+         * @default true
+         */
+        navigation: boolean;
+
+        /**
+         * Automatically collect HTTP/XHR requests
+         * @default true
+         */
+        xhr: boolean;
+    };
+
+    /**
+     * Optional filter/modifier function before adding breadcrumb
+     * Return null to discard breadcrumb
+     */
+    beforeBreadcrumb?: (
+        breadcrumb: Breadcrumb,
+        hint?: unknown,
+    ) => Breadcrumb | null;
+}
+```
+
 **LogLevel Type:**
 
 ```typescript
@@ -119,12 +222,39 @@ interface BaseLogger {
     info: LogFn;
     debug: LogFn;
     trace: LogFn;
+
+    /**
+     * Add a breadcrumb to the current scope
+     *
+     * @param breadcrumb - Partial breadcrumb object (timestamp auto-set if not provided)
+     * @param hint - Optional context for beforeBreadcrumb filter
+     */
+    addBreadcrumb(breadcrumb: Partial<Breadcrumb>, hint?: unknown): void;
+
+    /**
+     * Clear all breadcrumbs from the current scope
+     */
+    clearBreadcrumbs(): void;
+
+    /**
+     * Get all breadcrumbs in the current scope
+     *
+     * @returns Readonly array of breadcrumbs (oldest first)
+     */
+    getBreadcrumbs(): readonly Breadcrumb[];
+
+    /**
+     * Update breadcrumb configuration
+     *
+     * @param config - Partial config object to merge with existing config
+     */
+    configureBreadcrumbs(config: Partial<BreadcrumbConfig>): void;
 }
 ```
 
 ### Exports
 
-- **Types**: `BaseLogger`, `LogLevel` - Shared type definitions
+- **Types**: `BaseLogger`, `LogLevel`, `Breadcrumb`, `BreadcrumbConfig` - Shared type definitions
 - **`useLogger`**: Client composable for accessing the logger
 - **`getEventLogger`**: Server utility for accessing the logger in event handlers
 - **Dynamic loading**: Automatically extends the implementation specified in `LOGGER_LAYER_URI`
@@ -179,6 +309,14 @@ export default defineNuxtConfig({
                 includeStackTrace: true,
                 stackTraceLimit: 5,
                 logAllRequests: false,
+                breadcrumbs: {
+                    enabled: true,
+                    maxBreadcrumbs: 20,
+                    autoCollect: {
+                        navigation: true,
+                        xhr: true,
+                    },
+                },
             },
         },
     },
@@ -191,6 +329,12 @@ export default defineNuxtConfig({
 - `includeStackTrace`: Whether to include stack traces in error logs.
 - `stackTraceLimit`: Number of stack frames to include.
 - `logAllRequests`: If `true`, logs all HTTP requests. If `false`, logs only failed requests (4xx/5xx).
+- `breadcrumbs`: Configuration for breadcrumb tracking.
+  - `enabled`: Enable/disable breadcrumb collection.
+  - `maxBreadcrumbs`: Maximum number of breadcrumbs to store in memory.
+  - `autoCollect`: Automatic tracking settings.
+    - `navigation`: Track route changes.
+    - `xhr`: Track HTTP requests (`fetch`, `$fetch`).
   :::
 
 ## Pino Logger Implementation (`pino-logger`)
@@ -205,6 +349,7 @@ Production-ready logging using Pino, providing low-overhead JSON logging for bot
 - ✅ Pretty printing for development via `pino-pretty`
 - ✅ Automatic request/response logging middleware
 - ✅ Configurable log levels and transports
+- ✅ Breadcrumb tracking (manual and automatic navigation/XHR)
 
 ### Configuration
 
@@ -229,6 +374,17 @@ onMounted(() => {
     // Log with metadata
     logger.warn("Deprecated feature used", { feature: "oldAPI" });
     logger.error("Failed to load data", { error: "Network timeout" });
+
+    // Manual breadcrumb usage
+    logger.addBreadcrumb({
+        category: "ui",
+        message: "User clicked button",
+        level: "info",
+    });
+
+    // Or use the BreadcrumbManager composable
+    const breadcrumbs = logger.getBreadcrumbs();
+    logger.info(`Current breadcrumbs: ${breadcrumbs.length}`);
 });
 </script>
 
@@ -343,6 +499,14 @@ export function useLogger(): BaseLogger {
             console.error(`[ERROR] ${msg}`, ...args);
         },
         // ... implement other methods (fatal, warn, debug, trace, silent)
+        
+        // Implement breadcrumb methods
+        addBreadcrumb: (breadcrumb) => {
+            console.log("[BREADCRUMB]", breadcrumb);
+        },
+        clearBreadcrumbs: () => {},
+        getBreadcrumbs: () => [],
+        configureBreadcrumbs: () => {},
     };
 
     return logger;
