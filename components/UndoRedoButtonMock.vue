@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import ToolTipMock from './ToolTipMock.vue';
-import { useI18n } from 'vue-i18n';
+import { useI18n } from "vue-i18n";
+import ToolTipMock from "./ToolTipMock.vue";
 
 const { t } = useI18n();
 </script>

@@ -1,5 +1,12 @@
 <script setup lang="ts">
-import { TooltipArrow, TooltipContent, TooltipPortal, TooltipProvider, TooltipRoot, TooltipTrigger } from 'reka-ui'
+import {
+    TooltipArrow,
+    TooltipContent,
+    TooltipPortal,
+    TooltipProvider,
+    TooltipRoot,
+    TooltipTrigger,
+} from "reka-ui";
 
 const contentClasses = `
 text-black
