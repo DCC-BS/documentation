@@ -78,4 +78,12 @@ features:
       dark: https://cdn.simpleicons.org/readthedocs/white
     link: /howto/changelogs
     linkText: View Guides
+
+  - title: Docling Custom Images & Plugins
+    details: Patched docling-serve Docker images and custom plugins for GLM-OCR and PP-DocLayout-V3.
+    icon: 
+      light: https://cdn.simpleicons.org/docker
+      dark: https://cdn.simpleicons.org/docker/white
+    link: /docling/index.md
+    linkText: View Docling Documentation
 ---

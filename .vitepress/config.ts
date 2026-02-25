@@ -190,6 +190,24 @@ export default withMermaid({
                 ],
             },
             {
+                text: "Docling",
+                link: "/docling/index.md",
+                items: [
+                    {
+                        text: "DCC Docling Serve",
+                        link: "/docling/serve",
+                    },
+                    {
+                        text: "PP-Doc-Layout Plugin",
+                        link: "/docling/pp-doc-layout",
+                    },
+                    {
+                        text: "GLM-OCR Plugin",
+                        link: "/docling/glm-ocr",
+                    },
+                ],
+            },
+            {
                 text: "Team",
                 link: "/team",
             },
