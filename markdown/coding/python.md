@@ -717,7 +717,22 @@ root/
 - **Do:** Use dependency groups to separate development dependencies from production ones to keep Docker images small.
 - **Do:** Define scripts in `[project.scripts]` for tasks like data preparation or model training.
 
-Example `pyproject.toml` snippet:
+### Dependency Cooldowns
+
+To prevent instability, catch potential regressions, and **mitigate supply chain attacks**, we use **dependency cooldowns**. This ensures that we only update to new package versions after they have been available for a certain period, allowing time for malicious or buggy releases to be identified and retracted by the community.
+
+We configure this using `uv` in `pyproject.toml` (see [uv documentation](https://docs.astral.sh/uv/concepts/resolution/#dependency-cooldowns)):
+
+```toml
+[tool.uv]
+# Global cooldown: ignore releases newer than 1 week
+exclude-newer = "1 week"
+
+# Override for specific internal packages (e.g., 1 day cooldown)
+exclude-newer-package = { dcc-backend-common = "P1D" }
+```
+
+Example `pyproject.toml` snippet for scripts:
 
 ```toml
 [project.scripts]

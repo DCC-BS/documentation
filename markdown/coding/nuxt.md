@@ -239,12 +239,38 @@ export async function fetchUser(id: string) {
 - **Do:** Always run `biome check` before pushing code.
 - **Do:** Fix all lint and format issues before committing.
 
-```
+```bash
 # ✅ Right
 bun run check
 ```
 
 **Why:** Biome ensures consistent formatting and code quality across the entire project.
+
+## Dependency Management
+
+We use **[Bun](https://bun.sh/)** for package management and as our JavaScript runtime.
+
+### Dependency Cooldowns
+
+To prevent instability, catch potential regressions, and **mitigate supply chain attacks**, we use **dependency cooldowns**. This ensures that we only update to new package versions after they have been available for at least 7 days, allowing time for malicious or buggy releases to be identified and retracted by the community.
+
+We configure this using `bunfig.toml` (see [Bun documentation](https://bun.com/docs/runtime/bunfig#install-minimumreleaseage)):
+
+```toml
+[install]
+# Global cooldown: ignore releases newer than 7 days (in seconds)
+minimumReleaseAge = 604800
+
+# These packages bypass the 7-day minimum age requirement (e.g., internal packages)
+minimumReleaseAgeExcludes = [
+  "@types/bun",
+  "@dcc-bs/audio-recorder.bs.js",
+  "@dcc-bs/common-ui.bs.js",
+  "@dcc-bs/communication.bs.js",
+  "@dcc-bs/event-system.bs.js",
+  "@dcc-bs/dependency-injection.bs.js"
+]
+```
 
 ## Folder Structure Example
 
