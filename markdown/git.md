@@ -45,6 +45,18 @@ The pipeline is triggered by a push to the `main` branch and on pull requests to
 
 AI code reviews are performed by the Gemini and Code Rabbit.
 
+## Security
+
+To prevent tag overwrite supply chain attacks, we only use the full SHA hash to pin GitHub Actions workflows.
+
+```yaml
+# Good
+uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+
+# Bad
+uses: actions/checkout@v4
+```
+
 
 # GitHub Deployment
 Private Repo on GitHub Enterprise
