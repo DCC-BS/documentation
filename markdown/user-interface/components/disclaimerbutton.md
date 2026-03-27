@@ -5,7 +5,7 @@ outline: deep
 import { ref, onMounted } from 'vue';
 import UiContainer from '../../../components/UiContainer.vue';
 import { DisclaimerButton, Disclaimer } from "@dcc-bs/common-ui.bs.js/components";
-import { useLocalStorage } from "@dcc-bs/common-ui.bs.js/composables";
+import { useLocalStorage } from "@vueuse/core";
 
 const disclaimerAcceptedVersion = useLocalStorage<string | undefined>(
     "disclaimerAccepted",

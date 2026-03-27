@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Disclaimer } from "@dcc-bs/common-ui.bs.js/components";
-import { useLocalStorage } from "@dcc-bs/common-ui.bs.js/composables";
+import { useLocalStorage } from "@vueuse/core";
 import { onMounted } from "vue";
 import UiContainer from "./UiContainer.vue";
 
