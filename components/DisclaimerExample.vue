@@ -24,11 +24,12 @@ function showDisclaimer() {
     disclaimerAcceptedVersion.value = undefined;
 }
 
+const scriptClose = "</" + "script>";
 const code = `<script setup lang="ts">
 const content = \`${props.contentHtml}\`;
 const postfix = \`${props.postfixHtml}\`;
 const confirmationText = "${props.confirmationText}";
-<\/script>
+${scriptClose}
 
 <template>
     <Disclaimer
