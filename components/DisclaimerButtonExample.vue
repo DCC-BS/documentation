@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { DisclaimerButton } from "@dcc-bs/common-ui.bs.js/components";
-import { useLocalStorage } from "@dcc-bs/common-ui.bs.js/composables";
+import { useLocalStorage } from "@vueuse/core";
 
 const disclaimerAcceptedVersion = useLocalStorage<string | undefined>(
     "disclaimerAccepted",

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Disclaimer } from "@dcc-bs/common-ui.bs.js/components";
-import { useLocalStorage } from "@dcc-bs/common-ui.bs.js/composables";
+import { useLocalStorage } from "@vueuse/core";
 import { onMounted } from "vue";
 import UiContainer from "./UiContainer.vue";
 
@@ -24,11 +24,12 @@ function showDisclaimer() {
     disclaimerAcceptedVersion.value = undefined;
 }
 
+const scriptClose = "</" + "script>";
 const code = `<script setup lang="ts">
 const content = \`${props.contentHtml}\`;
 const postfix = \`${props.postfixHtml}\`;
 const confirmationText = "${props.confirmationText}";
-<\/script>
+${scriptClose}
 
 <template>
     <Disclaimer
