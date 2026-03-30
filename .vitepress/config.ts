@@ -36,7 +36,8 @@ export default withMermaid({
         sidebar: [
             {
                 text: "Dev Setup",
-                items: [{ text: "Dev Setup", link: "/dev-setup" }],
+                items: [{ text: "Dev Setup", link: "/dev-setup" },
+                { text: "Envroment variables", link: "/dev-setup/varlock"}],
             },
             {
                 text: "Docker",
