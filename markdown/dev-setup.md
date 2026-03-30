@@ -66,3 +66,9 @@ bun run dev
 ```
 
 Check the `README.md` of the specific repository for project-specific instructions and required `.env` variables.
+
+## 6. Environment Variables & Secrets
+
+We use **Varlock** for AI-safe `.env` file management with schema validation, type-safety, and secret injection from password managers.
+
+- **[Varlock Setup Guide](/dev-setup/varlock)** - Detailed setup for Nuxt and Python projects
