@@ -36,24 +36,7 @@ make dev
 
 ## Secrets
 
-We use [pass-cli](https://protonpass.github.io/pass-cli/) to inject secrets from **Proton Pass**.
-
-Because some Linux distros have a conflicting `pass-cli` command, we created `scripts/get-secret.sh` which expects the binary at `$HOME/.local/bin/pass-cli`. For other locations, create `scripts/.env.get-secret`:
-
-```bash
-PASS_CLI_PATH=/custom/path/to/pass-cli
-```
-
-### Usage in Schema
-
-In your `.env.schema`, use `exec()` to fetch secrets:
-
-```bash
-# @sensitive @type=string
-MY_SECRET=exec(`./scripts/get-secret.sh pass://Vault/Item/Field`)
-```
-
----
+We use the varlock [Proton Pass Plguin](https://varlock.dev/plugins/proton-pass/) to inject secrets from **Proton Pass**.
 
 ## Nuxt / Frontend
 
@@ -61,8 +44,7 @@ MY_SECRET=exec(`./scripts/get-secret.sh pass://Vault/Item/Field`)
 
 Run `bun env:check` to validate environment variables. This command:
 1. Logs into `pass-cli`
-2. Sources `.env`
-3. Runs `varlock load` to validate against schema
+2. Runs `varlock load` to validate against schema
 
 ### Vite Plugin
 
