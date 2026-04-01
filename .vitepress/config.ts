@@ -36,7 +36,8 @@ export default withMermaid({
         sidebar: [
             {
                 text: "Dev Setup",
-                items: [{ text: "Dev Setup", link: "/dev-setup" }],
+                items: [{ text: "Dev Setup", link: "/dev-setup" },
+                { text: "Envroment variables", link: "/dev-setup/varlock"}],
             },
             {
                 text: "Docker",
@@ -182,10 +183,6 @@ export default withMermaid({
                     {
                         text: "How to write changelogs",
                         link: "howto/changelogs",
-                    },
-                    {
-                        text: "How to Encrypt Environment Files",
-                        link: "howto/encrypt-env-files",
                     },
                 ],
             },
