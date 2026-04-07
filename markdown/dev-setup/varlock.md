@@ -75,9 +75,15 @@ Control validation with `APP_MODE`:
 
 | APP_MODE | Validates |
 |----------|-----------|
-| `dev` | All variables (buildtime + runtime) |
-| `build` | Buildtime variables only |
-| `prod` | Runtime variables only |
+| `dev`    | All variables (buildtime + runtime) |
+| `ci`     | All variable (buildtome + runtime) |
+| `build`  | Buildtime variables only |
+| `prod`   | Runtime variables only |
+
+::: info
+The ci mode will disable automaticaly set some variables, for example it can enable the DUMMY Mode, so testing works on CI.
+:::
+ 
 
 Example from `.env.schema`:
 
