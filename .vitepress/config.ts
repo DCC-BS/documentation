@@ -36,8 +36,10 @@ export default withMermaid({
         sidebar: [
             {
                 text: "Dev Setup",
-                items: [{ text: "Dev Setup", link: "/dev-setup" },
-                { text: "Envroment variables", link: "/dev-setup/varlock"}],
+                items: [
+                    { text: "Dev Setup", link: "/dev-setup" },
+                    { text: "Envroment variables", link: "/dev-setup/varlock" },
+                ],
             },
             {
                 text: "Docker",
@@ -201,6 +203,24 @@ export default withMermaid({
                     {
                         text: "GLM-OCR Plugin",
                         link: "/docling/glm-ocr",
+                    },
+                ],
+            },
+            {
+                text: "AI Infrastructure",
+                link: "/infrastructure/index.md",
+                items: [
+                    {
+                        text: "Overview",
+                        link: "/infrastructure/index.md",
+                    },
+                    {
+                        text: "GPU Compute Cluster",
+                        link: "/infrastructure/hardware.md",
+                    },
+                    {
+                        text: "Inference Software Stack",
+                        link: "/infrastructure/software.md",
                     },
                 ],
             },

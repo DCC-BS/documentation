@@ -86,4 +86,13 @@ features:
       dark: https://cdn.simpleicons.org/docker/white
     link: /docling/index.md
     linkText: View Docling Documentation
+
+  - title: AI Infrastructure
+    details: Hardware specifications, architectural overview, and the LLM inference software stack (vLLM, LiteLLM, KServe).
+    icon: 
+      light: https://cdn.simpleicons.org/nvidia
+      dark: https://cdn.simpleicons.org/nvidia/white
+    link: /infrastructure/index.md
+    linkText: Explore Infrastructure
 ---
+
