@@ -23,7 +23,7 @@ The platform is designed and maintained as a joint initiative between two major 
 
 ```
 ┌───────────────────────────────────────┐       ┌───────────────────────────────────────┐
-│     Data Competence Center (DCC)      │       │                 IT BS                 │
+│     DCC Data Competence Center        │       │                 IT BS                 │
 │         (Statistisches Amt)           │       │       (Central IT Provider)           │
 ├───────────────────────────────────────┤       ├───────────────────────────────────────┤
 │ • AI Strategy & Competence            │       │ • On-Premise Hardware Operations      │
@@ -33,7 +33,7 @@ The platform is designed and maintained as a joint initiative between two major 
 └───────────────────────────────────────┘       └───────────────────────────────────────┘
 ```
 
-* **Data Competence Center (DCC)** (part of the **Statistisches Amt**): Focuses on the "innovation and application" layer. The DCC leads cantonal AI strategy, coordinates use cases, develops reusable frontend and backend software libraries, evaluates models, and builds pilot applications (such as *TextMate*, *BS-Übersetzer*, and *Transcribo*).
+* **DCC Data Competence Center** (part of the **Statistisches Amt**): Focuses on the "innovation and application" layer. The DCC leads cantonal AI strategy, coordinates use cases, develops reusable frontend and backend software libraries, evaluates models, and builds pilot applications (such as *TextMate*, *BS-Übersetzer*, and *Transcribo*).
 * **IT BS**: Focuses on the "infrastructure and operation" layer. IT BS operates the underlying physical hardware, administers the virtualization platform (VMware vSphere Kubernetes Service), manages network zoning and firewall rules, and ensures overall platform stability, reliability, and enterprise-grade SLA monitoring.
 
 ---
@@ -95,7 +95,7 @@ Managed in partnership with Stackable, this stream provides a modular, open-sour
 This stream is the core engine for local AI. By utilizing advanced GPU hardware and container orchestration, it enables hosting massive Open-Source Large Language Models (LLMs) and other deep learning algorithms completely locally. (See the [Software Stack](/infrastructure/software) page for detail).
 
 ### Stream 3: The Collaborative Data Science Environment
-Built in partnership with b-data GmbH, this environment provides containerized, personal workspaces (using JupyterHub, RStudio, and Python) where data analysts from various cantons can securely work together on analytics without copying data locally.
+Built in partnership with [b-data GmbH](https://www.b-data.io), this environment provides containerized, personal workspaces (using JupyterHub, RStudio, and Python) where data analysts from various departments can securely work together on analytics without copying data locally.
 
 ### Stream 4: AI Web Applications
 This stream delivers standardized, reusable UI layers, Nuxt/Vue guidelines, and components to accelerate the deployment of user-facing AI applications (e.g., chat interfaces, RAG assistants, translation toolkits).
