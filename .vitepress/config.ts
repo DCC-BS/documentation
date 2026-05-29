@@ -222,6 +222,10 @@ export default withMermaid({
                         text: "Inference Software Stack",
                         link: "/infrastructure/software.md",
                     },
+                    {
+                        text: "Models & APIs",
+                        link: "/infrastructure/models.md",
+                    },
                 ],
             },
             {
