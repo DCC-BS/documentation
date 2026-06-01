@@ -13,7 +13,7 @@
         "vitepress-plugin-mermaid": "^2.0.17"
     },
     "peerDependencies": {
-        "typescript": "^5.9.3"
+        "typescript": "^5.9.3 || ^6.0.0"
     },
     "scripts": {
         "dev": "vitepress dev",
