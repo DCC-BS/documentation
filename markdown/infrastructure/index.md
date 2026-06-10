@@ -26,15 +26,15 @@ The platform is designed and maintained as a joint initiative between two major 
 │     DCC Data Competence Center        │       │                 IT BS                 │
 │         (Statistisches Amt)           │       │       (Central IT Provider)           │
 ├───────────────────────────────────────┤       ├───────────────────────────────────────┤
-│ • AI Strategy & Competence            │       │ • On-Premise Hardware Operations      │
-│ • Rapid Prototyping (TextMate, etc.)  │ <───> │ • VMware vSphere Kubernetes (VKS)     │
-│ • Model Evaluation & Optimization     │       │ • Security Zones & Firewall Controls  │
-│ • Shared UI and Nuxt/Vue Frontend     │       │ • Core Database & Gateway Operations  │
+│ • Rapid Prototyping (core service)    │       │ • On-Premise Hardware Operations      │
+│ • AI Strategy & Competence            │ <───> │ • VMware vSphere Kubernetes (VKS)     │
+│ • Teaching & AI Enablement            │       │ • Security Zones & Firewall Controls  │
+│ • Model Eval & Reusable Libraries     │       │ • App Operations & Productionization  │
 └───────────────────────────────────────┘       └───────────────────────────────────────┘
 ```
 
-* **DCC Data Competence Center** (part of the **Statistisches Amt**): Focuses on the "innovation and application" layer. The DCC leads cantonal AI strategy, coordinates use cases, develops reusable frontend and backend software libraries, evaluates models, and builds pilot applications (such as *TextMate*, *BS-Übersetzer*, and *Transcribo*).
-* **IT BS**: Focuses on the "infrastructure and operation" layer. IT BS operates the underlying physical hardware, administers the virtualization platform (VMware vSphere Kubernetes Service), manages network zoning and firewall rules, and ensures overall platform stability, reliability, and enterprise-grade SLA monitoring.
+* **DCC Data Competence Center** (part of the **Statistisches Amt**): Focuses on the "innovation and application" layer. The DCC's core focus is rapid prototyping (building pilots such as *TextMate*, *BS-Übersetzer*, and *Transcribo*), teaching across the canton (what AI is, how it can be used, and where it adds value), and enabling the use of AI within existing administrative processes. It also evaluates models and develops reusable frontend and backend software libraries.
+* **IT BS**: Focuses on the "infrastructure and operation" layer. IT BS operates the underlying physical hardware, administers the virtualization platform (VMware vSphere Kubernetes Service), manages network zoning and firewall rules, and runs the productive applications — including taking DCC's prototypes from prototype into production. It ensures overall platform stability, reliability, and enterprise-grade SLA monitoring.
 
 ---
 
@@ -51,13 +51,12 @@ graph TD
 
     subgraph api_layer ["API & Gateway Layer"]
         B --> D[Tyk.io API Gateway]
-        D --> E[LiteLLM AI Gateway / LLM Proxy]
     end
 
     subgraph compute_layer ["Compute & Inference Layer (Stream 2)"]
-        E --> F[vLLM Inference Engine]
-        E --> G[FasterWhisper & BentoML]
-        F --> H[KServe Model Serving]
+        D --> F[vLLM Inference Engine]
+        D --> G[FasterWhisper & BentoML]
+        F --> H[NVIDIA Run:ai Model Serving]
         G --> H
         I[KEDA Event-driven Autoscaler] -.-> H
     end

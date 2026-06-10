@@ -10,14 +10,14 @@ Our AI platform is divided into five architectural layers, structured from the r
 
 ```
 ┌────────────────────────────────────────────────────────┐
-│               1. API Gateway & LLM Proxy               │
-│               - Tyk.io  •  LiteLLM Proxy               │
+│                  1. API Gateway                        │
+│                    - Tyk.io                            │
 ├────────────────────────────────────────────────────────┤
 │           2. Model Inference & Auto-scaling            │
 │  - vLLM Engine  •  BentoML (FasterWhisper)  •  KEDA    │
 ├────────────────────────────────────────────────────────┤
 │          3. Orchestration & Secret Injectors           │
-│         - KServe  •  Azure Key Vault Secrets           │
+│      - NVIDIA Run:ai  •  SOPS Encrypted Secrets        │
 ├────────────────────────────────────────────────────────┤
 │             4. Compute & Driver Virtualization         │
 │     - VMware vSphere VKS  •  NVIDIA GPU Operator       │
@@ -31,15 +31,14 @@ Our AI platform is divided into five architectural layers, structured from the r
 ### 2. Model Serving & Autoscaling
 * **vLLM (Large Language Model Inference)**: The core engine used to host our Large Language Models. `vLLM` is chosen for its extreme throughput and state-of-the-art memory management via **PagedAttention**, which dynamically allocates Key-Value (KV) cache memory to maximize token generation speed.
 * **FasterWhisper + BentoML (Speech-to-Text)**: Standard Speech-to-Text inference is implemented using `FasterWhisper` (a highly optimized CTranslate2 implementation of OpenAI’s Whisper model, delivering up to 4x speedup). It is packaged and served using `BentoML`, which abstracts the model runtime and exposes clean HTTP/gRPC interfaces.
-* **KServe**: Operates as the declarative model-serving control plane. It abstracts model deployment schemas, standardizes metadata APIs, and handles green/blue canary routing.
+* **NVIDIA Run:ai**: Operates as the model-serving and GPU orchestration control plane. It abstracts model deployment schemas, standardizes metadata APIs, schedules workloads across the GPU fleet, and handles green/blue canary routing.
 * **KEDA (Kubernetes Event-driven Autoscaling)**: Provides advanced autoscaling capabilities. By integrating with Prometheus request metrics, KEDA scales inference deployments up or down based on incoming concurrent queues. It can scale GPU-consuming pods **down to zero** during idle periods to free up expensive GPU memory for other tasks.
 
-### 3. API Management & Gateway (LLM Proxy)
-* **LiteLLM AI Gateway / LLM Proxy**: Positioned as the centralized AI Gateway. LiteLLM acts as a high-performance proxy that normalizes various models' APIs into standard OpenAI-compatible JSON schemas. It handles:
-  - **Load Balancing**: Distributing client requests across multiple backend vLLM/KServe replicas.
-  - **Failover / Fallbacks**: Gracefully routing traffic to backup model replicas if an active node fails.
-  - **Rate Limiting & Token Tracking**: Measuring consumption per tenant.
-* **Tyk.io**: The primary enterprise API Gateway. It oversees cross-tenant communication, enforces firewall policies, manages authentication tokens, and maintains detailed audit logs of all network calls.
+### 3. API Management & Gateway
+* **Tyk.io**: The primary enterprise API Gateway and the single gateway currently in production. It oversees cross-tenant communication, enforces firewall policies, manages authentication tokens, applies rate limiting, and maintains detailed audit logs of all network calls.
+
+> [!NOTE]
+> A dedicated **LiteLLM AI Gateway / LLM Proxy** is planned for the future (see the [roadmap](#future-technology-roadmap)). It is **not** in use today.
 
 ---
 
@@ -52,16 +51,16 @@ The entire platform is managed declaratively, adhering to modern **GitOps** prin
 │   GitHub Repos  │ ──────────────────> │ Argo CD │ ─────────────────────> │  VKS Cluster   │
 └─────────────────┘                     └─────────┘                        └────────────────┘
                                              ▲
-                                             │ Pull Secrets
+                                             │ Decrypt Secrets
                                     ┌─────────────────┐
-                                    │ Azure Key Vault │
+                                    │  SOPS (in Git)  │
                                     └─────────────────┘
 ```
 
 * **Argo CD**: Used for declarative continuous delivery. Argo CD watches our GitHub repositories and automatically synchronizes the cluster state with the YAML manifests defined in git. It manages separate environments, including:
-  - **Test Environment (CPU-only)**: For rapid integration testing.
-  - **UAT Environment (GPU-accelerated)**: For performance validation and user acceptance testing.
-* **Azure Key Vault (AKV)**: To secure sensitive environment variables (such as API keys, database credentials, and service tokens) without storing them in Git. AKV integrates with Kubernetes via secret injectors, dynamically injecting credentials directly into pod memory at startup.
+  - **Test Environment**: For rapid integration testing.
+  - **UAT Environment**: For performance validation and user acceptance testing.
+* **SOPS (Secrets OPerationS)**: Used to secure sensitive environment variables (such as API keys, database credentials, and service tokens) directly in Git. Secrets are stored **encrypted** alongside the manifests and are decrypted only inside the cluster at deploy time, keeping plaintext credentials out of the repository while preserving a fully GitOps-driven workflow.
 
 ---
 
@@ -81,8 +80,16 @@ Continuous monitoring is vital to ensure stable response times and analyze resou
 To remain at the cutting edge of AI operations, the DCC and IT BS teams are actively evaluating the following advanced technologies:
 
 > [!TIP]
+> **Centralized LLM Proxy**
+> We plan to introduce a **LiteLLM AI Gateway / LLM Proxy** in front of the inference backends. It will normalize various models' APIs into OpenAI-compatible schemas and add load balancing across vLLM replicas, failover/fallbacks, and per-tenant rate limiting & token tracking. It is not yet deployed.
+
+> [!NOTE]
+> **Managed Secret Store**
+> We are evaluating **Azure Key Vault (AKV)** as a managed secret store that would inject credentials into pod memory at startup via secret injectors. Until then, secrets are managed with **SOPS** encrypted in Git.
+
+> [!TIP]
 > **Dynamic GPU Sharing**
-> We are exploring **NVIDIA Run:AI** to implement dynamic GPU slicing and advanced queuing. This will allow the platform to dynamically re-allocate unused GPU resources from batch training jobs to real-time inference workloads, maximizing hardware ROI.
+> We are extending our use of **NVIDIA Run:ai** toward dynamic GPU slicing and advanced queuing. This will allow the platform to dynamically re-allocate unused GPU resources from batch training jobs to real-time inference workloads, maximizing hardware ROI.
 
 > [!NOTE]
 > **KV Cache Optimization**

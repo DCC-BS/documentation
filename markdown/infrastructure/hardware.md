@@ -12,6 +12,7 @@ Below is a direct comparison of the key hardware metrics for both server generat
 
 | Hardware Metric | Pilot Server Node (Current IST) | Enterprise Server Node (Roadmap SOLL 2026/2027) |
 | :--- | :--- | :--- |
+| **Number of Nodes** | 2 servers (current deployment) | 8 servers (planned scale-out) |
 | **Server Hardware** | HPE ProLiant DL385 Gen11 | HPE ProLiant DL380a Gen12 |
 | **CPU Cores** | 2x AMD EPYC (32 Cores total) | 2x Intel Xeon 6530P (64 Cores total, 2.3 GHz) |
 | **System RAM** | 512 GB DDR5 | 2 TB DDR5-6400 |
