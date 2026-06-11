@@ -51,12 +51,12 @@ Models are grouped by function: Large Language Models (LLM), text embeddings and
 #### Gemma 4 31B — 🟢 Active
 General-purpose LLM from Google. Supports reasoning, tool-use, and vision (image/video) input.
 * **Hugging Face Model**: [RedHatAI/gemma-4-31B-it-NVFP4](https://huggingface.co/RedHatAI/gemma-4-31B-it-NVFP4)
-* **Applications**: TextMate, BS-Übersetzer, RAG Bot, Polizeiberichtgenerator.
+* **Applications**: TextMate, BS-Übersetzer, RAG Bot, Berichtgenerator.
 
 #### Qwen 3 32B — 🟡 Deactivated
 Reasoning LLM from Alibaba with a large context window and strong multilingual support. Scheduled for retirement in favor of Gemma 4.
 * **Hugging Face Model**: [Qwen/Qwen3-32B-AWQ](https://huggingface.co/Qwen/Qwen3-32B-AWQ)
-* **Applications**: TextMate, BS-Übersetzer, Berichtgenerator, RAG Bot, Polizeiberichtgenerator.
+* **Applications**: TextMate, BS-Übersetzer, Berichtgenerator, RAG Bot, Berichtgenerator.
 
 #### Qwen 3.5 27B — 🟡 Deactivated
 Multimodal reasoning model from Alibaba. Temporarily deactivated due to high token generation overhead during reasoning tasks.
@@ -95,7 +95,7 @@ Lightweight cross-encoder that re-scores and re-orders search results.
 Speech-to-text runtime for transcription and speaker indexing.
 * **Description**: OpenAI's Whisper model optimized with CTranslate2, combined with PyAnnote diarization for speaker indexing.
 * **Hugging Face Model**: [openai/whisper-large-v2](https://huggingface.co/openai/whisper-large-v2) (Transcription) and [pyannote/speaker-diarization-community-1](https://huggingface.co/pyannote/speaker-diarization-community-1) (Speaker Diarization)
-* **Applications**: Transcribo, Kantonspolizei Polizeiberichtgenerator, DCC Berichtgenerator.
+* **Applications**: Transcribo, Kantonspolizei Berichtgenerator, DCC Berichtgenerator.
 
 ---
 
