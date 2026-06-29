@@ -28,7 +28,7 @@ features:
     icon: 
       light: https://cdn.simpleicons.org/github
       dark: https://cdn.simpleicons.org/github/white
-    link: /git
+    link: /dev-setup/git
     linkText: View Git Standards
 
   - title: Python

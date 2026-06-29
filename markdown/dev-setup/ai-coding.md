@@ -71,45 +71,12 @@ We use AI integrations directly inside our Pull Requests to automate code review
 * Ensure code standards and conventions are upheld.
 
 ### 2. The `/documentation` Comment Command
-When you submit a PR containing code changes, you can automatically update this documentation repository by commenting `/documentation` on the PR.
+When you submit a PR containing code changes, you can automatically update this documentation repository by commenting `/documentation` on the PR. You can also append free-text instructions in quotes to steer the update, e.g. `/documentation "Make sure the docs reflect the updated API."`
 
-* **How it works:** A GitHub Actions workflow is triggered, analyzes your code diff using an LLM, translates the changes into documentation edits, and automatically commits those updates back to the documentation repository.
-* **Workflow definition:** [llm-doc-update.yml (ci-workflows)](https://github.com/DCC-BS/ci-workflows/blob/main/.github/workflows/llm-doc-update.yml)
-* **Trigger definition:** [llm-doc-update-trigger.yml (nuxt-layers)](https://github.com/DCC-BS/nuxt-layers/blob/main/.github/workflows/llm-doc-update-trigger.yml)
+An LLM analyses your code diff against the existing docs, opens (or updates) a single documentation PR for your source PR, and comments back on your PR with a summary and a link. Follow-up `/documentation` comments refine the same documentation PR.
 
-#### How to Add the `/documentation` Command to a New Repo
-To configure a new repository to support the `/documentation` comment command:
-
-1. Create a workflow file in your new repository at `.github/workflows/llm-doc-update-trigger.yml`.
-2. Add the following trigger configuration (which triggers on new comments and invokes the shared workflow in `DCC-BS/ci-workflows`):
-
-```yaml
-name: LLM Doc Update Trigger
-
-on:
-  issue_comment:
-    types: [created]
-
-jobs:
-  llm-doc-update:
-    # Only trigger on pull request comments matching /documentation by members/owners
-    if: >
-      github.event.issue.pull_request &&
-      github.event.comment.body == '/documentation' &&
-      (github.event.comment.author_association == 'OWNER' || github.event.comment.author_association == 'MEMBER')
-    uses: DCC-BS/ci-workflows/.github/workflows/llm-doc-update.yml@main
-    with:
-      doc_repo: "DCC-BS/documentation"
-      doc_path: "markdown"
-      pr_number: ${{ github.event.issue.number }}
-    secrets:
-      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      GH_TOKEN: ${{ secrets.DOCS_WRITE_TOKEN }}
-```
-
-3. **Configure Secrets** in your repository settings (`Settings -> Secrets and variables -> Actions`):
-   * `OPENAI_API_KEY`: Your OpenAI API key.
-   * `DOCS_WRITE_TOKEN`: A GitHub Personal Access Token (PAT) or GitHub App installation token with **write access** to the `DCC-BS/documentation` repository. This token is required so the runner can push documentation commits directly to the docs codebase.
+> [!TIP]
+> Setup, authentication (GitHub App), and the trigger workflow are documented in detail under [Git / GitHub / CI/CD → LLM Documentation Auto-Update](/dev-setup/git#llm-documentation-auto-update-documentation).
 
 ---
 

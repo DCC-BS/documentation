@@ -40,6 +40,7 @@ export default withMermaid({
                     { text: "Dev Setup", link: "/dev-setup" },
                     { text: "Envroment variables", link: "/dev-setup/varlock" },
                     { text: "AI Assisted Coding", link: "/dev-setup/ai-coding" },
+                    { text: "Git / GitHub / CI/CD", link: "/dev-setup/git" },
                 ],
             },
             {
@@ -53,10 +54,6 @@ export default withMermaid({
                     { text: "Python", link: "/coding/python" },
                     { text: "Nuxt / Vue", link: "/coding/nuxt" },
                 ],
-            },
-            {
-                text: "Git / GitHub / CI/CD",
-                link: "/git",
             },
             {
                 text: "User Interfaces",

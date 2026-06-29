@@ -13,7 +13,7 @@ Most important thing:
 - **Do:** Use and extend `backend-common` code where possible. See the [backend-common documentation](/backend-common/) for more information.
 - **Do:** Use our existing nuxt modules. See the [nuxt documentation](/coding/nuxt) and [user-interface documentation](/user-interface/) for more information.
 - **Do:** Add new create new nuxt modules or npm packages for code that is reused across projects.
-- **Do:** Use the [Git / GitHub / CI/CD Standards](/git) for your commits and pull requests.
+- **Do:** Use the [Git / GitHub / CI/CD Standards](/dev-setup/git) for your commits and pull requests.
 - **Do:** Use the [Dev Setup](/dev-setup) for your development environment.
 
 ## Python
@@ -26,4 +26,4 @@ Most important thing:
 
 ## Git / GitHub / CI/CD
 
-- [Git / GitHub / CI/CD Standards](/git)
+- [Git / GitHub / CI/CD Standards](/dev-setup/git)

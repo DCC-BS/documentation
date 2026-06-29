@@ -47,8 +47,8 @@ Ensure you follow our language-specific guidelines:
 
 ## 4. Git & Workflow
 
-- **Git Workflow:** We follow [GitHub Flow](/git#git-workflow).
-- **Security:** Always use **SHA pinning** for GitHub Actions. See [Security Standards](/git#security).
+- **Git Workflow:** We follow [GitHub Flow](/dev-setup/git#git-workflow).
+- **Security:** Always use **SHA pinning** for GitHub Actions. See [Security Standards](/dev-setup/git#security).
 - **Dependency Cooldowns:** We enforce a 7-day cooldown for new package versions to prevent supply chain attacks. This is pre-configured in `pyproject.toml` (uv) and `bunfig.toml` (Bun).
 
 ## 5. Local Project Initialization
