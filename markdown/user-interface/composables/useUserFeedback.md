@@ -1,5 +1,8 @@
 ---
 outline: deep
+skillParent: dcc-ui
+skillName: useUserFeedback
+skillDescription: "Vue/Nuxt composable returning showToast and showError to display Nuxt UI toast notifications (success/info/warning/error) and i18n-translated API error messages. Use when surfacing user feedback, toasts, or handling ApiError responses in a DCC frontend."
 ---
 # useUserFeedback composable
 

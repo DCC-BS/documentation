@@ -1,7 +1,9 @@
 ---
 outline: deep
+skillParent: dcc-ui
+skillName: databs-footer
+skillDescription: "DataBsFooter is a branded application footer with default DCC logo/branding and left, center, and right slots for custom links, version, or contact content. Use when adding a page footer."
 ---
-
 <script setup lang="ts">
 import UiContainer from "../../../components/UiContainer.vue";
 import { DataBsFooter } from "@dcc-bs/common-ui.bs.js/components";

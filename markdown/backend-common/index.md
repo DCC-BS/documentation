@@ -1,8 +1,9 @@
 ---
 outline: deep
 editLink: true
+skillName: dcc-backend
+skillDescription: "Shared Python library dcc-backend-common for FastAPI services. Use when building or maintaining a DCC backend and needing its reusable modules: config (Pydantic AppConfig/LlmConfig), structlog logging, fastapi_health_probes (Kubernetes probes), fastapi_error_handling, usage_tracking, and the Pydantic AI llm_agent framework. Routes to the matching module reference."
 ---
-
 # Backend Common
 
 `dcc-backend-common` is our shared Python package that provides reusable components for building FastAPI-based backend services. It standardizes logging, configuration, health probes, and LLM integration across all our projects.
@@ -20,13 +21,13 @@ editLink: true
 Install the base package using [uv](https://docs.astral.sh/uv/):
 
 ```bash
-uv add ddc-backend-common
+uv add dcc-backend-common
 ```
 
 For **LLM Agent** support, install the optional dependencies:
 
 ```bash
-uv add ddc-backend-common[pydantic_ai]
+uv add dcc-backend-common[pydantic_ai]
 ```
 
 ## Quick Start

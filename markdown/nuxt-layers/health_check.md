@@ -1,8 +1,10 @@
 ---
 outline: deep
 editLink: true
+skillParent: dcc-nuxt-layers
+skillName: nuxt-layer-health-check
+skillDescription: "DCC-BS Nuxt layer exposing Kubernetes-ready health endpoints GET api/health/liveness, api/health/readiness, and api/health/startup for container orchestration. Use when configuring liveness/readiness/startup probes or Docker Compose healthchecks for a Nuxt app (not the FastAPI backend-probes)."
 ---
-
 # Health Check Layer
 
 The health check layer provides Kubernetes-ready health monitoring endpoints for

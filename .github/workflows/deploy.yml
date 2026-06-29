@@ -40,6 +40,10 @@ jobs:
               run: bun install
             - name: Build with VitePress
               run: bun run build
+            - name: Compile Agent Skills
+              run: bun run package-skills
+            - name: Copy Installer Script to build target
+              run: cp scripts/install-skills.sh .vitepress/dist/install-skills.sh
             - name: Upload artifact
               uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
               with:

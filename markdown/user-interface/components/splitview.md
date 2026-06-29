@@ -1,7 +1,9 @@
 ---
 outline: deep
+skillParent: dcc-ui
+skillName: split-view
+skillDescription: "SplitView is a resizable two-pane layout with a draggable resizer, a/b slots, isHorizontal orientation toggle, and per-pane/resizer style props. Use when users need to drag-adjust pane proportions. NOT a fixed card (use split-container for a non-resizable header layout)."
 ---
-
 <script setup lang="ts">
 import { ref } from 'vue';
 import UiContainer from '../../../components/UiContainer.vue';

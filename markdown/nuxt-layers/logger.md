@@ -1,8 +1,10 @@
 ---
 outline: deep
 editLink: true
+skillParent: dcc-nuxt-layers
+skillName: nuxt-layer-logger
+skillDescription: "DCC-BS frontend Nuxt logging layer with pluggable implementations selected by LOGGER_LAYER_URI (pino-logger). Provides the useLogger() composable and getEventLogger(event) server utility plus breadcrumbs, for both browser and server. Not the Python structlog backend-logger."
 ---
-
 # Logger Layer
 
 The logger layer provides a universal, type-safe logging interface for DCC-BS Nuxt applications. It enables switching between different logging implementations using environment variables, without changing your application code.

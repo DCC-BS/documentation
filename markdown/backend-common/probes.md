@@ -1,8 +1,10 @@
 ---
 outline: deep
 editLink: true
+skillParent: dcc-backend
+skillName: backend-probes
+skillDescription: "dcc_backend_common.fastapi_health_probes module for Kubernetes health checks. Use when mounting health_probe_router(service_dependencies) to expose /health/liveness, /health/readiness, and /health/startup endpoints with external dependency checks."
 ---
-
 # Health Probes
 
 The `dcc_backend_common.fastapi_health_probes` module provides Kubernetes-ready health check endpoints that follow best practices for container orchestration.
@@ -22,7 +24,7 @@ The module provides:
 The health probes module is part of the `dcc-backend-common` package:
 
 ```bash
-uv add ddc-backend-common
+uv add dcc-backend-common
 ```
 
 ## Quick Start

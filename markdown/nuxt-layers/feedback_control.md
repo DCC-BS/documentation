@@ -1,8 +1,10 @@
 ---
 outline: deep
 editLink: true
+skillParent: dcc-nuxt-layers
+skillName: nuxt-layer-feedback-control
+skillDescription: "DCC-BS Nuxt layer providing the <FeedbackControl /> widget that posts user feedback to GitHub issues via /api/feedback. Use when adding emoji-rating feedback, file attachments, or FEEDBACK_REPO/FEEDBACK_GITHUB_TOKEN config — distinct from dcc-ui's general components/composables."
 ---
-
 # Feedback Control Layer
 
 The feedback control layer provides a comprehensive, user-friendly feedback collection system for DCC-BS Nuxt applications. It enables users to submit feedback directly from your application, with support for ratings, file attachments, and seamless integration with GitHub issues.

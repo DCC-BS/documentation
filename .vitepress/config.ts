@@ -35,10 +35,11 @@ export default withMermaid({
 
         sidebar: [
             {
-                text: "Dev Setup",
+                text: "Setup & Tooling",
                 items: [
                     { text: "Dev Setup", link: "/dev-setup" },
                     { text: "Envroment variables", link: "/dev-setup/varlock" },
+                    { text: "AI Assisted Coding", link: "/dev-setup/ai-coding" },
                 ],
             },
             {

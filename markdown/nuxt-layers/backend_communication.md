@@ -1,8 +1,10 @@
 ---
 outline: deep
 editLink: true
+skillParent: dcc-nuxt-layers
+skillName: nuxt-layer-backend-communication
+skillDescription: "DCC-BS Nuxt server-route layer exposing backendHandlerBuilder(), a fluent type-safe builder (withMethod, withBodyProvider, withFetcher, withDummyFetcher, postMap, build) for proxying to API_URL. Use when creating Nuxt server API handlers, dummy-data mode, or dynamic [r:]/[q:] path forwarding."
 ---
-
 # Backend Communication Layer
 
 The backend communication layer provides powerful utilities for building

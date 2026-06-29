@@ -19,7 +19,8 @@
         "dev": "vitepress dev",
         "build": "vitepress build",
         "preview": "vitepress preview",
-        "check": "biome check --write"
+        "check": "biome check --write",
+        "package-skills": "bun run scripts/package-skills.ts"
     },
     "dependencies": {
         "@dcc-bs/common-ui.bs.js": "^1.2.0",

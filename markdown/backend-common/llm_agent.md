@@ -1,8 +1,10 @@
 ---
 outline: deep
 editLink: true
+skillParent: dcc-backend
+skillName: backend-llm-agent
+skillDescription: "dcc_backend_common.llm_agent module: a Pydantic AI agent framework (pydantic_ai extra). Use when subclassing BaseAgent, streaming with run/run_stream_text/run_stream_events, configuring LlmConfig, adding postprocessors (trim_text, replace_eszett), or debugging via withDebbuger."
 ---
-
 # LLM Agent Module
 
 The `dcc_backend_common.llm_agent` module provides a comprehensive Pydantic AI agent framework with streaming support, postprocessing utilities, and debugging tools.

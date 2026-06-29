@@ -1,8 +1,10 @@
 ---
 outline: deep
 editLink: true
+skillParent: dcc-backend
+skillName: backend-usage-tracking
+skillDescription: "dcc_backend_common.usage_tracking module for privacy-compliant usage events. Use when logging events with UsageTrackingService.log_event() and pseudonymizing user IDs via HMAC-SHA256 (get_pseudonymized_user_id) for OpenSearch-compatible structured logs."
 ---
-
 # Usage Tracking
 
 The `dcc_backend_common.usage_tracking` module provides a service for tracking and logging usage events compatible with OpenSearch functionality, with built-in user pseudonymization for privacy compliance.
@@ -21,7 +23,7 @@ The module provides:
 The usage tracking module is part of the `dcc-backend-common` package:
 
 ```bash
-uv add ddc-backend-common
+uv add dcc-backend-common
 ```
 
 ## Quick Start

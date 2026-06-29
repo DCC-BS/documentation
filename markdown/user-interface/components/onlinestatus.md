@@ -1,5 +1,8 @@
 ---
 outline: deep
+skillParent: dcc-ui
+skillName: online-status
+skillDescription: "OnlineStatus is a color-coded health indicator (green/red) with tooltip that polls a server health endpoint at a configurable pollInterval, with optional showText and custom isOnlineCheckFunction props. Use when showing live server connectivity status."
 ---
 <script setup lang="ts">
 import OnlineStatusExample from '../../../components/OnlineStatusExample.vue';

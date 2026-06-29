@@ -1,8 +1,10 @@
 ---
 outline: deep
 editLink: true
+skillParent: dcc-nuxt-layers
+skillName: nuxt-layer-auth
+skillDescription: "DCC-BS Nuxt auth layer with plug-and-play implementation switching via the AUTH_LAYER_URI env var (azure-auth Entra ID vs no-auth). Use when wiring authentication, the useAppAuth() composable, or the authHandler server utility for Bearer-token backend calls in a Nuxt app."
 ---
-
 # Authentication Layer
 
 The authentication layer provides a flexible, plug-and-play authentication system

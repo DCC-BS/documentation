@@ -1,8 +1,9 @@
 ---
 outline: deep
 editLink: true
+skillName: dcc-nuxt-layers
+skillDescription: "DCC-BS reusable Nuxt layers — partial Nuxt apps shared across projects via extends: ['github:DCC-BS/nuxt-layers/...']. Use when adding, configuring, or choosing among the five layers: auth (Azure AD/no-auth switching), backend_communication (backendHandlerBuilder), logger (pino), feedback-control (GitHub-issue widget), and health_check (Kubernetes probes)."
 ---
-
 # Nuxt Layers
 
 > **📦 Repository**: [github.com/DCC-BS/nuxt-layers](https://github.com/DCC-BS/nuxt-layers)

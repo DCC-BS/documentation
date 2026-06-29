@@ -1,7 +1,9 @@
 ---
 outline: deep
+skillParent: dcc-ui
+skillName: disclaimer
+skillDescription: "Modal Disclaimer Vue component that gatekeeps app access until the user accepts terms; tracks accepted version in localStorage with HTML content. Use when adding a one-time terms/usage-guidelines acceptance gate (not the re-open DisclaimerButton or full-page DisclaimerPage)."
 ---
-
 <script setup lang="ts">
 import { ref } from 'vue';
 import DisclaimerExample from '../../../components/DisclaimerExample.vue';

@@ -1,5 +1,8 @@
 ---
 outline: deep
+skillParent: dcc-ui
+skillName: disclaimer-button
+skillDescription: "DisclaimerButton is a button (variant outline or ghost) that re-opens the already-accepted disclaimer modal on demand. Use when users need to re-view terms after acceptance, e.g. in the NavigationBar. NOT the initial modal gate (disclaimer) or full page (disclaimer-page)."
 ---
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';

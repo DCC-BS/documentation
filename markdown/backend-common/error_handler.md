@@ -1,8 +1,10 @@
 ---
 outline: deep
 editLink: true
+skillParent: dcc-backend
+skillName: backend-error-handler
+skillDescription: "dcc_backend_common.fastapi_error_handling module for standardized API errors. Use when raising ApiErrorException, choosing ApiErrorCodes (INVALID_REQUEST, RESOURCE_NOT_FOUND, etc.), shaping the ErrorResponse JSON, or registering the handler with inject_api_error_handler(app)."
 ---
-
 # Error Handler
 
 The `dcc_backend_common.fastapi_error_handling` module provides a standardized way to handle and format API errors across all FastAPI services.
@@ -23,7 +25,7 @@ The module provides:
 The error handler module is part of the `dcc-backend-common` package:
 
 ```bash
-uv add ddc-backend-common
+uv add dcc-backend-common
 ```
 
 ## Quick Start

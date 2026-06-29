@@ -1,5 +1,8 @@
 ---
 outline: deep
+skillParent: dcc-ui
+skillName: changelogs
+skillDescription: "Propless Changelogs component that fetches changelog entries from the /changelogs endpoint, renders Markdown, and shows a modal of unread versions tracked via the changelogs-last-read localStorage key. Use when surfacing release notes or what's new to users on app load."
 ---
 # Changelogs
 

@@ -2,8 +2,10 @@
 outline: deep
 description: Coding standards and best practices for Python projects.
 editLink: true
+skillParent: dcc-coding
+skillName: python
+skillDescription: "Python coding standards and conventions: type hints, Google-style docstrings, FastAPI routers/Pydantic models, Returns for functional error handling, HTTPX async clients, Dependency Injector, and UV/ruff/ty/pytest tooling. Covers code style, structure, and tooling rules (not the shared backend-common library modules). Use when writing or reviewing .py backend code."
 ---
-
 # Python Coding Standards
 
 These coding standards define how we write, organize, and maintain our **Python** projects.

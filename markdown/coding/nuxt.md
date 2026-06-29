@@ -2,8 +2,10 @@
 outline: deep
 description: Coding standards and best practices for Nuxt.js + TypeScript projects.
 editLink: true
+skillParent: dcc-coding
+skillName: nuxt
+skillDescription: "Nuxt.js + Vue + TypeScript coding conventions: Composition API with <script setup>, file naming (kebab-case pages/PascalCase components/camelCase utils), composables, Nuxt import aliases, Tailwind + Lucide, Biome linting, and Bun dependency management. Use when creating or reviewing .vue/.ts files or Nuxt frontend code."
 ---
-
 # Nuxt.js + TypeScript Coding Standards
 
 These coding standards define how we write, organize, and maintain our **Nuxt.js + TypeScript** projects.  

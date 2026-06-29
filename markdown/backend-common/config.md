@@ -1,8 +1,10 @@
 ---
 outline: deep
 editLink: true
+skillParent: dcc-backend
+skillName: backend-config
+skillDescription: "dcc_backend_common.config module for type-safe settings. Use when defining AppConfig/AbstractAppConfig/LlmConfig with Pydantic, loading env vars via get_env_or_throw, masking secrets with log_secret, or running the generate-env-example / sync-env-with-example CLI tools."
 ---
-
 # Configuration Management
 
 The `dcc_backend_common.config` module provides a robust, type-safe way to manage application configuration using Pydantic and environment variables.
@@ -24,7 +26,7 @@ The module provides:
 The config module is part of the `dcc-backend-common` package:
 
 ```bash
-uv add ddc-backend-common
+uv add dcc-backend-common
 ```
 
 ## Quick Start

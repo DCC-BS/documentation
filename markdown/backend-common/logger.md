@@ -1,8 +1,10 @@
 ---
 outline: deep
 editLink: true
+skillParent: dcc-backend
+skillName: backend-logger
+skillDescription: "dcc_backend_common.logger module for structured logging built on structlog. Use when calling init_logger() at startup and get_logger(__name__), choosing JSON (IS_PROD) vs colored console output, or tuning FocusedTracebackFormatter / DEV_TRACEBACK_STYLE tracebacks."
 ---
-
 # Structured Logging
 
 The `dcc_backend_common.logger` module provides structured, consistent logging across all services using [structlog](https://www.structlog.org/).
@@ -27,7 +29,7 @@ The module provides:
 The logger module is part of the `dcc-backend-common` package:
 
 ```bash
-uv add ddc-backend-common
+uv add dcc-backend-common
 ```
 
 ## Quick Start

@@ -25,3 +25,11 @@ bun run dev
 # Build for production
 bun run build
 ```
+
+## AI Coding Agent Skills
+
+This documentation is also published as reusable coding skills/rules for AI assistants (like Claude Code, Antigravity, and Cursor). 
+
+* **To install these skills in a project:** Run `curl -sSL https://dcc-bs.github.io/documentation/install-skills.sh | bash` inside the project root.
+* **To add/edit skills:** Read the [AI Assisted Coding Guide](file:///home/yanick/code/documentation/markdown/dev-setup/ai-coding.md).
+
