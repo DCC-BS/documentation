@@ -5,3 +5,4 @@ Welcome to the Docling documentation section. Here we provide details about our 
 - [DCC Docling Serve](/docling/serve)
 - [Docling PP-Doc-Layout Plugin](/docling/pp-doc-layout)
 - [Docling GLM-OCR Plugin](/docling/glm-ocr)
+- [Docling PP-OCRv6 Plugin](/docling/pp-ocrv6)
