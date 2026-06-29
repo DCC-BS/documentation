@@ -154,6 +154,22 @@ export function useHead(_: any) {
 }
 
 /**
+ * Shim for Nuxt's injectHead
+ */
+export function injectHead() {
+    return {
+        push: () => ({
+            dispose: () => {},
+        }),
+        resolveTags: () => Promise.resolve([]),
+        hooks: {
+            hook: () => {},
+        },
+        use: () => {},
+    };
+}
+
+/**
  * Shim for Nuxt's useColorMode
  */
 export function useColorMode() {
