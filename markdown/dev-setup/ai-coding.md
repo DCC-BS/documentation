@@ -88,7 +88,8 @@ When using a compatible agent in a DCC repository, the following core skills are
 | :--- | :--- | :--- |
 | **`varlock`** | Environment variable schema, secret injection, and validation with the varlock tool. | *None (Standalone)* |
 | **`docker`** | Containerization, Dockerfile structure, and docker-compose setups. | *None (Standalone)* |
-| **`dcc-ui`** | Reusable `common-ui.bs.js` Vue components, composables, and the Kanton Basel-Stadt design system. | `disclaimer`, `disclaimer-button`, `disclaimer-page`, `changelogs`, `databs-footer`, `navigation-bar`, `online-status`, `split-container`, `split-view`, `undo-redo-buttons`, `useUserFeedback` |
+| **`dcc-git`** | Git/CI/CD conventions: GitHub Flow, SHA-pinned Actions, reusable workflows, `/documentation` command. | *None (Standalone)* |
+| **`dcc-ui`** | Reusable `common-ui.bs.js` Vue components, composables, and the Kanton Basel-Stadt design system. | `ui-components-catalog`, `ui-composables-catalog`, `disclaimer`, `disclaimer-button`, `disclaimer-page`, `changelogs`, `changelogs-howto`, `databs-footer`, `navigation-bar`, `online-status`, `split-container`, `split-view`, `undo-redo-buttons`, `useUserFeedback` |
 | **`dcc-coding`**| Development standards for DCC backend and frontend. | `nuxt` (Nuxt/Vue/TS conventions), `python` (Python coding conventions) |
 | **`dcc-backend`**| `dcc-backend-common` shared library modules for FastAPI services. | `backend-config`, `backend-logger`, `backend-error-handler`, `backend-probes`, `backend-usage-tracking`, `backend-llm-agent` |
 | **`dcc-nuxt-layers`**| Reusable Nuxt layers shared across DCC projects via `extends`. | `nuxt-layer-auth`, `nuxt-layer-backend-communication`, `nuxt-layer-feedback-control`, `nuxt-layer-health-check`, `nuxt-layer-logger` |
@@ -138,3 +139,25 @@ skillName: useUserFeedback
 skillDescription: Standard composable for toast notifications, confirmation dialogs, and error handling.
 ---
 ```
+
+### Parent Index Content: Inline vs Reference
+
+A parent skill's `index.md` has its own body (overview, setup, conventions) **in addition** to the child sub-skills it groups. By default that body is compiled into `references/index.md` and linked from `SKILL.md` as an **Overview** entry, so agents read it on demand.
+
+If the body is short and important enough that an agent should *always* see it the moment the skill activates, set `skillInline: true`. The body is then folded directly into the generated `SKILL.md` instead of becoming a separate reference file.
+
+```yaml
+---
+skillName: dcc-coding
+skillDescription: DCC coding standards across languages and stacks.
+skillInline: true   # fold this index body straight into SKILL.md (always loaded)
+---
+```
+
+| Mode | Frontmatter | Where the body lands | Use when |
+| :--- | :--- | :--- | :--- |
+| **Reference** (default) | *(omit `skillInline`)* | `references/index.md`, linked as **Overview** | Body is long; agent reads it only when relevant. |
+| **Inline** | `skillInline: true` | Inside `SKILL.md`, always loaded | Body is short, high-value routing rules the agent must always see. |
+
+> [!NOTE]
+> This only matters for **parent** skills (an `index.md` that has children). Standalone skills always have their body linked as `references/index.md`.

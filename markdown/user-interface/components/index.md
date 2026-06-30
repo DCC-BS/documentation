@@ -1,3 +1,9 @@
+---
+skillParent: dcc-ui
+skillName: ui-components-catalog
+skillDescription: "Catalog of all common-ui.bs.js Vue components (SplitView, SplitContainer, DisclaimerLlm/Button/Page, DataBsFooter, DataBsBanner, UndoRedoButtons, Changelogs, NavigationBar, OnlineStatus) with one-line summaries. Use to discover which DCC UI component fits a need before opening its detailed reference."
+---
+
 # Components
 
 ## [SplitView](splitview.md)

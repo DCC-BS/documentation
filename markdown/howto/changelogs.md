@@ -1,6 +1,9 @@
 ---
 outline: deep
 description: Learn how to write and maintain changelogs for your application using the common-ui.bs.js library.
+skillParent: dcc-ui
+skillName: changelogs-howto
+skillDescription: "End-to-end guide for adding user-facing changelogs to a Nuxt app with @dcc-bs/common-ui.bs.js: the Changelogs component, changelog markdown file format/frontmatter, and version tracking. Use when implementing changelogs or writing release notes (the full how-to companion to the changelogs component reference)."
 ---
 
 # How to Write Changelogs
