@@ -202,10 +202,6 @@ export default withMermaid({
                         text: "GLM-OCR Plugin",
                         link: "/docling/glm-ocr",
                     },
-                    {
-                        text: "PP-OCRv6 Plugin",
-                        link: "/docling/pp-ocrv6",
-                    },
                 ],
             },
             {
