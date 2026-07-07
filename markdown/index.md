@@ -23,12 +23,12 @@ features:
     link: /docker
     linkText: View Docker Standards
 
-  - title: Git & CI/CD
-    details: Version control workflows, branching strategies, and continuous integration pipelines.
+  - title: Development Workflow
+    details: End-to-end issue workflow, Git branching, CI/CD, releasing, and deployment.
     icon: 
       light: https://cdn.simpleicons.org/github
       dark: https://cdn.simpleicons.org/github/white
-    link: /dev-setup/git
+    link: /dev-setup/development-workflow
     linkText: View Git Standards
 
   - title: Python

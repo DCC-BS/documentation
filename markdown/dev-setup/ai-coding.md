@@ -76,7 +76,7 @@ When you submit a PR containing code changes, you can automatically update this 
 An LLM analyses your code diff against the existing docs, opens (or updates) a single documentation PR for your source PR, and comments back on your PR with a summary and a link. Follow-up `/documentation` comments refine the same documentation PR.
 
 > [!TIP]
-> Setup, authentication (GitHub App), and the trigger workflow are documented in detail under [Git / GitHub / CI/CD → LLM Documentation Auto-Update](/dev-setup/git#llm-documentation-auto-update-documentation).
+> Setup, authentication (GitHub App), and the trigger workflow are documented in detail under [Development Workflow → LLM Documentation Auto-Update](/dev-setup/development-workflow#llm-documentation-auto-update-documentation).
 
 ---
 

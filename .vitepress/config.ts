@@ -40,7 +40,7 @@ export default withMermaid({
                     { text: "Dev Setup", link: "/dev-setup" },
                     { text: "Envroment variables", link: "/dev-setup/varlock" },
                     { text: "AI Assisted Coding", link: "/dev-setup/ai-coding" },
-                    { text: "Git / GitHub / CI/CD", link: "/dev-setup/git" },
+                    { text: "Development Workflow", link: "/dev-setup/development-workflow" },
                 ],
             },
             {
