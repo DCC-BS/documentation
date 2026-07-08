@@ -45,7 +45,11 @@ If your change needs a **new secret**, set it up early — you will need it to r
 1. Store it in **Proton Pass** so the team has access.
 2. Add it to the **[varlock env schema](./varlock.md)** so it is validated and wired up correctly.
 
-### 5. Format, lint, and test locally
+### 5. Adjust / extend the onboarding tour (Nuxt frontend)
+
+For changes in a Nuxt frontend, the onboarding tour needs to be adjusted or extended to match the new frontend feature set.
+
+### 6. Format, lint, and test locally
 
 Run the full check suite before pushing so CI does not fail on avoidable issues:
 
@@ -56,11 +60,11 @@ Run the full check suite before pushing so CI does not fail on avoidable issues:
 | Test   | `bun run test`     | `make test`    |
 | All    | `bun run check`    | `make check`   |
 
-### 6. Write tests
+### 7. Write tests
 
 Add tests where they make sense — new logic, bug reproductions, and edge cases. Aim to cover the behavior you changed, not to hit a coverage number.
 
-### 7. Open a pull request
+### 8. Open a pull request
 
 Push your branch and open a pull request against `main`:
 
@@ -68,15 +72,15 @@ Push your branch and open a pull request against `main`:
 git push -u origin feature/short-description
 ```
 
-### 8. Get the PR reviewed
+### 9. Get the PR reviewed
 
 Pull requests are reviewed by the team and by AI assistants — **[CodeRabbit](https://coderabbit.ai)** posts an automated review. Iterate on the feedback and push fixes until the review is clean. For complex or high-risk changes, ask a colleague for a human review as well.
 
-### 9. Make CI green
+### 10. Make CI green
 
 The CI pipeline must pass before merging. Fix any failing checks (see [GitHub CI/CD](#github-ci-cd)).
 
-### 10. Bump the version
+### 11. Bump the version
 
 Bump the version yourself following [Semantic Versioning](https://semver.org) — `major` for breaking changes, `minor` for new backward-compatible features, `patch` for backward-compatible fixes:
 
@@ -91,11 +95,11 @@ Push the new version (and its tag) so the release workflows can pick it up:
 git push --follow-tags
 ```
 
-### 11. Write a changelog entry (UI repos)
+### 12. Write a changelog entry (UI repos)
 
 For **UI code bases**, add a changelog entry so users see what changed. Follow the [How to write changelogs](../howto/changelogs.md) guide.
 
-### 12. Update the documentation (while the PR is open)
+### 13. Update the documentation (while the PR is open)
 
 Keep this documentation site in sync. Comment [`/documentation`](./ai-coding.md#_2-the-documentation-comment-command) on your source PR to have the documentation bot open (or update) a matching docs PR. See [LLM Documentation Auto-Update](#llm-documentation-auto-update-documentation) for details.
 
@@ -103,11 +107,11 @@ Keep this documentation site in sync. Comment [`/documentation`](./ai-coding.md#
 The documentation bot only works from an **open** pull request. Trigger `/documentation` while your PR is still open — once the PR is merged you can no longer use it, and follow-up `/documentation` comments iterate on the same docs PR.
 :::
 
-### 13. Merge the PR
+### 14. Merge the PR
 
 Once the review is clean, CI is green, the version is bumped, and the documentation PR is in flight, merge the pull request into `main`.
 
-### 14. Publish the package or container
+### 15. Publish the package or container
 
 Release using the [CI reusable workflows](#reusable-workflows):
 
@@ -116,7 +120,7 @@ Release using the [CI reusable workflows](#reusable-workflows):
 
 The publishing workflows live in [`DCC-BS/ci-workflows`](https://github.com/DCC-BS/ci-workflows) — see [Reusable Workflows](#reusable-workflows).
 
-### 15. Deploy to Kubernetes
+### 16. Deploy to Kubernetes
 
 Deploy the new version by updating the Helm chart (bump the image tag / chart version) in the Helm chart repository on **GitHub Enterprise**. This rolls out the change to the cluster.
 
@@ -131,6 +135,7 @@ Copy this into your PR description so nothing gets forgotten:
 - [ ] Created a `feature/` or `fix/` branch off `main`
 - [ ] Implemented the change
 - [ ] Stored any new secrets in Proton Pass and added them to the varlock schema
+- [ ] Adjusted / extended the onboarding tour (Nuxt frontend changes only)
 - [ ] Ran format / lint / test locally and everything passes
 - [ ] Added tests where suitable
 - [ ] Opened a PR against `main`
