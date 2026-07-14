@@ -1,6 +1,6 @@
 ---
 skillName: dcc-ui
-skillDescription: "Nuxt module of the Kanton Basel-Stadt design system for DCC Basel-Stadt apps: NavigationBar, DataBsFooter, SplitContainer/SplitView, Disclaimer/DisclaimerButton/DisclaimerPage, Changelogs, OnlineStatus, UndoRedoButtons components, the useUserFeedback composable, and the BS color palette. Use when building a DCC/Basel-Stadt Vue/Nuxt frontend or wiring up the common-ui.bs.js module."
+skillDescription: "Nuxt module of the Kanton Basel-Stadt design system for DCC Basel-Stadt apps: NavigationBar, DataBsFooter, SplitContainer/SplitView, Disclaimer/DisclaimerButton/DisclaimerPage, Changelogs, OnlineStatus, UndoRedoButtons components, the useUserFeedback composable, and the BS color palette. Use when building a DCC Basel-Stadt/Basel-Stadt Vue/Nuxt frontend or wiring up the common-ui.bs.js module."
 ---
 # User Interface Overview
 
@@ -61,6 +61,32 @@ When using this Nuxt module:
 - Internationalization (i18n) integration is automatically configured
 - Design system assets are automatically included
 - Kanton Basel-Stadt color palette is integrated with Tailwind CSS
+
+## Runtime Configuration
+
+The module exposes runtime configuration options that allow you to disable certain features at runtime. These are available under `runtimeConfig.public.commonUi` in your `nuxt.config.ts`:
+
+```typescript
+export default defineNuxtConfig({
+  runtimeConfig: {
+    public: {
+      commonUi: {
+        disableChangelog: false,
+        disableDisclaimer: false,
+      },
+    },
+  },
+})
+```
+
+| Option               | Type      | Default | Description                                                                          |
+| -------------------- | --------- | ------- | ------------------------------------------------------------------------------------ |
+| `disableChangelog`   | `boolean` | `false` | When set to `true`, the `Changelogs` component will not fetch or display changelogs. |
+| `disableDisclaimer`  | `boolean` | `false` | When set to `true`, the `Disclaimer` component modal will not be displayed.          |
+
+::: tip
+These options can also be set via environment variables `NUXT_PUBLIC_COMMON_UI_DISABLE_CHANGELOG` and `NUXT_PUBLIC_COMMON_UI_DISABLE_DISCLAIMER`.
+:::
 
 ## Internationalization
 
