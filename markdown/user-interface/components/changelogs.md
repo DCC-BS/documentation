@@ -2,7 +2,7 @@
 outline: deep
 skillParent: dcc-ui
 skillName: changelogs
-skillDescription: "Propless Changelogs component that fetches changelog entries from the /changelogs endpoint, renders Markdown, and shows a modal of unread versions tracked via the changelogs-last-read localStorage key. Use when surfacing release notes or what's new to users on app load."
+skillDescription: "Propless Changelogs component that fetches changelog entries from the /api/changelogs endpoint (filterable via lastRead query param), renders Markdown, and shows a modal of unread versions tracked via the changelogs-last-read localStorage key. Can be disabled globally via the disableChangelog runtime config. Use when surfacing release notes or what's new to users on app load."
 ---
 # Changelogs
 
@@ -10,16 +10,40 @@ The `Changelogs` component displays a modal with application changelog informati
 
 ## Features
 
-- **Automatic Fetching**: Retrieves changelog data from `/changelogs` endpoint
+- **Automatic Fetching**: Retrieves changelog data from `/api/changelogs` endpoint
 - **Version Tracking**: Shows only unread changelogs based on stored version
 - **Markdown Support**: Renders changelog content with Markdown formatting
 - **Responsive Design**: Modal with fullscreen option for better readability
 - **Smart Updates**: Only displays when new versions are available
 - **localStorage Integration**: Automatically tracks the last read changelog version
+- **Configurable**: Can be globally disabled via runtime config
 
 ## Props
 
 This component has no props - it works automatically!
+
+## Configuration
+
+The changelog feature can be disabled globally via Nuxt runtime config. This is useful for environments where changelogs are not needed (e.g., internal tools or development builds).
+
+::: tip
+Set `disableChangelog` to `true` to completely disable the component. No data will be fetched and no modal will be shown.
+:::
+
+```typescript
+// nuxt.config.ts
+export default defineNuxtConfig({
+  runtimeConfig: {
+    public: {
+      commonUi: {
+        disableChangelog: true, // or "true"
+      },
+    },
+  },
+});
+```
+
+When `disableChangelog` is enabled, the component exits early on mount without fetching data or displaying the modal.
 
 ## Server Setup
 
@@ -114,15 +138,16 @@ function clearChangelogCache() {
 
 ## How It Works
 
-1. **First Visit**: When a user visits your application for the first time, the component checks for available changelogs
-2. **Version Comparison**: It compares the stored version (from localStorage) with available changelog versions
-3. **Modal Display**: If new versions are found, a modal appears showing all unread changelogs
-4. **Version Update**: Once the user closes the modal, the latest version is stored in localStorage
-5. **Subsequent Visits**: On future visits, only changelogs newer than the stored version will be shown
+1. **Config Check**: On mount, the component first checks if the changelog feature is disabled via runtime config. If disabled, it exits immediately.
+2. **First Visit**: When a user visits your application for the first time, the component checks for available changelogs
+3. **Version Comparison**: It compares the stored version (from localStorage) with available changelog versions
+4. **Modal Display**: If new versions are found, a modal appears showing all unread changelogs
+5. **Version Update**: Once the user closes the modal, the latest version is stored in localStorage
+6. **Subsequent Visits**: On future visits, only changelogs newer than the stored version will be shown
 
 ## API Endpoint
 
-The component expects a GET endpoint at `/changelogs` that returns an array of changelog objects:
+The component expects a GET endpoint at `/api/changelogs` that accepts an optional `lastRead` query parameter (the last read version string) and returns an array of changelog objects:
 
 ```typescript
 interface Changelog {

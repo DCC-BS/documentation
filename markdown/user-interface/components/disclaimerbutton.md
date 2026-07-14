@@ -2,7 +2,7 @@
 outline: deep
 skillParent: dcc-ui
 skillName: disclaimer-button
-skillDescription: "DisclaimerButton is a button (variant outline or ghost) that re-opens the already-accepted disclaimer modal on demand. Use when users need to re-view terms after acceptance, e.g. in the NavigationBar. NOT the initial modal gate (disclaimer) or full page (disclaimer-page)."
+skillDescription: "DisclaimerButton is a button (variant outline or ghost) that re-opens the already-accepted disclaimer modal on demand. Use when users need to re-view terms after acceptance, e.g. in the NavigationBar. NOT the initial modal gate (disclaimer) or full page (disclaimer-page). Respects the disableDisclaimer runtime config."
 ---
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
@@ -111,3 +111,23 @@ Commonly placed in the navigation bar for easy access (ghost variant is commonly
   </NavigationBar>
 </template>
 ```
+
+## Disabling the Disclaimer
+
+The disclaimer system can be disabled globally via the `disableDisclaimer` runtime config option. When enabled, the disclaimer modal will not be shown even when the `DisclaimerButton` is clicked.
+
+```typescript
+export default defineNuxtConfig({
+  runtimeConfig: {
+    public: {
+      commonUi: {
+        disableDisclaimer: true
+      }
+    }
+  }
+})
+```
+
+::: tip
+You can also set this via the environment variable `NUXT_PUBLIC_COMMON_UI_DISABLE_DISCLAIMER=true`.
+:::
