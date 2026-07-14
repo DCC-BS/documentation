@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import { Disclaimer } from "@dcc-bs/common-ui.bs.js/components";
+import {
+    Disclaimer,
+    DisclaimerButton,
+} from "@dcc-bs/common-ui.bs.js/components";
 import { useLocalStorage } from "@vueuse/core";
 import { onMounted } from "vue";
 import UiContainer from "./UiContainer.vue";
@@ -39,6 +42,8 @@ ${scriptClose}
         :confirmation-text="confirmationText"
         disclaimer-version="1.0.0"
     />
+
+    <DisclaimerButton variant="ghost" />
 </template>`;
 </script>
 
@@ -47,8 +52,8 @@ ${scriptClose}
         <template #element>
             <Disclaimer :confirmation-text="props.confirmationText" :app-name="props.appName"
                 :content-html="props.contentHtml" :postfix-html="props.postfixHtml"></Disclaimer>
-            <UButton varian="solid" icon="i-lucide-eye" @click="showDisclaimer">Show Disclaimer
-            </UButton>
+
+            <DisclaimerButton variant="ghost" />
         </template>
     </UiContainer>
 </template>
