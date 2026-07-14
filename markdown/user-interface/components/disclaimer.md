@@ -1,8 +1,9 @@
 ---
+---
 outline: deep
 skillParent: dcc-ui
 skillName: disclaimer
-skillDescription: "Modal Disclaimer Vue component that gatekeeps app access until the user accepts terms; tracks accepted version in localStorage with HTML content. Use when adding a one-time terms/usage-guidelines acceptance gate (not the re-open DisclaimerButton or full-page DisclaimerPage)."
+skillDescription: "Modal Disclaimer Vue component that gatekeeps app access until the user accepts terms; tracks accepted version in localStorage with HTML content. Can be disabled via runtime config. Use when adding a one-time terms/usage-guidelines acceptance gate (not the re-open DisclaimerButton or full-page DisclaimerPage)."
 ---
 <script setup lang="ts">
 import { ref } from 'vue';
@@ -41,6 +42,7 @@ The `Disclaimer` component displays a modal disclaimer that users must accept be
 - **Persistent State**: Remembers acceptance across sessions
 - **Accessibility**: Keyboard accessible with proper focus management
 - **Responsive Design**: Works seamlessly on all device sizes
+- **Runtime Disabling**: Can be disabled via runtime config for specific environments
 
 ## Props
 
@@ -51,6 +53,32 @@ The `Disclaimer` component displays a modal disclaimer that users must accept be
 | `disclaimerVersion` | `string` | No       | Version identifier (e.g., "1.0.0") - changing this re-shows the modal |
 | `contentHtml`       | `string` | No       | Main HTML content for the disclaimer body. When not set, the translation key `disclaimer.content` will be used.                             |
 | `postfixHtml`       | `string` | No       | HTML content displayed after main content (e.g., contact info)        |
+
+## Configuration
+
+The Disclaimer component reads from Nuxt's runtime config and can be disabled entirely without removing the component from your templates. This is useful for environments where the disclaimer is not needed (e.g., internal tools, testing).
+
+### Disabling the Disclaimer
+
+Set the `disableDisclaimer` option in your `nuxt.config.ts`:
+
+```typescript
+export default defineNuxtConfig({
+  runtimeConfig: {
+    public: {
+      commonUi: {
+        disableDisclaimer: true,
+      },
+    },
+  },
+});
+```
+
+When `disableDisclaimer` is set to `true`, the modal will never be displayed, even on first visit or when the version changes.
+
+::: tip
+You can also set this value to the string `"true"` (e.g., via environment variables) and it will be treated the same as the boolean `true`.
+:::
 
 ## Usage
 
@@ -154,17 +182,18 @@ When you update your terms, increment the version:
 
 ## How It Works
 
-1. **Component Mounts**: Checks localStorage for `disclaimerAccepted` key
-2. **Version Check**: Compares stored version with current `disclaimerVersion` prop
-3. **Display Logic**:
+1. **Runtime Config Check**: Reads `disableDisclaimer` from runtime config; if enabled, the component does nothing
+2. **Component Mounts**: Checks localStorage for `disclaimerAccepted` key
+3. **Version Check**: Compares stored version with current `disclaimerVersion` prop
+4. **Display Logic**:
     - Shows modal if no version is stored (first visit)
     - Shows modal if stored version differs from current version
     - Hides modal if user has accepted current version
-4. **User Acceptance**:
+5. **User Acceptance**:
     - User must check the confirmation checkbox
     - Current version is stored in localStorage
     - Modal closes and user can access the app
-5. **Subsequent Visits**: Modal doesn't show unless version changes
+6. **Subsequent Visits**: Modal doesn't show unless version changes
 
 ## localStorage Structure
 
