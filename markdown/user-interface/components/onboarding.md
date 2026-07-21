@@ -1,7 +1,6 @@
 ---
 outline: deep
 ---
-```
 
 # Onboarding
 
@@ -79,14 +78,12 @@ const builder = useOnboardingBuilder()
     .switchPhase("Phase1")
     .addSteps([
         {
-            element: "#step-1-target",
             popover: {
                 title: "Step 1",
                 description: "This is step 1",
             },
         },
         {
-            element: "#step-2-target",
             popover: {
                 title: "Step 2",
                 description: "This is step 2",
@@ -96,7 +93,6 @@ const builder = useOnboardingBuilder()
     .switchPhase("Phase2")
     .addSteps([
         {
-            element: "#step-3-target",
             popover: {
                 title: "Step 3",
                 description: "This is step 3",
@@ -148,6 +144,8 @@ Each step accepts an `element` selector (any value driver.js understands — a C
 
 Step `title` and `description` may be provided either as a string or as a function that returns a string (`tOrFunc<string>`). Functions are evaluated when the driver is built, which lets you resolve translations or computed values lazily.
 
+In addition to lazy title and description, the step popover accepts all other driver.js `Popover` properties (such as `onNextClick`, `onPrevClick`, positioning options, etc.). Any navigation hooks you provide are **merged** with the builder's phase-transition hooks rather than overridden — see [Optional Driver Config](#optional-driver-config) below.
+
 ```ts
 .addSteps([
     {
@@ -187,6 +185,7 @@ Each phase accepts optional `onEnter` and `onExit` async callbacks. The builder 
 - **`onExit` of the current phase + `onEnter` of the next phase** fire when the user advances from the last step of one phase into the next.
 - **`onExit` of the current phase + `onEnter` of the previous phase** fire when the user navigates backward from the first step of a phase into the previous one.
 - **`onEnter` of the initial phase** fires once, when the first step is highlighted.
+- **`onExit` of the final phase** fires when the user completes the tour from the last step.
 
 ```ts
 type OnboardingPhase<Phases> = {
@@ -211,8 +210,8 @@ const builder = useOnboardingBuilder({
 });
 ```
 
-::: warning
-The builder reserves several configuration slots for itself: button text, progress text, the `onPopoverRender` hook (used to inject Lucide icons), and certain `onNextClick`/`onPrevClick`/`onHighlightStarted` hooks (used to drive phase transitions). Providing your own values for these may be overridden or merged.
+::: tip
+The builder reserves several configuration slots for itself: button text, progress text, the `onPopoverRender` hook (used to inject Lucide icons), and certain `onNextClick`/`onPrevClick`/`onHighlightStarted` hooks (used to drive phase transitions). Custom hooks you provide via the config or on individual step popovers are **merged**, not overridden — your hook runs first, then the builder's internal phase-transition hook executes.
 :::
 
 ## Auto-Start Behavior
@@ -282,7 +281,7 @@ Because driver.js renders the popover outside this component's DOM, these styles
 2. **Mount**: The component checks the `tour-completed` cookie. If `true`, it does nothing.
 3. **Readiness**: If a `Disclaimer` modal is present, a `MutationObserver` waits for it to be removed.
 4. **Start**: A driver.js instance is built from the builder and `drive()` is called.
-5. **Navigation**: As the user moves between steps, the builder-injected `onNextClick`/`onPrevClick` hooks fire the appropriate phase `onEnter`/`onExit` callbacks before advancing.
+5. **Navigation**: As the user moves between steps, the builder-injected `onNextClick`/`onPrevClick` hooks fire the appropriate phase `onEnter`/`onExit` callbacks before advancing. Any custom hooks you supplied on individual steps or via the driver config are merged and run alongside the builder's hooks. When the user completes the tour from the final step, the last active phase's `onExit` callback is also invoked.
 6. **Completion**: When the user closes or finishes the tour, `onDestroyStarted` sets `tour-completed` to `true` and the driver is destroyed.
 7. **Cleanup**: On unmount, the observer is disconnected and any active driver is destroyed.
 
