@@ -251,7 +251,7 @@ Button labels and progress text are read from the `common-ui.tour` namespace. De
             "next": "Next",
             "prev": "Back",
             "finish": "Finish",
-            "progress": "Step {{current}} of {{total}}"
+            "progress": "Step \\{\\{current\\}\\} of \\{\\{total\\}\\}"
         }
     }
 }
@@ -263,7 +263,7 @@ Button labels and progress text are read from the `common-ui.tour` namespace. De
 | `common-ui.tour.next`        | Label for the "Next" navigation button             |
 | `common-ui.tour.prev`        | Label for the "Back" navigation button             |
 | `common-ui.tour.finish`      | Label for the "Next" button on the final step      |
-| `common-ui.tour.progress`    | Progress text template; `{{current}}` and `{{total}}` are interpolated by driver.js |
+| `common-ui.tour.progress`    | Progress text template <span v-pre>`{{current}}` and `{{total}}`</span> are interpolated by driver.js |
 
 ## Styling
 
