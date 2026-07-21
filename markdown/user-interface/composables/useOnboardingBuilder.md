@@ -14,7 +14,7 @@ The resulting builder is consumed by the [`Onboarding`](../components/onboarding
 - **Fluent API**: Chain `addPhases` → `switchPhase` → `addSteps` to describe the whole tour declaratively.
 - **Type-Safe Phase Names**: Phase names are inferred from a generic you pass to `addPhases`, so `switchPhase` only accepts valid names.
 - **Lazy Titles & Descriptions**: Step `popover.title` and `popover.description` accept either a string or a function (`tOrFunc<string>`), evaluated at build time.
-- **Automatic Hook Wiring**: When the user navigates across a phase boundary, the previous phase's `onExit` and the next phase's `onEnter` are invoked automatically.
+- **Automatic Hook Wiring**: When the user navigates across a phase boundary — including the final step of the tour — the previous phase's `onExit` and the next phase's `onEnter` are invoked automatically. Any navigation hooks you provide on steps or in the driver config are merged with the builder's handlers, never overwritten.
 - **driver.js Integration**: Produces a configured `Driver` instance via `buildDriver`, including i18n labels and Lucide footer-button icons.
 
 ## Return Shape
@@ -48,17 +48,17 @@ type OnboardingPhase<Phases> = {
 
 ### `OnboardingStep`
 
-A step is either a driver.js `DriveStep` or a minimal object with a `popover` whose `title` and `description` may be values or functions:
+A step is a driver.js `DriveStep` with the `popover` type extended so that `title` and `description` accept either a string or a function (`tOrFunc<string>`). All other `DriveStep` and `Popover` properties (including `element`, `onNextClick`, `onPrevClick`, etc.) are preserved:
 
 ```ts
-type OnboardingStep =
-  | DriveStep
-  | {
-      popover?: {
-        title?: tOrFunc<string>;
-        description?: tOrFunc<string>;
-      };
-    };
+type StepPopoverOverride = Omit<Popover, 'title' | 'description'> & {
+  title?: tOrFunc<string>;
+  description?: tOrFunc<string>;
+};
+
+type OnboardingStep = Omit<DriveStep, 'popover'> & {
+  popover?: StepPopoverOverride;
+};
 
 type tOrFunc<T> = T | (() => T);
 ```
@@ -162,6 +162,10 @@ const builder = useOnboardingBuilder({
   .addSteps([/* ... */]);
 ```
 
+::: tip
+Hooks you provide at the driver-config level (such as `onDeselected`, `onHighlightStarted`) are merged with the builder's own hooks via `extendDriverHook`, so they run before the builder's phase-transition logic. Similarly, step-level `onNextClick`/`onPrevClick` hooks are preserved and executed before the builder's navigation handlers.
+:::
+
 ## How Phase Transitions Work
 
 The builder is a small state machine (`Initial` → `PhaseSwitched` → `StepsAdded`). The state determines how hooks are attached when you call `addSteps` and `switchPhase`:
@@ -175,9 +179,10 @@ The builder is a small state machine (`Initial` → `PhaseSwitched` → `StepsAd
    - `await currentPhase.onExit?.()`
    - `await oldPhase.onEnter?.()`
    - `driver.movePrevious()`
+4. **Last step of the tour** — the `onNextClick` handler of the very last step is wired to invoke the current phase's `onExit` before advancing, ensuring the final phase's teardown always runs.
 
 ::: tip
-Because the builder mutates the step popovers to install these handlers, declare phases and steps through the fluent API rather than constructing `DriveStep` objects with custom `onNextClick`/`onPrevClick` handlers yourself — those would be overwritten at phase boundaries.
+The builder merges user-provided hooks with its own navigation handlers via `extendDriverHook`, so any `onNextClick`/`onPrevClick`/`onHighlightStarted` hooks you define on a step or in the driver config are preserved and run **before** the builder's phase-transition logic. You can safely combine custom step-level hooks with the fluent builder API.
 :::
 
 ## Errors
