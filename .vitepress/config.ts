@@ -265,6 +265,10 @@ export default withMermaid({
                     path.dirname(fileURLToPath(import.meta.url)),
                     "shims/nuxt-imports.ts",
                 ),
+                "#app": path.resolve(
+                    path.dirname(fileURLToPath(import.meta.url)),
+                    "shims/nuxt-imports.ts",
+                ),
             },
         },
         ssr: {

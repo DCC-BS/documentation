@@ -30,7 +30,9 @@ export function useState<T>(key: string, init?: () => T): Ref<T> {
  */
 export function useRuntimeConfig() {
     return {
-        public: {},
+        public: {
+            commonUi: {},
+        },
         app: {},
     };
 }
