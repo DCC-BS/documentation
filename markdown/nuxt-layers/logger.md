@@ -295,7 +295,7 @@ docker build --build-arg LOGGER_LAYER_URI=github:DCC-BS/nuxt-layers/pino-logger 
 ```
 
 ::: tip Related Documentation
-For more details on Docker standards and best practices, see [Internal Docker Standards](/docker).
+For more details on Docker standards and best practices, see [Internal Docker Standards](/coding/docker.md).
 :::
 
 ### Runtime Configuration

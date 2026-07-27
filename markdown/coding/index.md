@@ -17,6 +17,10 @@ Most important thing:
 - **Do:** Use the [Development Workflow](/dev-setup/development-workflow) for your commits and pull requests.
 - **Do:** Use the [Dev Setup](/dev-setup) for your development environment.
 
+## Docker
+
+- [Docker Standards](/coding/docker)
+
 ## Python
 
 - [Python Coding Standards](/coding/python)

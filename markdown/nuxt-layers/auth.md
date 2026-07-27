@@ -151,7 +151,7 @@ docker build --build-arg AUTH_LAYER_URI=github:DCC-BS/nuxt-layers/azure-auth -t 
 ```
 
 ::: tip Related Documentation
-For more details on Docker standards and best practices, see [Internal Docker Standards](/docker).
+For more details on Docker standards and best practices, see [Internal Docker Standards](/coding/docker.md).
 :::
 
 ## Azure Auth Implementation (`azure-auth`)

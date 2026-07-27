@@ -15,12 +15,20 @@ hero:
       link: /team
 
 features:
+  - title: AI Web Applications
+    details: Overview of TextMate, BS-Übersetzer, and Transcribo. Features, interfaces, and architecture.
+    icon:
+      light: https://cdn.simpleicons.org/chainguard
+      dark: https://cdn.simpleicons.org/chainguard/white
+    link: /apps/index.md
+    linkText: View Applications
+
   - title: Docker
     details: Container standards, best practices for Dockerfiles, and deployment configurations.
     icon: 
       light: https://cdn.simpleicons.org/docker
       dark: https://cdn.simpleicons.org/docker/white
-    link: /docker
+    link: /coding/docker.md
     linkText: View Docker Standards
 
   - title: Development Workflow

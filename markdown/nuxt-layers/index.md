@@ -176,7 +176,7 @@ Layer URI environment variables like `AUTH_LAYER_URI` and `LOGGER_LAYER_URI` are
 In Docker, we use `ARG` (build arguments) to pass these values during the image build process. During `RUN` commands, Docker injects `ARG` values into the container's environment, making them available to processes via `process.env`.
 
 ::: tip Related Documentation
-For more details on Docker standards and best practices, see [Internal Docker Standards](/docker).
+For more details on Docker standards and best practices, see [Internal Docker Standards](/coding/docker.md).
 :::
 
 ## Architecture Overview

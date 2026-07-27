@@ -22,6 +22,16 @@ const members = [
       { icon: 'gmail', link: 'mailto:yanick.schraner@bs.ch' }
     ]
   },
+  {
+    avatar: 'https://avatars.githubusercontent.com/u/6950000?v=4',
+    name: 'Thomas Gerig',
+    title: 'Developer',
+    links: [
+      { icon: 'github', link: 'https://github.com/thogerig' },
+      { icon: 'twitter', link: 'https://www.linkedin.com/in/thomas-gerig/' },
+      { icon: 'gmail', link: 'mailto:thomas.gerig@bs.ch' }
+    ]
+  },
 ]
 </script>
 

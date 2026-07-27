@@ -35,6 +35,15 @@ export default withMermaid({
 
         sidebar: [
             {
+                text: "AI Web Applications",
+                link: "/apps/index.md",
+                items: [
+                    { text: "TextMate", link: "/apps/textmate.md" },
+                    { text: "BS-Übersetzer", link: "/apps/bs-uebersetzer.md" },
+                    { text: "Transcribo", link: "/apps/transcribo.md" },
+                ],
+            },
+            {
                 text: "Setup & Tooling",
                 items: [
                     { text: "Dev Setup", link: "/dev-setup" },
@@ -44,13 +53,10 @@ export default withMermaid({
                 ],
             },
             {
-                text: "Docker",
-                link: "/docker/index.md",
-            },
-            {
                 text: "Coding",
                 link: "/coding/index.md",
                 items: [
+                    { text: "Docker", link: "/coding/docker.md" },
                     { text: "Python", link: "/coding/python" },
                     { text: "Nuxt / Vue", link: "/coding/nuxt" },
                 ],

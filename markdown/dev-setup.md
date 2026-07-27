@@ -28,7 +28,7 @@ All applications must be runnable via Docker. For security, we strictly use **Ro
 - **Docker Compose:** Used for orchestrating multi-container environments (e.g., Frontend + Backend + Database).
 
 ::: tip Standards
-Review our [Internal Docker Standards](/docker) for Dockerfile patterns and orchestration strategies.
+Review our [Internal Docker Standards](/coding/docker.md) for Dockerfile patterns and orchestration strategies.
 :::
 
 ## 3. IDE & Tooling
