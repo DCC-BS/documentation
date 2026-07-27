@@ -73,6 +73,10 @@ export default withMermaid({
                                 text: "useUserFeedback",
                                 link: "/user-interface/composables/useUserFeedback.md",
                             },
+                            {
+                                text: "useOnboardingBuilder",
+                                link: "/user-interface/composables/useOnboardingBuilder.md",
+                            },
                         ],
                     },
                     {
@@ -102,6 +106,10 @@ export default withMermaid({
                             {
                                 text: "Navigation Bar",
                                 link: "/user-interface/components/navigationbar.md",
+                            },
+                            {
+                                text: "Onboarding",
+                                link: "/user-interface/components/onboarding.md",
                             },
                             {
                                 text: "Online Status",

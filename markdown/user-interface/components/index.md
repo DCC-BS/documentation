@@ -1,7 +1,7 @@
 ---
 skillParent: dcc-ui
 skillName: ui-components-catalog
-skillDescription: "Catalog of all common-ui.bs.js Vue components (SplitView, SplitContainer, DisclaimerLlm/Button/Page, DataBsFooter, DataBsBanner, UndoRedoButtons, Changelogs, NavigationBar, OnlineStatus) with one-line summaries. Use to discover which DCC UI component fits a need before opening its detailed reference."
+skillDescription: "Catalog of all common-ui.bs.js Vue components (SplitView, SplitContainer, DisclaimerLlm/Button/Page, DataBsFooter, DataBsBanner, UndoRedoButtons, Changelogs, NavigationBar, OnlineStatus, Onboarding) with one-line summaries. Use to discover which DCC UI component fits a need before opening its detailed reference."
 ---
 
 # Components
@@ -32,3 +32,6 @@ A responsive navigation bar with language switching, disclaimer button, and cust
 
 ## [OnlineStatus](onlinestatus.md)
 A real-time health status indicator that polls the server to verify connectivity and displays visual status with tooltips.
+
+## [Onboarding](onboarding.md)
+A renderless component that drives interactive guided tours using driver.js, supporting phased step builders, cookie-based persistence, and automatic startup after the disclaimer modal is dismissed.

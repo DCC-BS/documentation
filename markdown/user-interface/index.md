@@ -1,6 +1,6 @@
 ---
 skillName: dcc-ui
-skillDescription: "Nuxt module of the Kanton Basel-Stadt design system for DCC Basel-Stadt apps: NavigationBar, DataBsFooter, SplitContainer/SplitView, Disclaimer/DisclaimerButton/DisclaimerPage, Changelogs, OnlineStatus, UndoRedoButtons components, the useUserFeedback composable, and the BS color palette. Use when building a DCC Basel-Stadt/Basel-Stadt Vue/Nuxt frontend or wiring up the common-ui.bs.js module."
+skillDescription: "Nuxt module of the Kanton Basel-Stadt design system for DCC Basel-Stadt apps: NavigationBar, DataBsFooter, SplitContainer/SplitView, Disclaimer/DisclaimerButton/DisclaimerPage, Changelogs, OnlineStatus, UndoRedoButtons, Onboarding components, the useUserFeedback and useOnboardingBuilder composables, and the BS color palette. Use when building a DCC Basel-Stadt/Basel-Stadt Vue/nuxt frontend or wiring up the common-ui.bs.js module."
 ---
 # User Interface Overview
 
@@ -112,6 +112,13 @@ You can customize the following translation keys in your application:
             "offline_title": "Offline",
             "online_description": "All services are available",
             "offline_description": "Some services are unavailable, features may be limited"
+        },
+        "tour": {
+            "skip": "Skip",
+            "next": "Next",
+            "prev": "Back",
+            "finish": "Finish",
+            "progress": "Step {{current}} of {{total}}"
         }
     },
     "disclaimer": {
