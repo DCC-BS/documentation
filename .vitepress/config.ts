@@ -74,6 +74,10 @@ export default withMermaid({
                                 link: "/user-interface/composables/useUserFeedback.md",
                             },
                             {
+                                text: "useDriverFactory",
+                                link: "/user-interface/composables/useDriverFactory.md",
+                            },
+                            {
                                 text: "useOnboardingBuilder",
                                 link: "/user-interface/composables/useOnboardingBuilder.md",
                             },
