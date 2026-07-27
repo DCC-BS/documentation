@@ -1,4 +1,4 @@
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { cp, mkdir, readdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 
@@ -259,7 +259,10 @@ async function packageArchive(): Promise<void> {
     const zipPath = path.join(DIST_DIR, "dcc-skills.zip");
     await rm(zipPath, { force: true });
     console.log("Archiving .agents directory to dcc-skills.zip...");
-    execSync(`cd ${SKILLS_BUILD_DIR} && zip -r ${zipPath} .agents`);
+    execFileSync("zip", ["-r", zipPath, ".agents"], {
+        cwd: SKILLS_BUILD_DIR,
+        stdio: "inherit",
+    });
 
     await rm(SKILLS_BUILD_DIR, { recursive: true, force: true });
     console.log(
