@@ -2,7 +2,7 @@
 outline: deep
 skillParent: dcc-ui
 skillName: navigation-bar
-skillDescription: "NavigationBar is a responsive top nav bar with left/center/right slots plus rightPreItems/rightPostItems, including a built-in DisclaimerButton and LanguageSelect and i18n app-name branding. Use when building the app header/top navigation."
+skillDescription: "NavigationBar is a responsive top nav bar with left/center/right slots plus rightPreItems/rightPostItems, including built-in DisclaimerButton, ChangelogsButton, OnboardingRestartButton, and LanguageSelect with i18n app-name branding. Use when building the app header/top navigation."
 ---
 <script setup lang="ts">
 import UiContainer from "../../../components/UiContainer.vue";
@@ -27,7 +27,7 @@ const exampleCode = `<template>
 
 # NavigationBar
 
-The `NavigationBar` component provides a flexible, responsive navigation bar with customizable content areas. It includes built-in support for language switching, disclaimer button, and multiple slot areas for complete customization of the navigation layout.
+The `NavigationBar` component provides a flexible, responsive navigation bar with customizable content areas. It includes built-in support for language switching, disclaimer button, changelogs access, onboarding restart, and multiple slot areas for complete customization of the navigation layout.
 
 <UiContainer :code="exampleCode">
     <template #element>
@@ -52,6 +52,8 @@ The `NavigationBar` component provides a flexible, responsive navigation bar wit
 - **Flexible Slot System**: Multiple slots for left, center, and right sections
 - **Language Switcher**: Built-in language selection component
 - **Disclaimer Button**: Integrated disclaimer access
+- **Changelogs Button**: Built-in access to changelogs on demand
+- **Onboarding Restart**: Built-in button to restart the onboarding tour
 - **Default Branding**: App name displayed by default on the left
 - **Nested Slot Support**: Fine-grained control over right section items
 - **Responsive Design**: Adapts to mobile, tablet, and desktop screens
@@ -64,13 +66,13 @@ This component has no props - it uses slots for all customization.
 
 ## Slots
 
-| Slot             | Description                                                                 | Default Content                                  |
-| ---------------- | --------------------------------------------------------------------------- | ------------------------------------------------ |
-| `left`           | Content for the left section of the navigation bar                          | App name from `navigation.app` translation       |
-| `center`         | Content for the center section                                              | Empty                                            |
-| `right`          | Complete override of the right section                                      | DisclaimerButton + LanguageSelect + nested slots |
-| `rightPreItems`  | Items to appear before the disclaimer button (within default right section) | Empty                                            |
-| `rightPostItems` | Items to appear after the language select (within default right section)    | Empty                                            |
+| Slot             | Description                                                                 | Default Content                                                                   |
+| ---------------- | --------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `left`           | Content for the left section of the navigation bar                          | App name from `navigation.app` translation                                        |
+| `center`         | Content for the center section                                              | Empty                                                                             |
+| `right`          | Complete override of the right section                                      | DisclaimerButton + ChangelogsButton + OnboardingRestartButton + LanguageSelect + nested slots |
+| `rightPreItems`  | Items to appear before the disclaimer button (within default right section) | Empty                                                                             |
+| `rightPostItems` | Items to appear after the language select (within default right section)    | Empty                                                                             |
 
 ## Usage
 
@@ -88,6 +90,8 @@ This displays:
 
 - App name on the left (from `navigation.app` translation)
 - Disclaimer button on the right
+- Changelogs button on the right
+- Onboarding restart button on the right
 - Language switcher on the right
 
 ### With Custom Left Content
@@ -149,7 +153,7 @@ Add items after the language select:
 <template>
     <NavigationBar>
         <template #rightPostItems>
-            <UButton variant="ghost" icon="i-lucide-user">Profile</UButton>
+            <OnlineStatus />
         </template>
     </NavigationBar>
 </template>
@@ -185,9 +189,7 @@ const { t } = useI18n();
         </template>
 
         <template #rightPostItems>
-            <UDropdown :items="userMenuItems">
-                <UAvatar src="/avatar.jpg" alt="User" />
-            </UDropdown>
+            <OnlineStatus />
         </template>
     </NavigationBar>
 </template>
@@ -211,7 +213,7 @@ Replace the entire right section if you don't want the default buttons:
 </template>
 ```
 
-**Note:** When you override the `right` slot, the `rightPreItems` and `rightPostItems` slots are not rendered, and you lose the default DisclaimerButton and LanguageSelect components unless you add them manually.
+**Note:** When you override the `right` slot, the `rightPreItems` and `rightPostItems` slots are not rendered, and you lose the default DisclaimerButton, ChangelogsButton, OnboardingRestartButton, and LanguageSelect components unless you add them manually.
 
 ## i18n Configuration
 
@@ -251,7 +253,7 @@ Use in your layout for consistent navigation:
             <template #center>
                 <nav><!-- Your nav items --></nav>
             </template>
-            <template #rightPreItems>
+            <template #rightPostItems>
                 <OnlineStatus />
             </template>
         </NavigationBar>
@@ -304,6 +306,8 @@ The NavigationBar uses a flexbox layout with three main sections:
     <div class="flex items-center gap-2">
       <slot name="rightPreItems" />
       <DisclaimerButton variant="ghost" />
+      <ChangelogsButton />
+      <OnboardingRestartButton />
       <LanguageSelect />
       <slot name="rightPostItems" />
     </div>
@@ -329,12 +333,14 @@ The default `right` slot includes:
 
 1. Content from `rightPreItems` slot
 2. DisclaimerButton with `ghost` variant
-3. LanguageSelect component
-4. Content from `rightPostItems` slot
+3. ChangelogsButton
+4. OnboardingRestartButton
+5. LanguageSelect component
+6. Content from `rightPostItems` slot
 
 ### Nested Slots vs Complete Override
 
-- **Use `rightPreItems` and `rightPostItems`**: When you want to keep the DisclaimerButton and LanguageSelect
+- **Use `rightPreItems` and `rightPostItems`**: When you want to keep the DisclaimerButton, ChangelogsButton, OnboardingRestartButton, and LanguageSelect
 - **Use `right` slot**: When you want complete control over the entire right section
 
 ## Styling
@@ -365,10 +371,10 @@ If you're migrating from an older version with only `center` and `right` slots:
 
 ```vue
 <NavigationBar>
-  <template #rightPreItems>
+  <template #rightPostItems>
     <OnlineStatus />
   </template>
 </NavigationBar>
 ```
 
-This allows you to keep the default DisclaimerButton and LanguageSelect while adding your custom content.
+This allows you to keep the default DisclaimerButton, ChangelogsButton, OnboardingRestartButton, and LanguageSelect while adding your custom content.
