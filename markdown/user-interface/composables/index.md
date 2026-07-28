@@ -1,7 +1,7 @@
 ---
 skillParent: dcc-ui
 skillName: ui-composables-catalog
-skillDescription: "Catalog of common-ui.bs.js Vue composables (useUserFeedback, useDriverFactory, useOnboardingBuilder) with one-line summaries. Use to discover which DCC UI composable fits a need before opening its detailed reference."
+skillDescription: "Catalog of common-ui.bs.js Vue composables (useUserFeedback, useDriverFactory, useOnboardingBuilder, useChangelogsPending) with one-line summaries. Use to discover which DCC UI composable fits a need before opening its detailed reference."
 ---
 
 # Composables
@@ -14,3 +14,6 @@ Creates configured driver.js instances with internationalization support, Lucide
 
 ## [useOnboardingBuilder](useOnboardingBuilder.md)
 A fluent builder API for constructing multi-phase onboarding tours with driver.js, supporting phase transitions with enter/exit lifecycle hooks and lazy-evaluated step content.
+
+## useChangelogsPending
+Fetches changelog releases and reactively tracks whether any unread versions exist since the last-read marker cookie, used by the `FirstRunOrchestrator` to gate the Changelogs first-run flow.
