@@ -1,33 +1,54 @@
 ---
+---
 outline: deep
 skillParent: dcc-ui
 skillName: changelogs
-skillDescription: "Propless Changelogs component that fetches changelog entries from the /api/changelogs endpoint (filterable via lastRead query param), renders Markdown, and shows a modal of unread versions tracked via the changelogs-last-read localStorage key. Can be disabled globally via the disableChangelog runtime config. Use when surfacing release notes or what's new to users on app load."
+skillDescription: "Changelogs component renders a modal of release notes passed via the releases prop (fetched by FirstRunOrchestrator/useChangelogsPending), renders Markdown, and emits a finished event when dismissed. Includes the ChangelogsButton companion that resets the changelogs-last-read cookie to re-trigger the flow on demand. Disable via disableChangelog runtime config. Use when surfacing release notes or what's new to users."
 ---
 # Changelogs
 
-The `Changelogs` component displays a modal with application changelog information. It automatically fetches changelog data from the server and shows unread entries to users. The component tracks the last read version in localStorage and only shows new changelogs.
+The `Changelogs` component displays a modal with application changelog information. It renders unread release notes passed to it via the `releases` prop and emits a `finished` event when the user dismisses the modal.
+
+This component is designed to be used within the `FirstRunOrchestrator`, which handles fetching changelog data, tracking read state via the `changelogs-last-read` cookie, and conditionally mounting the component when new releases are available. For manual triggering (e.g., from a navigation bar), use the companion [`ChangelogsButton`](#changelogsbutton) component.
 
 ## Features
 
-- **Automatic Fetching**: Retrieves changelog data from `/api/changelogs` endpoint
-- **Version Tracking**: Shows only unread changelogs based on stored version
-- **Markdown Support**: Renders changelog content with Markdown formatting
-- **Responsive Design**: Modal with fullscreen option for better readability
-- **Smart Updates**: Only displays when new versions are available
-- **localStorage Integration**: Automatically tracks the last read changelog version
+- **Markdown Rendering**: Renders changelog content with Markdown formatting
+- **Responsive Design**: Modal with close button for better readability
+- **Orchestrator-Driven**: Mounted only when new releases exist (via `FirstRunOrchestrator`)
+- **Event-Based**: Emits a `finished` event so the parent can update tracking state
 - **Configurable**: Can be globally disabled via runtime config
+- **Companion Button**: `ChangelogsButton` allows users to re-view changelogs on demand
 
 ## Props
 
-This component has no props - it works automatically!
+| Prop       | Type          | Required | Description                                                        |
+| ---------- | ------------- | -------- | ------------------------------------------------------------------ |
+| `releases` | `Changelog[]` | Yes      | Array of changelog entries to display in the modal (newest first). |
+
+### Changelog Type
+
+```typescript
+interface Changelog {
+  title: string;
+  version: string;
+  published_at: string;
+  body: string; // Markdown content
+}
+```
+
+## Events
+
+| Event      | Payload                  | Description                                                                                          |
+| ---------- | ------------------------ | ---------------------------------------------------------------------------------------------------- |
+| `finished` | `{ completed: boolean }` | Emitted when the user closes the modal. Signals the orchestrator to update the `changelogs-last-read` cookie. |
 
 ## Configuration
 
-The changelog feature can be disabled globally via Nuxt runtime config. This is useful for environments where changelogs are not needed (e.g., internal tools or development builds).
+The changelog feature can be disabled globally via Nuxt runtime config. When disabled, the `FirstRunOrchestrator` will not include the Changelogs flow.
 
 ::: tip
-Set `disableChangelog` to `true` to completely disable the component. No data will be fetched and no modal will be shown.
+Set `disableChangelog` to `true` to completely disable the flow. No data will be fetched and no modal will be shown.
 :::
 
 ```typescript
@@ -42,8 +63,6 @@ export default defineNuxtConfig({
   },
 });
 ```
-
-When `disableChangelog` is enabled, the component exits early on mount without fetching data or displaying the modal.
 
 ## Server Setup
 
@@ -85,65 +104,75 @@ Name your changelog files consistently, for example:
 
 ## Usage
 
-### Basic Implementation
+### With FirstRunOrchestrator
 
-Simply add the component to your layout or page:
+The `Changelogs` component is designed to be rendered by the `FirstRunOrchestrator`, which manages the fetching, cookie tracking, and conditional display logic. You typically do not mount `Changelogs` directly.
 
-```vue-vue
+```vue
 <template>
-  <div>
-    <Changelogs />
-    <!-- Your app content -->
-  </div>
+  <UApp>
+    <FirstRunOrchestrator
+      :disclaimer="{
+        appName: 'My App',
+        confirmationText: 'I have read and understood...',
+      }"
+    />
+    <NuxtPage />
+  </UApp>
 </template>
 ```
 
-### In a Layout
+The orchestrator automatically:
 
-Perfect for displaying in your default layout:
+1. Fetches changelog data via the `/api/changelogs` endpoint
+2. Compares available versions against the `changelogs-last-read` cookie
+3. Mounts the `Changelogs` component when new releases exist
+4. Updates the cookie when the user dismisses the modal
 
-```vue-vue
+### Manual Trigger with ChangelogsButton
+
+To allow users to view changelogs on demand (e.g., from a navigation bar), use the `ChangelogsButton` component:
+
+```vue
 <template>
-  <div>
-    <NavigationBar />
-    <main>
-      <slot />
-    </main>
-    <Changelogs />
-  </div>
+  <NavigationBar>
+    <template #rightPostItems>
+      <OnlineStatus />
+    </template>
+  </NavigationBar>
 </template>
 ```
 
-### Testing & Development
+::: info
+`ChangelogsButton` is built into the default `NavigationBar` right section — no manual placement is needed unless you override the `right` slot.
+:::
 
-For development and testing purposes, you can clear the changelog cache:
+## ChangelogsButton
 
-```vue-vue
-<script setup>
-function clearChangelogCache() {
-  localStorage.removeItem("changelogs-last-read");
-  location.reload();
-}
-</script>
+The `ChangelogsButton` component provides a button that allows users to re-view the changelogs at any time. It resets the `changelogs-last-read` cookie to `"0.0.0"`, which causes the `FirstRunOrchestrator` to re-evaluate pending changelogs and surface them again without a page reload.
 
-<template>
-  <div>
-    <button @click="clearChangelogCache">
-      Clear Changelog Cache
-    </button>
-    <Changelogs />
-  </div>
-</template>
-```
+### Features
+
+- **Responsive**: Icon-only with tooltip on mobile, icon + label on desktop
+- **Cookie-Based**: Uses `useCookie` to reset the `changelogs-last-read` value
+- **i18n Integrated**: Uses the `common-ui.changelogs.title` translation key for the label and tooltip
+- **Ghost Variant**: Minimal styling with `i-lucide-history` icon
+
+### Props
+
+This component has no props.
+
+### Behavior
+
+When clicked, the button sets the `changelogs-last-read` cookie to `"0.0.0"`. The orchestrator's `useChangelogsPending` composable watches this cookie and re-evaluates, surfacing the Changelogs flow without requiring a page reload.
 
 ## How It Works
 
-1. **Config Check**: On mount, the component first checks if the changelog feature is disabled via runtime config. If disabled, it exits immediately.
-2. **First Visit**: When a user visits your application for the first time, the component checks for available changelogs
-3. **Version Comparison**: It compares the stored version (from localStorage) with available changelog versions
-4. **Modal Display**: If new versions are found, a modal appears showing all unread changelogs
-5. **Version Update**: Once the user closes the modal, the latest version is stored in localStorage
-6. **Subsequent Visits**: On future visits, only changelogs newer than the stored version will be shown
+1. **Orchestrator Mount**: The `FirstRunOrchestrator` is placed in `app.vue` or a layout, running on every page.
+2. **Pending Check**: The `useChangelogsPending` composable fetches from `/api/changelogs?lastRead=<cookie>` and determines if new releases exist.
+3. **Priority Resolution**: The orchestrator resolves flows by priority (Disclaimer > Changelogs > Onboarding). Changelogs only appears after the Disclaimer is accepted (if enabled).
+4. **Modal Display**: When Changelogs is the active flow, the `Changelogs` component is mounted and opens immediately, displaying all unread release notes.
+5. **Completion**: When the user closes the modal, the `finished` event fires. The orchestrator writes the latest release version to the `changelogs-last-read` cookie, which reactively unmounts the component.
 
 ## API Endpoint
 
@@ -154,7 +183,7 @@ interface Changelog {
   title: string;
   version: string;
   published_at: string;
-  content: string; // Markdown content
+  body: string; // Markdown content
 }
 ```
 
@@ -166,13 +195,13 @@ Example server response:
     "title": "Version 1.1.0",
     "version": "1.1.0",
     "published_at": "2024-01-15T10:00:00Z",
-    "content": "## New Features\n- Feature 1\n- Feature 2"
+    "body": "## New Features\n- Feature 1\n- Feature 2"
   },
   {
     "title": "Version 1.0.0",
     "version": "1.0.0",
     "published_at": "2024-01-01T10:00:00Z",
-    "content": "## Initial Release\n- First version"
+    "body": "## Initial Release\n- First version"
   }
 ]
 ```
@@ -184,9 +213,11 @@ Changelogs are automatically sorted by version number (newest first) using seman
 - `1.2.3`
 - `2.0.0-beta.1`
 
-## localStorage Key
+## Cookie Reference
 
-The component uses the localStorage key `changelogs-last-read` to track the last viewed changelog version.
+| Name                   | Type     | Default | Purpose                                                                                                                    |
+| ---------------------- | -------- | ------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `changelogs-last-read` | `string` | `""`    | Tracks the last viewed changelog version. Set to the newest release version when the user dismisses the modal. Reset to `"0.0.0"` by `ChangelogsButton` to re-trigger the flow. |
 
 ## Best Practices
 
