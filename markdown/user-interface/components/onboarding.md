@@ -6,15 +6,15 @@ outline: deep
 
 The `Onboarding` component provides an interactive guided tour for new users, powered by [driver.js](https://driverjs.com/). It is a **renderless** component — it renders nothing in the DOM but drives an overlay that highlights elements and walks users through your application's features.
 
-Tours are configured declaratively with the [`useOnboardingBuilder`](#the-useonboardingbuilder-composable) composable, which supports phased step groups with `onEnter`/`onExit` lifecycle hooks. Persistence, locale-aware restarts, and auto-start after the disclaimer modal are handled automatically.
+Tours are configured declaratively with the [`useOnboardingBuilder`](#the-useonboardingbuilder-composable) composable, which supports phased step groups with `onEnter`/`onExit` lifecycle hooks. The component auto-starts on mount and emits a `finished` event when the user closes or completes the tour. In typical usage, the component is mounted by the `FirstRunOrchestrator`, which sequences it after the Disclaimer and Changelogs flows and persists completion via the `tour-completed` cookie.
 
 ## Features
 
 - **Renderless**: Owns no DOM beyond a hidden sentinel; all UI is driven by driver.js
 - **Phased Tours**: Group steps into named phases with enter/exit callbacks
-- **Cookie Persistence**: First-time users skip the tour automatically once completed
+- **Event-Based Completion**: Emits a `finished` event when the user closes or completes the tour, allowing the parent (e.g., `FirstRunOrchestrator`) to record completion
 - **Locale-Aware**: Recreates the driver when the active locale changes so labels stay translated
-- **Auto-Start**: Waits for the `Disclaimer` modal to be dismissed before starting, so the modal remains clickable
+- **Auto-Start**: Starts the tour automatically on mount
 - **Programmatic Control**: Exposes `start()` and `destroy()` methods via template ref
 - **Localized Labels**: Buttons and progress text are translated via i18n
 - **Custom Icons**: Lucide icons are injected into the navigation buttons
@@ -26,6 +26,12 @@ Tours are configured declaratively with the [`useOnboardingBuilder`](#the-useonb
 | --------- | ----------------------------------- | -------- | ---------------------------------------------------------- |
 | `builder` | `OnboardingStepBuilder<Phases>`     | Yes      | The step builder created via `useOnboardingBuilder().addPhases(...)` |
 
+## Events
+
+| Event      | Payload                  | Description                                                                                                                    |
+| ---------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| `finished` | `{ completed: boolean }` | Emitted when the user closes or completes the tour (fires from the driver.js `onDestroyStarted` hook). The parent component should use this to record completion (e.g., set the `tour-completed` cookie). |
+
 ## Exposed Methods
 
 The component exposes the following methods via a template ref:
@@ -33,27 +39,22 @@ The component exposes the following methods via a template ref:
 | Method    | Signature       | Description                                                          |
 | --------- | --------------- | ------------------------------------------------------------------- |
 | `start`   | `() => void`    | Destroys any active driver, rebuilds it from the builder, and starts the tour. |
-| `destroy` | `() => void`    | Tears down the active driver without recording completion (useful for re-running the tour during development). |
+| `destroy` | `() => void`    | Tears down the active driver. Does **not** emit `finished` — useful for re-running the tour during development. |
 
 ## Persistence
 
-The component uses a cookie named `tour-completed` (default `false`) to remember that a user has finished the tour. Completion is recorded in the driver.js `onDestroyStarted` hook, which fires when the user explicitly closes or completes the tour — **not** when `destroy()` is called programmatically. This means calling `start()` in your own code (e.g., a "Replay tour" button) will not permanently mark the tour as completed.
+Persistence is managed by the parent component — typically the `FirstRunOrchestrator` — which listens for the `finished` event and writes the `tour-completed` cookie. This means calling `start()` in your own code (e.g., a "Replay tour" button) will not permanently mark the tour as completed; only the orchestrator does that.
 
 Because the cookie is SSR-readable, first-time visitors skip the tour on the server render and avoid a hydration flash.
 
 ## Usage
 
-### Basic Implementation
+### With the FirstRunOrchestrator (Recommended)
 
-The tour is defined in three steps: declare phases, switch to a phase, and add steps to it.
+The recommended way to use the `Onboarding` component is through the `FirstRunOrchestrator`, which is placed once in `app.vue` or your default layout. The builder is app-owned (each app defines its own tour); the orchestrator owns when to mount it.
 
 ```vue
 <script lang="ts" setup>
-import Onboarding from "@dcc-bs/common-ui.bs.js/components/Onboarding.vue";
-import { useOnboardingBuilder } from "@dcc-bs/common-ui.bs.js/composables";
-
-const onboarding = ref<InstanceType<typeof Onboarding>>();
-
 const builder = useOnboardingBuilder()
     .addPhases<"Phase1" | "Phase2">([
         {
@@ -99,20 +100,38 @@ const builder = useOnboardingBuilder()
             },
         },
     ]);
-
-onMounted(() => {
-    onboarding.value?.start();
-});
 </script>
 
 <template>
-    <Onboarding ref="onboarding" :builder="builder" />
+    <UApp>
+        <FirstRunOrchestrator
+            :onboarding-builder="builder"
+            :disclaimer="{
+                appName: 'Test App',
+                confirmationText:
+                    'I have read and understood the instructions and confirm that I will use Test App exclusively in compliance with the stated guidelines.',
+            }"
+        />
+        <NuxtPage />
+    </UApp>
 </template>
 ```
 
+::: tip
+The `FirstRunOrchestrator` receives the builder via its `onboarding-builder` prop and manages the `tour-completed` cookie. If the builder is omitted, the onboarding flow is skipped entirely.
+:::
+
 ### Replay Tour on Demand
 
-Because the cookie is only set when the user closes or finishes the tour, you can wire a "Replay tour" button to `start()`:
+The `OnboardingRestartButton` component provides a pre-built button that resets the `tour-completed` cookie and re-triggers the tour via the orchestrator. It is included by default in the `NavigationBar`.
+
+```vue
+<template>
+    <OnboardingRestartButton />
+</template>
+```
+
+Alternatively, if you are mounting the `Onboarding` component directly, you can wire a custom button to the `start()` method via a template ref:
 
 ```vue
 <template>
@@ -216,16 +235,10 @@ The builder reserves several configuration slots for itself: button text, progre
 
 ## Auto-Start Behavior
 
-On mount, the component calls `beginTourWhenReady()`, which:
-
-1. **Returns immediately** if the `tour-completed` cookie is `true`.
-2. **Starts the tour immediately** if no element matching `.disclaimer-modal` is present in the DOM.
-3. **Observes the DOM** otherwise, and starts the tour as soon as the disclaimer modal is removed from the document.
-
-This coordination is necessary because driver.js sets `pointer-events: none` on every descendant except the highlighted element while active. Starting the tour while the disclaimer modal is open would render the modal unclickable.
+On mount, the component immediately builds a driver.js instance from the builder and calls `drive()`. When managed by the `FirstRunOrchestrator`, the component is only mounted after the Disclaimer and Changelogs flows are complete, so there is no need for the component to observe the DOM for blocking modals.
 
 ::: tip
-If your application does not use the `Disclaimer` component, the tour starts on the next tick after mount with no delay.
+If you mount the `Onboarding` component directly (without the orchestrator), ensure no blocking modals are open at mount time — driver.js sets `pointer-events: none` on all descendants except the highlighted element.
 :::
 
 ## Locale Awareness
@@ -239,6 +252,28 @@ watch(locale, () => {
 });
 ```
 
+## Runtime Configuration
+
+The onboarding flow can be disabled globally via the `disableOnboarding` runtime config option:
+
+```typescript
+export default defineNuxtConfig({
+  runtimeConfig: {
+    public: {
+      commonUi: {
+        disableOnboarding: true,
+      },
+    },
+  },
+});
+```
+
+When set to `true`, the `FirstRunOrchestrator` will never mount the `Onboarding` component.
+
+::: tip
+You can also set this via the environment variable `NUXT_PUBLIC_COMMON_UI_DISABLE_ONBOARDING=true`.
+:::
+
 ## i18n Configuration
 
 Button labels and progress text are read from the `common-ui.tour` namespace. Defaults are provided for `en` and `de`; override them in your application's i18n files to add languages or change wording.
@@ -251,6 +286,7 @@ Button labels and progress text are read from the `common-ui.tour` namespace. De
             "next": "Next",
             "prev": "Back",
             "finish": "Finish",
+            "restart": "Restart tour",
             "progress": "Step \\{\\{current\\}\\} of \\{\\{total\\}\\}"
         }
     }
@@ -263,6 +299,7 @@ Button labels and progress text are read from the `common-ui.tour` namespace. De
 | `common-ui.tour.next`        | Label for the "Next" navigation button             |
 | `common-ui.tour.prev`        | Label for the "Back" navigation button             |
 | `common-ui.tour.finish`      | Label for the "Next" button on the final step      |
+| `common-ui.tour.restart`     | Label for the `OnboardingRestartButton` component  |
 | `common-ui.tour.progress`    | Progress text template <span v-pre>`{{current}}` and `{{total}}`</span> are interpolated by driver.js |
 
 ## Styling
@@ -277,16 +314,15 @@ Because driver.js renders the popover outside this component's DOM, these styles
 
 ## How It Works
 
-1. **Build**: You construct a builder with `useOnboardingBuilder()` and pass it to the component via the `builder` prop.
-2. **Mount**: The component checks the `tour-completed` cookie. If `true`, it does nothing.
-3. **Readiness**: If a `Disclaimer` modal is present, a `MutationObserver` waits for it to be removed.
-4. **Start**: A driver.js instance is built from the builder and `drive()` is called.
-5. **Navigation**: As the user moves between steps, the builder-injected `onNextClick`/`onPrevClick` hooks fire the appropriate phase `onEnter`/`onExit` callbacks before advancing. Any custom hooks you supplied on individual steps or via the driver config are merged and run alongside the builder's hooks. When the user completes the tour from the final step, the last active phase's `onExit` callback is also invoked.
-6. **Completion**: When the user closes or finishes the tour, `onDestroyStarted` sets `tour-completed` to `true` and the driver is destroyed.
-7. **Cleanup**: On unmount, the observer is disconnected and any active driver is destroyed.
+1. **Build**: You construct a builder with `useOnboardingBuilder()` and pass it to the `FirstRunOrchestrator` via the `onboarding-builder` prop.
+2. **Sequencing**: The orchestrator checks the `tour-completed` cookie and the pending state of higher-priority flows (Disclaimer, Changelogs). If the cookie is `true` or a higher-priority flow is pending/loading, the `Onboarding` component is not mounted.
+3. **Start**: When onboarding becomes the active flow, the orchestrator mounts the `Onboarding` component, which immediately builds a driver.js instance and calls `drive()`.
+4. **Navigation**: As the user moves between steps, the builder-injected `onNextClick`/`onPrevClick` hooks fire the appropriate phase `onEnter`/`onExit` callbacks before advancing. Any custom hooks you supplied on individual steps or via the driver config are merged and run alongside the builder's hooks. When the user completes the tour from the final step, the last active phase's `onExit` callback is also invoked.
+5. **Completion**: When the user closes or finishes the tour, `onDestroyStarted` emits the `finished` event. The orchestrator receives it and sets `tour-completed` to `true`.
+6. **Cleanup**: On unmount, any active driver is destroyed.
 
 ## Cookie Reference
 
 | Name              | Type      | Default | Purpose                                                          |
 | ----------------- | --------- | ------- | ---------------------------------------------------------------- |
-| `tour-completed`  | `boolean` | `false` | Set to `true` when the user completes or skips the tour. SSR-readable. |
+| `tour-completed`  | `boolean` | `false` | Set to `true` when the user completes or skips the tour. Written by the `FirstRunOrchestrator`. SSR-readable. |
