@@ -2,7 +2,7 @@
 outline: deep
 skillParent: dcc-ui
 skillName: disclaimer
-skillDescription: "Modal Disclaimer Vue component that gatekeeps app access until the user accepts terms; tracks accepted version in localStorage with HTML content. Can be disabled via runtime config. Use when adding a one-time terms/usage-guidelines acceptance gate (not the re-open DisclaimerButton or full-page DisclaimerPage)."
+skillDescription: "Modal Disclaimer Vue component that gatekeeps app access until the user accepts terms; emits a finished event and is designed to be orchestrated by FirstRunOrchestrator. Version and completion are tracked via cookies. Can be disabled via runtime config. Use when adding a one-time terms/usage-guidelines acceptance gate (not the re-open DisclaimerButton or full-page DisclaimerPage)."
 ---
 <script setup lang="ts">
 import { ref } from 'vue';
@@ -29,19 +29,17 @@ const postfixHtml = ref(`<p>
 
 # Disclaimer
 
-The `Disclaimer` component displays a modal disclaimer that users must accept before using the application. It shows on first visit or when the disclaimer version changes, providing a gatekeeping mechanism for terms of service, usage guidelines, or legal notices.
+The `Disclaimer` component displays a modal disclaimer that users must accept before using the application. It is designed to be used within the `FirstRunOrchestrator` component, which manages when to show the disclaimer based on cookie state, runtime configuration, and the priority of other first-run flows (changelogs, onboarding).
 
 ## Features
 
 - **Modal Display**: Full-screen modal that blocks app access until accepted
-- **Version Tracking**: Tracks accepted version in localStorage
 - **HTML Content Support**: Rich text formatting with custom HTML
 - **Customizable Confirmation**: Configurable acceptance checkbox and text
-- **Automatic Detection**: Shows only when needed (first visit or version change)
-- **Persistent State**: Remembers acceptance across sessions
 - **Accessibility**: Keyboard accessible with proper focus management
 - **Responsive Design**: Works seamlessly on all device sizes
-- **Runtime Disabling**: Can be disabled via runtime config for specific environments
+- **Event-Driven**: Emits a `finished` event when the user accepts, allowing the parent (e.g., `FirstRunOrchestrator`) to manage completion state
+- **Runtime Configuration**: Version, app name, and disabling are configurable via runtime config
 
 ## Props
 
@@ -49,51 +47,87 @@ The `Disclaimer` component displays a modal disclaimer that users must accept be
 | ------------------- | -------- | -------- | --------------------------------------------------------------------- |
 | `appName`           | `string` | Yes      | The name of your application, will be used for the default `contentHtml` and `confirmationText` when these props are not set.                                          |
 | `confirmationText`  | `string` | No       | Text users must confirm by checking the box. When not set, the translation key `disclaimer.confirmation_text` will be used with `{appName}` as a placeholder.                           |
-| `disclaimerVersion` | `string` | No       | Version identifier (e.g., "1.0.0") - changing this re-shows the modal |
 | `contentHtml`       | `string` | No       | Main HTML content for the disclaimer body. When not set, the translation key `disclaimer.content` will be used.                             |
 | `postfixHtml`       | `string` | No       | HTML content displayed after main content (e.g., contact info)        |
 
+## Events
+
+| Event      | Payload                     | Description                                                                                          |
+| ---------- | --------------------------- | --------------------------------------------------------------------------------------------------- |
+| `finished` | `{ completed: boolean }`    | Emitted when the user checks the confirmation checkbox. The orchestrator listens for this event to set the completion cookie and unmount the component. |
+
 ## Configuration
 
-The Disclaimer component reads from Nuxt's runtime config and can be disabled entirely without removing the component from your templates. This is useful for environments where the disclaimer is not needed (e.g., internal tools, testing).
+The Disclaimer is configured through Nuxt's runtime config and can be disabled entirely or have its defaults set without passing props. This is useful for environments where the disclaimer is not needed (e.g., internal tools, testing).
 
-### Disabling the Disclaimer
+### Runtime Config
 
-Set the `disableDisclaimer` option in your `nuxt.config.ts`:
+Set the `disclaimer` options and `disableDisclaimer` flag in your `nuxt.config.ts`:
 
 ```typescript
 export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       commonUi: {
-        disableDisclaimer: true,
+        disableDisclaimer: false,
+        disclaimer: {
+          appName: "My App",
+          version: "1.0.0",
+        },
       },
     },
   },
 });
 ```
 
-When `disableDisclaimer` is set to `true`, the modal will never be displayed, even on first visit or when the version changes.
+| Option                        | Type                 | Default     | Description                                                                 |
+| ----------------------------- | -------------------- | ----------- | --------------------------------------------------------------------------- |
+| `disableDisclaimer`           | `boolean` \| `string` | `false`     | When `true` (or `"true"`), the disclaimer flow is skipped entirely by the orchestrator. |
+| `disclaimer.appName`          | `string`             | `""`        | Default application name passed to the Disclaimer component.               |
+| `disclaimer.version`          | `string`             | `"1.0.0"`   | Version identifier — changing this re-shows the disclaimer to all users.    |
 
 ::: tip
-You can also set this value to the string `"true"` (e.g., via environment variables) and it will be treated the same as the boolean `true`.
+You can also set `disableDisclaimer` to the string `"true"` (e.g., via environment variables) and it will be treated the same as the boolean `true`.
 :::
 
 ## Usage
 
-### Basic Implementation
+### With FirstRunOrchestrator (Recommended)
 
-The simplest disclaimer with just text confirmation:
+The `Disclaimer` component is designed to be orchestrated by `FirstRunOrchestrator`, which manages the sequencing of first-run flows (disclaimer → changelogs → onboarding) and handles completion state via cookies. Place the orchestrator once in `app.vue` so it is available on every page:
 
 ```vue
+<script lang="ts" setup>
+const builder = useOnboardingBuilder()
+    .addPhases<"Phase1">([
+        {
+            name: "Phase1",
+            onEnter: async () => {},
+            onExit: async () => {},
+        },
+    ])
+    .switchPhase("Phase1")
+    .addSteps([
+        { popover: { title: "Step 1", description: "This is step 1" } },
+    ]);
+</script>
+
 <template>
-    <Disclaimer
-        app-name="My Application"
-        confirmation-text="I accept the terms and conditions."
-        disclaimer-version="1.0.0"
-    />
+    <UApp>
+        <FirstRunOrchestrator
+            :onboarding-builder="builder"
+            :disclaimer="{
+                appName: 'Test App',
+                confirmationText:
+                    'I have read and understood the instructions and confirm that I will use Test App exclusively in compliance with the stated guidelines.',
+            }"
+        />
+        <NuxtPage />
+    </UApp>
 </template>
 ```
+
+The `disclaimer` prop on `FirstRunOrchestrator` provides overrides for the runtime config defaults. The orchestrator compares the `disclaimer-accepted` cookie against the configured version to determine whether the disclaimer should be shown.
 
 ### Using Default Translations
 
@@ -102,10 +136,7 @@ If `confirmationText` and `contentHtml` are not provided, the component will aut
 ```vue
 <template>
     <!-- Uses translations: disclaimer.confirmation_text and disclaimer.content -->
-    <Disclaimer
-        app-name="My Application"
-        disclaimer-version="1.0.0"
-    />
+    <Disclaimer app-name="My Application" />
 </template>
 ```
 
@@ -152,25 +183,44 @@ Customize the disclaimer content and see changes in real-time, try to leave prop
 
 ## Version Management
 
-The `disclaimerVersion` prop is crucial for managing disclaimer updates:
+The disclaimer version is configured via runtime config (`disclaimer.version`). When the version changes, users will need to accept the disclaimer again.
 
 ### Initial Version
 
-```vue
-<template>
-    <Disclaimer app-name="My App" disclaimer-version="1.0.0" ... />
-</template>
+```typescript
+// nuxt.config.ts
+export default defineNuxtConfig({
+  runtimeConfig: {
+    public: {
+      commonUi: {
+        disclaimer: {
+          appName: "My App",
+          version: "1.0.0",
+        },
+      },
+    },
+  },
+});
 ```
 
 ### Updating the Disclaimer
 
-When you update your terms, increment the version:
+When you update your terms, increment the version in your runtime config:
 
-```vue
-<template>
-    <!-- Users will need to accept again -->
-    <Disclaimer app-name="My App" disclaimer-version="2.0.0" ... />
-</template>
+```typescript
+// nuxt.config.ts
+export default defineNuxtConfig({
+  runtimeConfig: {
+    public: {
+      commonUi: {
+        disclaimer: {
+          appName: "My App",
+          version: "2.0.0", // Users will need to accept again
+        },
+      },
+    },
+  },
+});
 ```
 
 ### Versioning Strategy
@@ -181,24 +231,25 @@ When you update your terms, increment the version:
 
 ## How It Works
 
-1. **Runtime Config Check**: Reads `disableDisclaimer` from runtime config; if enabled, the component does nothing
-2. **Component Mounts**: Checks localStorage for `disclaimerAccepted` key
-3. **Version Check**: Compares stored version with current `disclaimerVersion` prop
-4. **Display Logic**:
-    - Shows modal if no version is stored (first visit)
-    - Shows modal if stored version differs from current version
-    - Hides modal if user has accepted current version
-5. **User Acceptance**:
-    - User must check the confirmation checkbox
-    - Current version is stored in localStorage
-    - Modal closes and user can access the app
-6. **Subsequent Visits**: Modal doesn't show unless version changes
+When used with `FirstRunOrchestrator`:
 
-## localStorage Structure
+1. **Orchestrator Check**: The `FirstRunOrchestrator` reads `disableDisclaimer` from runtime config; if enabled, the disclaimer flow is skipped
+2. **Version Check**: The orchestrator compares the `disclaimer-accepted` cookie with the configured `disclaimer.version`
+3. **Display Logic**:
+    - Shows the disclaimer if no version is stored (first visit) or the stored version differs from the current version
+    - Skips the disclaimer if the user has accepted the current version
+4. **User Acceptance**:
+    - User must check the confirmation checkbox
+    - The component emits the `finished` event
+    - The orchestrator sets the `disclaimer-accepted` cookie to the current version
+    - The disclaimer is unmounted and the next pending flow (if any) is shown
+
+## Cookie Structure
 
 ```typescript
-// Key: 'disclaimerAccepted'
+// Cookie name: 'disclaimer-accepted'
 // Value: Version string (e.g., "1.0.0")
 
-localStorage.getItem("disclaimerAccepted"); // "1.0.0"
+const disclaimerAccepted = useCookie<string>("disclaimer-accepted");
+disclaimerAccepted.value; // "1.0.0"
 ```
