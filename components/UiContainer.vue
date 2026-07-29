@@ -9,6 +9,7 @@ const props = defineProps<{
 const showCode = ref(false);
 const elementRef = ref<HTMLElement | null>(null);
 const capturedCode = ref("");
+const displayCode = ref<string>("");
 
 onMounted(async () => {
     await nextTick();
@@ -56,8 +57,6 @@ function formatHTML(html: string): string {
 
     return formatted.trim();
 }
-
-const displayCode = ref<string>("");
 
 const slots = defineSlots<{
     element?: any;
