@@ -1,4 +1,5 @@
 ---
+---
 outline: deep
 ---
 
@@ -6,7 +7,7 @@ outline: deep
 
 The `useOnboardingBuilder` composable provides a fluent, type-safe builder API for constructing multi-phase onboarding tours on top of [driver.js](https://driverjs.com). It lets you declare named phases with `onEnter`/`onExit` lifecycle hooks and attach steps to each phase; the builder transparently wires phase transitions into driver.js navigation so that moving between steps across phases runs the correct hooks.
 
-The resulting builder is consumed by the [`Onboarding`](../components/onboarding.md) component via its `builder` prop.
+The resulting builder is consumed by the [`FirstRunOrchestrator`](../components/onboarding.md) component via its `onboardingBuilder` prop, which manages sequencing with the Disclaimer and Changelogs flows, cookie persistence, and the driver lifecycle. Internally the orchestrator renders the [`Onboarding`](../components/onboarding.md) component with the builder.
 
 ## Features
 
@@ -67,12 +68,10 @@ type tOrFunc<T> = T | (() => T);
 
 ### Basic Phased Tour
 
+The builder is app-owned — each application defines its own tour. Construct it once (for example in `app.vue`) and pass it to the `FirstRunOrchestrator`, which owns _when_ to mount the tour:
+
 ```vue
 <script lang="ts" setup>
-import Onboarding from '@dcc-bs/common-ui.bs.js/components/Onboarding.vue';
-
-const onboarding = ref<InstanceType<typeof Onboarding>>();
-
 const builder = useOnboardingBuilder()
   .addPhases<'Phase1' | 'Phase2'>([
     {
@@ -118,16 +117,21 @@ const builder = useOnboardingBuilder()
       },
     },
   ]);
-
-onMounted(() => {
-  onboarding.value?.start();
-});
 </script>
 
 <template>
-  <Onboarding ref="onboarding" :builder="builder" />
+  <FirstRunOrchestrator
+    :onboarding-builder="builder"
+    :disclaimer="{
+      appName: 'Test App',
+      confirmationText:
+        'I have read and understood the instructions and confirm that I will use Test App exclusively in compliance with the stated guidelines.',
+    }"
+  />
 </template>
 ```
+
+The orchestrator sequences the flows by priority (Disclaimer → Changelogs → Onboarding). The tour auto-starts on mount once all higher-priority flows have completed. If the `onboardingBuilder` prop is omitted, the Onboarding flow is skipped entirely.
 
 ### Lazy Title and Description
 
@@ -197,16 +201,32 @@ The builder throws synchronously when used incorrectly:
 
 ## Consuming the Builder
 
-The builder is designed to be handed to the `Onboarding` component, which calls `buildDriver`, persists completion in a cookie, and manages the driver lifecycle:
+The builder is designed to be handed to the `FirstRunOrchestrator` component, which handles flow sequencing, cookie persistence, and the driver lifecycle:
 
 ```vue
 <template>
-  <Onboarding ref="onboarding" :builder="builder" />
+  <FirstRunOrchestrator :onboarding-builder="builder" />
 </template>
 ```
 
-For the full component behavior (cookie persistence, auto-start after the disclaimer modal, exposed `start`/`destroy` methods), see the [Onboarding component page](../components/onboarding.md).
+The orchestrator records tour completion in a `tour-completed` cookie when the user closes or finishes the tour. Use the `OnboardingRestartButton` component (included by default in the `NavigationBar`) to let users re-trigger the tour on demand.
+
+To disable the onboarding flow entirely, set `disableOnboarding` in your runtime config:
+
+```typescript
+export default defineNuxtConfig({
+  runtimeConfig: {
+    public: {
+      commonUi: {
+        disableOnboarding: true,
+      },
+    },
+  },
+});
+```
+
+For the full component behavior (orchestrator sequencing, cookie persistence, exposed methods), see the [Onboarding component page](../components/onboarding.md).
 
 ## i18n
 
-The driver instance built by this composable is preconfigured with translation keys under `common-ui.tour.*`. See the [Internationalization](../#internationalization) section for the available keys (`skip`, `next`, `prev`, `finish`, `progress`).
+The driver instance built by this composable is preconfigured with translation keys under `common-ui.tour.*`. See the [Internationalization](../#internationalization) section for the available keys (`skip`, `next`, `prev`, `finish`, `progress`, `restart`).

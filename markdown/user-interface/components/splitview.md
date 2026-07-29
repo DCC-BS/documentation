@@ -5,7 +5,7 @@ skillName: split-view
 skillDescription: "SplitView is a resizable two-pane layout with a draggable resizer, a/b slots, isHorizontal orientation toggle, and per-pane/resizer style props. Use when users need to drag-adjust pane proportions. NOT a fixed card (use split-container for a non-resizable header layout)."
 ---
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import UiContainer from '../../../components/UiContainer.vue';
 import { SplitView } from "@dcc-bs/common-ui.bs.js/components";
 
@@ -26,7 +26,7 @@ const horizontalResizerStyle =
     "h-[16px] cursor-row-resize relative pointer-events-auto flex items-center";
 const horizontalResizerInnerStyle = "bg-gray-100 h-[2px] w-full";
 
-const code = `<SplitView :is-horizontal="isHorizontal">
+const code = computed(() => `<SplitView :is-horizontal="${isHorizontal.value}">
     <template #a>
         <div class="p-4 h-full overflow-auto">
             <h3 class="text-lg font-semibold mb-2">Pane A</h3>
@@ -39,7 +39,7 @@ const code = `<SplitView :is-horizontal="isHorizontal">
             <p>This is Pane B. The split view supports both horizontal and vertical orientations.</p>
         </div>
     </template>
-</SplitView>`;
+</SplitView>`);
 </script>
 
 # SplitView

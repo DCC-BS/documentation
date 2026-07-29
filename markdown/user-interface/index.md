@@ -1,6 +1,6 @@
 ---
 skillName: dcc-ui
-skillDescription: "Nuxt module of the Kanton Basel-Stadt design system for DCC Basel-Stadt apps: NavigationBar, DataBsFooter, SplitContainer/SplitView, Disclaimer/DisclaimerButton/DisclaimerPage, Changelogs, OnlineStatus, UndoRedoButtons, Onboarding components, the useUserFeedback and useOnboardingBuilder composables, and the BS color palette. Use when building a DCC Basel-Stadt/Basel-Stadt Vue/nuxt frontend or wiring up the common-ui.bs.js module."
+skillDescription: "Nuxt module of the Kanton Basel-Stadt design system for DCC Basel-Stadt apps: NavigationBar, DataBsFooter, SplitContainer/SplitView, FirstRunOrchestrator, Disclaimer/DisclaimerButton/DisclaimerPage, Changelogs/ChangelogsButton, Onboarding/OnboardingRestartButton, OnlineStatus, UndoRedoButtons, the useUserFeedback and useOnboardingBuilder composables, and the BS color palette. Use when building a DCC Basel-Stadt/Basel-Stadt Vue/nuxt frontend or wiring up the common-ui.bs.js module."
 ---
 # User Interface Overview
 
@@ -52,12 +52,88 @@ export default defineNuxtConfig({
 @import "@dcc-bs/common-ui.bs.js";
 ```
 
+4. Add the `FirstRunOrchestrator` to your `app.vue` to enable the first-run flow (Disclaimer → Changelogs → Onboarding):
+
+```vue
+<script lang="ts" setup>
+const builder = useOnboardingBuilder()
+    .addPhases<"Phase1" | "Phase2">([
+        {
+            name: "Phase1",
+            onEnter: async () => { /* ... */ },
+            onExit: async () => { /* ... */ },
+        },
+        {
+            name: "Phase2",
+            onEnter: async () => { /* ... */ },
+            onExit: async () => { /* ... */ },
+        },
+    ])
+    .switchPhase("Phase1")
+    .addSteps([
+        { popover: { title: "Step 1", description: "This is step 1" } },
+        { popover: { title: "Step 2", description: "This is step 2" } },
+    ])
+    .switchPhase("Phase2")
+    .addSteps([
+        { popover: { title: "Step 3", description: "This is step 3" } },
+    ]);
+</script>
+
+<template>
+    <UApp>
+        <FirstRunOrchestrator
+            :onboarding-builder="builder"
+            :disclaimer="{
+                appName: 'My App',
+                confirmationText: 'I have read and understood...',
+            }"
+        />
+        <NuxtPage />
+    </UApp>
+</template>
+```
+
 That's it! You can now use common-ui.bs.js in your Nuxt app ✨
+
+## FirstRunOrchestrator
+
+The `FirstRunOrchestrator` component coordinates the three first-run flows — **Disclaimer**, **Changelogs**, and **Onboarding** — ensuring they run in priority order without overlapping. It manages all completion state via cookies, so individual flow components no longer handle persistence themselves.
+
+### How It Works
+
+1. **Disclaimer** (highest priority): Blocks until the user accepts the terms.
+2. **Changelogs**: After the disclaimer is accepted, if there are new changelog entries since the user's last visit, the changelog modal is shown.
+3. **Onboarding** (lowest priority): After changelogs are dismissed, the guided tour starts (if a builder is provided).
+
+Each flow emits a `finished` event when complete. The orchestrator records the completion cookie, which reactively advances to the next pending flow.
+
+### Props
+
+| Prop                | Type                            | Required | Description                                                                 |
+| ------------------- | ------------------------------- | -------- | --------------------------------------------------------------------------- |
+| `onboardingBuilder` | `OnboardingStepBuilder<Phases>` | No       | The onboarding tour builder. If omitted, the Onboarding flow is skipped.    |
+| `disclaimer`        | `Partial<DisclaimerConfig>`     | No       | Overrides for the runtime config disclaimer defaults (`appName`, `version`, `contentHtml`, `postfixHtml`, `confirmationText`). |
+
+### Completion Cookies
+
+The orchestrator owns all cookie writes. Individual flow components (Disclaimer, Changelogs, Onboarding) only emit `finished` events and do not write cookies themselves.
+
+| Cookie                  | Type      | Default | Purpose                                                             |
+| ----------------------- | --------- | ------- | ------------------------------------------------------------------- |
+| `disclaimer-accepted`   | `string`  | `""`    | Set to the disclaimer version when the user accepts.                |
+| `changelogs-last-read`  | `string`  | `""`    | Set to the latest release version when the user dismisses changelogs. |
+| `tour-completed`        | `boolean` | `false` | Set to `true` when the user completes or skips the onboarding tour. |
+
+::: tip
+The `ChangelogsButton` and `DisclaimerButton` components can reset these cookies to re-trigger their respective flows on demand.
+:::
 
 ## Module Features
 
 When using this Nuxt module:
 - All components are automatically available globally without imports
+- First-run orchestration (Disclaimer → Changelogs → Onboarding) via the `FirstRunOrchestrator`
 - Internationalization (i18n) integration is automatically configured
 - Design system assets are automatically included
 - Kanton Basel-Stadt color palette is integrated with Tailwind CSS
@@ -73,6 +149,11 @@ export default defineNuxtConfig({
       commonUi: {
         disableChangelog: false,
         disableDisclaimer: false,
+        disableOnboarding: false,
+        disclaimer: {
+          appName: "",
+          version: "1.0.0",
+        },
       },
     },
   },
@@ -83,9 +164,12 @@ export default defineNuxtConfig({
 | -------------------- | --------- | ------- | ------------------------------------------------------------------------------------ |
 | `disableChangelog`   | `boolean` | `false` | When set to `true`, the `Changelogs` component will not fetch or display changelogs. |
 | `disableDisclaimer`  | `boolean` | `false` | When set to `true`, the `Disclaimer` component modal will not be displayed.          |
+| `disableOnboarding`  | `boolean` | `false` | When set to `true`, the `Onboarding` component will not start the guided tour.       |
+| `disclaimer.appName` | `string`  | `""`    | Default application name used in the disclaimer flow.                                |
+| `disclaimer.version` | `string`  | `"1.0.0"` | Disclaimer version. Changing this forces users to re-accept the disclaimer.        |
 
 ::: tip
-These options can also be set via environment variables `NUXT_PUBLIC_COMMON_UI_DISABLE_CHANGELOG` and `NUXT_PUBLIC_COMMON_UI_DISABLE_DISCLAIMER`.
+These options can also be set via environment variables such as `NUXT_PUBLIC_COMMON_UI_DISABLE_CHANGELOG`, `NUXT_PUBLIC_COMMON_UI_DISABLE_DISCLAIMER`, and `NUXT_PUBLIC_COMMON_UI_DISABLE_ONBOARDING`.
 :::
 
 ## Internationalization
@@ -118,6 +202,7 @@ You can customize the following translation keys in your application:
             "next": "Next",
             "prev": "Back",
             "finish": "Finish",
+            "restart": "Restart tour",
             "progress": "Step {{current}} of {{total}}"
         }
     },

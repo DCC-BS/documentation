@@ -92,6 +92,10 @@ export default withMermaid({
                                 link: "/user-interface/components/changelogs.md",
                             },
                             {
+                                text: "Changelogs Button",
+                                link: "/user-interface/components/changelogsbutton.md",
+                            },
+                            {
                                 text: "Data Bs Footer",
                                 link: "/user-interface/components/databsfooter.md",
                             },
@@ -108,12 +112,20 @@ export default withMermaid({
                                 link: "/user-interface/components/disclaimerpage.md",
                             },
                             {
+                                text: "First Run Orchestrator",
+                                link: "/user-interface/components/first-run-orchestrator.md",
+                            },
+                            {
                                 text: "Navigation Bar",
                                 link: "/user-interface/components/navigationbar.md",
                             },
                             {
                                 text: "Onboarding",
                                 link: "/user-interface/components/onboarding.md",
+                            },
+                            {
+                                text: "Onboarding Restart Button",
+                                link: "/user-interface/components/onboardingrestartbutton.md",
                             },
                             {
                                 text: "Online Status",
