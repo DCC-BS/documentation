@@ -3,9 +3,9 @@ import {
     Disclaimer,
     DisclaimerButton,
 } from "@dcc-bs/common-ui.bs.js/components";
-import { useLocalStorage } from "@vueuse/core";
-import { onMounted } from "vue";
+import { computed, onMounted, ref } from "vue";
 import UiContainer from "./UiContainer.vue";
+import { useCookie } from "../.vitepress/shims/nuxt-imports";
 
 const props = defineProps<{
     confirmationText: string;
@@ -14,9 +14,10 @@ const props = defineProps<{
     postfixHtml?: string;
 }>();
 
-const disclaimerAcceptedVersion = useLocalStorage<string | undefined>(
-    "disclaimerAccepted",
-    "1.0.0",
+const isDisclaimerOpen = ref(false);
+
+const disclaimerAcceptedVersion = useCookie<string | undefined>(
+    "disclaimer-accepted"
 );
 
 onMounted(() => {
@@ -28,7 +29,7 @@ function showDisclaimer() {
 }
 
 const scriptClose = "</" + "script>";
-const code = `<script setup lang="ts">
+const code = computed(() => `<script setup lang="ts">
 const content = \`${props.contentHtml}\`;
 const postfix = \`${props.postfixHtml}\`;
 const confirmationText = "${props.confirmationText}";
@@ -44,16 +45,18 @@ ${scriptClose}
     />
 
     <DisclaimerButton variant="ghost" />
-</template>`;
+</template>`);
 </script>
 
 <template>
     <UiContainer :code="code">
         <template #element>
-            <Disclaimer :confirmation-text="props.confirmationText" :app-name="props.appName"
-                :content-html="props.contentHtml" :postfix-html="props.postfixHtml"></Disclaimer>
+            <Disclaimer v-if="isDisclaimerOpen" :confirmation-text="props.confirmationText" :app-name="props.appName"
+                :content-html="props.contentHtml" :postfix-html="props.postfixHtml" @finished="isDisclaimerOpen = false"></Disclaimer>
 
-            <DisclaimerButton variant="ghost" />
+            <button @click="isDisclaimerOpen = true">
+                Show Disclaimer
+            </button>
         </template>
     </UiContainer>
 </template>

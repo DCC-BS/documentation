@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { codeToHtml } from "shiki";
-import { nextTick, onMounted, ref } from "vue";
+import { nextTick, onMounted, ref, watch } from "vue";
 
 const props = defineProps<{
     code?: string;
@@ -16,6 +16,9 @@ onMounted(async () => {
         // Capture the HTML content from the element slot
         capturedCode.value = formatHTML(elementRef.value.innerHTML);
     }
+});
+
+watch(() => props.code, async () => {
     displayCode.value = await codeToHtml(props.code || capturedCode.value, {
         lang: "vue",
         themes: {
@@ -24,7 +27,7 @@ onMounted(async () => {
         },
         defaultColor: false,
     });
-});
+}, { immediate: true});
 
 function formatHTML(html: string): string {
     // Remove leading/trailing whitespace

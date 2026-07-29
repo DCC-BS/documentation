@@ -1,8 +1,6 @@
 ---
 outline: deep
 ---
-```
-
 # Onboarding Restart Button
 
 The `OnboardingRestartButton` component provides a button that allows users to replay the onboarding tour on demand. It resets the tour completion state so the [`FirstRunOrchestrator`](./onboarding.md) re-arms the onboarding flow — without requiring a page reload.

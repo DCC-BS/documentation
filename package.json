@@ -23,7 +23,7 @@
         "package-skills": "bun run scripts/package-skills.ts"
     },
     "dependencies": {
-        "@dcc-bs/common-ui.bs.js": "^1.2.0",
+        "@dcc-bs/common-ui.bs.js": "^2.0.0",
         "@nuxt/ui": "^4.2.1",
         "@tailwindcss/vite": "^4.1.18",
         "@vueuse/core": "^14.1.0",

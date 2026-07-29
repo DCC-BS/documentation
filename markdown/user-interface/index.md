@@ -1,5 +1,4 @@
 ---
----
 skillName: dcc-ui
 skillDescription: "Nuxt module of the Kanton Basel-Stadt design system for DCC Basel-Stadt apps: NavigationBar, DataBsFooter, SplitContainer/SplitView, FirstRunOrchestrator, Disclaimer/DisclaimerButton/DisclaimerPage, Changelogs/ChangelogsButton, Onboarding/OnboardingRestartButton, OnlineStatus, UndoRedoButtons, the useUserFeedback and useOnboardingBuilder composables, and the BS color palette. Use when building a DCC Basel-Stadt/Basel-Stadt Vue/nuxt frontend or wiring up the common-ui.bs.js module."
 ---
