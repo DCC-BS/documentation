@@ -11,10 +11,13 @@ Transcribo is a web application for transcribing and editing audio and video rec
 
 - **Audio/Video Transcription** upload media files and generate accurate transcriptions
 - **Speaker Diarization** identify and separate different speakers in a recording
+- **AI Speaker Inference** identify speaker names from context
 - **Timeline Editor** visual timeline with speaker labels for precise segment editing
 - **Smart Editor** learns from user edits to improve future transcriptions
 - **Real-time Editing** edit transcription text with live preview and validation
 - **AI Summarization** generate a summary of the transcribed text
+- **AI Title Inference** identify speaker names from context
+- **AI Keyword Correction** keywords are identified and corrected as a post-processing step
 - **Export Options** export as plain text or SRT subtitle files
 - **Audio Recording** record audio directly in the app
 - **Undo/Redo** full command-based undo/redo support
