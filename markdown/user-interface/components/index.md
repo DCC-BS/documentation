@@ -10,7 +10,7 @@ skillDescription: "Catalog of all common-ui.bs.js Vue components (SplitView, Spl
 ## [SplitView](splitview.md)
 A resizable split view layout component supporting both horizontal and vertical orientations with customizable panes.
 
-## [FirstRunOrchestrator](firstrunorchestrator.md)
+## [FirstRunOrchestrator](first-run-orchestrator.md)
 Orchestrates first-run experience flows (Disclaimer, Changelogs, Onboarding) with priority-based ordering, cookie-based completion tracking, and automatic mounting of the next pending flow.
 
 ## [DisclaimerLlm](disclaimer.md)
