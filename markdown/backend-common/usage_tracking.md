@@ -17,6 +17,28 @@ The module provides:
 - **User pseudonymization**: One-way HMAC-based hashing of user IDs for privacy
 - **Structured logging**: Events logged in a format compatible with OpenSearch
 - **Flexible event data**: Support for custom key-value pairs in event logs
+- **Always emitted**: Events go through the pinned `usage` logger, so `LOG_LEVEL` never silences them
+
+## Where the Events Go
+
+`UsageTrackingService` writes to the `usage` logger (see [Logger — Usage Events](/backend-common/logger#usage-events)), not to your module logger. That logger is pinned to `INFO` in `init_logger()`, so business events survive even `LOG_LEVEL=WARNING`.
+
+Fields are flat, snake_case, top-level keys, so OpenSearch can aggregate on them without nested paths. Filter on `logger: "usage"` and `event: "app_event"` to isolate them.
+
+Example production output:
+
+```json
+{
+  "timestamp": "2025-07-14T09:12:03.481920Z",
+  "logger": "usage",
+  "level": "info",
+  "event": "app_event",
+  "action": "document_processor.extract_text",
+  "pseudonym_id": "9f2c1b...",
+  "document_type": "pdf",
+  "page_count": 10
+}
+```
 
 ## Installation
 
@@ -59,6 +81,8 @@ UsageTrackingService(hmac_secret: str)
 | Parameter | Type | Description |
 |-----------|------|-------------|
 | `hmac_secret` | `str` | Secret key used for HMAC-based pseudonymization of user IDs |
+
+Raises `ValueError` if `hmac_secret` is empty or the literal string `"none"` — an unset secret would make every pseudonym trivially reproducible, so the service refuses to start instead.
 
 **Example:**
 
@@ -117,7 +141,20 @@ log_event(
 | `module` | `str` | The module name where the event occurred |
 | `func` | `str` | The function name where the event occurred |
 | `user_id` | `str \| None` | The user ID (will be pseudonymized automatically) |
-| `**kwargs` | `str \| int \| float \| bool \| None` | Additional event data as key-value pairs |
+| `**kwargs` | `str \| int \| float \| bool \| None` | Additional event data as flat top-level key-value pairs |
+
+Emits an `app_event` record with:
+
+| Field | Value |
+|-------|-------|
+| `event` | `"app_event"` |
+| `action` | `"{module}.{func}"` |
+| `pseudonym_id` | HMAC-SHA256 of the user ID |
+| *(your kwargs)* | Merged in as top-level keys |
+
+::: warning Scalars only
+Keep `**kwargs` to `str`, `int`, `float`, `bool` or `None`. Nested dicts and lists defeat OpenSearch aggregation, which is the point of the flat shape. Never pass raw user content or unhashed user identifiers.
+:::
 
 **Example:**
 
@@ -143,7 +180,22 @@ The HMAC secret should be:
 - **Consistent**: Same secret across all application instances for consistent pseudonymization
 - **Stored securely**: Use environment variables or secret management systems
 
+The built-in [`AppConfig`](/backend-common/config) already exposes it as `hmac_secret` (from `HMAC_SECRET`), so wire the service from config rather than reading the environment again:
 
+```python
+config = AppConfig.from_env()
+usage_tracking = UsageTrackingService(hmac_secret=config.hmac_secret)
+```
+
+::: warning Rotating the secret
+Changing the secret changes every pseudonym, breaking continuity of per-user analysis across the rotation point.
+:::
+
+## Related Documentation
+
+- [Logger](/backend-common/logger#usage-events) — the pinned `usage` logger these events use
+- [Configuration](/backend-common/config) — where `hmac_secret` comes from
+- [LLM Agent](/backend-common/llm_agent#usage-logging) — the other producer on the `usage` logger
 
 ::: tip Source Code
 The full implementation is available on GitHub: [dcc_backend_common/usage_tracking/usage_tracking.py](https://github.com/DCC-BS/backend-common/blob/main/src/dcc_backend_common/usage_tracking/usage_tracking.py)

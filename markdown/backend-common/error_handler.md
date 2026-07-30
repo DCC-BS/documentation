@@ -22,10 +22,10 @@ The module provides:
 
 ## Installation
 
-The error handler module is part of the `dcc-backend-common` package:
+The error handler module is part of the `dcc-backend-common` package and needs the `fastapi` extra:
 
 ```bash
-uv add dcc-backend-common
+uv add "dcc-backend-common[fastapi]"
 ```
 
 ## Quick Start
@@ -169,8 +169,12 @@ inject_api_error_handler(app)
 ```
 
 The handler:
-- Catches `ApiErrorException` and returns its structured response
-- Catches other exceptions and returns a 500 response with `UNEXPECTED_ERROR`
+- Is registered **only** for `ApiErrorException` and returns its structured response
+- Falls back to a 500 response with `UNEXPECTED_ERROR` and the exception string as `debugMessage` for anything else it is handed
+
+::: warning Other exceptions
+`inject_api_error_handler()` does not register a catch-all. Exceptions that are not `ApiErrorException` still go through FastAPI's default handling — convert them at the boundary with `construct_api_error_exception()`, or register `api_error_handler` for additional exception types yourself. Unhandled exceptions are logged by the [logging middleware](/backend-common/logging_middleware).
+:::
 
 ## API Response Format
 
@@ -193,6 +197,7 @@ All errors are returned in a consistent JSON format:
 
 - [Configuration](/backend-common/config) - Manage application configuration
 - [Logger](/backend-common/logger) - Structured logging with structlog
+- [Logging Middleware](/backend-common/logging_middleware) - Logs failed requests and their `request_id`
 - [Python Coding Standards](/coding/python) - General Python best practices
 
 ## API Reference

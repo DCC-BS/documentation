@@ -190,6 +190,10 @@ export default withMermaid({
                         link: "/backend-common/logger.md",
                     },
                     {
+                        text: "Logging Middleware",
+                        link: "/backend-common/logging_middleware.md",
+                    },
+                    {
                         text: "Error Handler",
                         link: "/backend-common/error_handler.md",
                     },

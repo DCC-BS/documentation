@@ -18,6 +18,7 @@ The module provides:
 - **`LlmConfig`**: A base configuration class for LLM API settings
 - **`get_env_or_throw()`**: Helper to retrieve required environment variables
 - **`log_secret()`**: Helper to safely log sensitive values
+- **`AppConfigError`**: The `ValueError` subclass raised when a required variable is missing
 - **`.env.example` Generator**: CLI tool to automatically generate environment variable templates
 - **`.env` Sync Tool**: CLI tool to synchronize local `.env` with `.env.example`
 
@@ -82,17 +83,39 @@ print(config.llm_url)
 
 The module also provides `LlmConfig`, a base class specifically for LLM-related configuration. It is designed to be extended or used to type-check configuration objects passed to LLM agents.
 
+::: warning Import path
+`LlmConfig` is **not** re-exported from `dcc_backend_common.config`. Import it from the module directly:
+
+```python
+from dcc_backend_common.config.app_config import LlmConfig
+```
+:::
+
 ::: tip
 `LlmConfig` does not implement `from_env` by default. You should inherit from it to define how your specific environment variables are mapped, or instantiate it manually.
 :::
 
 ### Available Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `llm_model` | `str` | The model identifier for the LLM API (e.g., `gpt-4o`) |
-| `llm_url` | `str` | The URL for the LLM API endpoint |
-| `llm_api_key` | `str` | The API key for authenticating with the LLM provider |
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `llm_model` | `str` | Required | The model identifier for the LLM API (e.g., `gemma-3-27b-it`) |
+| `llm_url` | `str` | Required | The URL for the LLM API endpoint |
+| `llm_api_key` | `str` | Required | The API key for authenticating with the LLM provider |
+| `llm_timeout` | `int` | `300` | Timeout for LLM API requests in seconds (`>= 0`) |
+| `llm_max_retries` | `int` | `2` | Maximum retries for LLM API requests (`>= 0`); `N` retries means `N + 1` total attempts |
+
+```python
+from dcc_backend_common.config.app_config import LlmConfig
+
+llm = LlmConfig(
+    llm_model="gemma-3-27b-it",
+    llm_url="http://vllm:8000/v1",
+    llm_api_key="your-key",
+)
+```
+
+`llm_timeout` and `llm_max_retries` are consumed by [`BaseAgent`](/backend-common/llm_agent) when it builds its retrying HTTP client.
 
 ## Creating a Custom AppConfig
 
@@ -179,13 +202,31 @@ api_key = get_env_or_throw("OPENAI_API_KEY")
 
 ### log_secret
 
-Use this to safely log sensitive values. Returns `"****"` for non-empty secrets and `"None"` for empty/null values:
+Use this to safely log sensitive values. It keeps the **first two characters** and masks the rest with `*`, which is enough to tell two keys apart in a log without leaking either:
 
 ```python
 from dcc_backend_common.config import log_secret
 
-# Safe to log - will print "****" instead of the actual key
-print(f"API Key: {log_secret(config.openai_api_key)}")
+print(f"API Key: {log_secret('sk-abc123')}")  # "sk*******"
+```
+
+| Input | Output |
+|-------|--------|
+| `None` or `""` | `"None"` |
+| Length `<= 2` | Returned unchanged |
+| Longer | First 2 characters + `*` for every remaining character |
+
+### AppConfigError
+
+Raised by `get_env_or_throw()` when a required variable is unset. It subclasses `ValueError` and its message names the offending variable:
+
+```python
+from dcc_backend_common.config import AppConfigError, get_env_or_throw
+
+try:
+    api_key = get_env_or_throw("OPENAI_API_KEY")
+except AppConfigError as e:
+    print(e)  # Configuration variable 'OPENAI_API_KEY' is not set or invalid.
 ```
 
 ## Generating .env.example

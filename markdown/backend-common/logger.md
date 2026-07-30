@@ -3,7 +3,7 @@ outline: deep
 editLink: true
 skillParent: dcc-backend
 skillName: backend-logger
-skillDescription: "dcc_backend_common.logger module for structured logging built on structlog. Use when calling init_logger() at startup and get_logger(__name__), choosing JSON (IS_PROD) vs colored console output, or tuning FocusedTracebackFormatter / DEV_TRACEBACK_STYLE tracebacks."
+skillDescription: "dcc_backend_common.logger module for structured logging built on structlog. Use when calling init_logger() at startup and get_logger(__name__), emitting always-on usage events with get_usage_logger(), choosing JSON (IS_PROD) vs colored console output, or tuning FocusedTracebackFormatter / DEV_TRACEBACK_STYLE tracebacks."
 ---
 # Structured Logging
 
@@ -19,10 +19,29 @@ The module provides:
 
 - **`init_logger()`**: Initialize the logging system (call once at startup)
 - **`get_logger()`**: Get a structured logger instance for any module
+- **`get_usage_logger()`**: Get the pinned `usage` logger for usage/audit events
+- **`USAGE_LOGGER_NAME`**: The name of that logger (`"usage"`) — use it to filter in OpenSearch
 - **`FocusedTracebackFormatter`**: Advanced traceback rendering for development that highlights user code
 - **`DevTracebackStyle`**: Configuration options for traceback styles in development mode
-- **Automatic context**: Request IDs, timestamps, module names, and line numbers
+- **Automatic context**: Timestamps, module names, function names, and line numbers (plus `request_id` when the [logging middleware](/backend-common/logging_middleware) is installed)
 - **Environment-aware rendering**: JSON in production (fluentbit compatible), colored console in development
+
+### One Pipeline for Everything
+
+`init_logger()` installs a **single** handler on the root logger. structlog events *and* stdlib records (uvicorn, third-party libraries, Python warnings) are rendered by the same pipeline, so every line has the same shape:
+
+- Handlers attached by uvicorn / `fastapi-cli` are cleared so records flow through the root handler.
+- `uvicorn.access` is disabled entirely (`propagate = False`) — per-request 200 lines are noise for fluentbit/OpenSearch, and the [logging middleware](/backend-common/logging_middleware) reports the failures that matter.
+- Chatty libraries (`httpx`, `httpcore`, `openai`, `urllib3`, `aiohttp`) are capped at `WARNING`.
+- `logging.captureWarnings(True)` routes `DeprecationWarning` & friends through the pipeline instead of raw stderr.
+
+::: warning Serving
+Run with plain `uvicorn`, **not** `fastapi run`. The `fastapi run` Rich banner and handlers bypass the JSON pipeline:
+
+```bash
+uvicorn my_app.app:app --host 0.0.0.0 --port 8090 --no-access-log
+```
+:::
 
 ## Installation
 
@@ -63,7 +82,7 @@ The logger is configured via environment variables:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `LOG_LEVEL` | `INFO` | Logging level (`DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`) |
+| `LOG_LEVEL` | `INFO` | Logging level for **application diagnostics** (`DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`). Does not affect usage events |
 | `IS_PROD` | - | Set to `true` for JSON output (fluentbit compatible) |
 | `DEV_TRACEBACK_STYLE` | `focused` | Traceback style in development: `focused` (user code locals) or `rich` (all locals) |
 | `LOGGER_USER_CODE_PATHS` | `dcc_backend_common, src/, app/, tests/` | Comma-separated paths to identify user code for detailed tracebacks |
@@ -74,7 +93,35 @@ The logger is configured via environment variables:
   - **Traceback Styles**:
     - **`focused` (default)**: Shows the full Rich traceback but only displays local variables for frames identified as "user code" (based on `LOGGER_USER_CODE_PATHS`). This reduces noise from library internals.
     - **`rich`**: Shows the full Rich traceback with local variables displayed for **all** frames, including third-party libraries. This is more verbose but useful for deep debugging.
-- **Production** (`IS_PROD=true`): JSON output for log aggregation tools like fluentbit. Tracebacks are handled structurally within the JSON output.
+- **Production** (`IS_PROD=true`): JSON output for log aggregation tools like fluentbit. Tracebacks are rendered into a string field by `format_exc_info`.
+
+::: tip Recommended levels
+`LOG_LEVEL=debug` on test stages, `LOG_LEVEL=info` in production.
+:::
+
+## Usage Events
+
+Usage/audit events go through a separate, **pinned** logger named `usage`. `init_logger()` sets that logger to `INFO` explicitly, so its events survive any `LOG_LEVEL` — even `LOG_LEVEL=WARNING`.
+
+```python
+from dcc_backend_common.logger import get_usage_logger
+
+usage_logger = get_usage_logger()
+usage_logger.info("app_event", action="translator.translate", pseudonym_id=..., chars=1200)
+```
+
+Two producers already use it:
+
+| Producer | Event | Emitted by |
+|----------|-------|------------|
+| `UsageTrackingService.log_event()` | `app_event` | [Usage Tracking](/backend-common/usage_tracking) |
+| `BaseAgent` (every LLM call) | `llm_call` | [LLM Agent](/backend-common/llm_agent) |
+
+In OpenSearch, filter on `logger: "usage"` to separate business events from diagnostics. The constant `USAGE_LOGGER_NAME` holds that name if you need it in code.
+
+::: warning Keep diagnostics out
+Do **not** route ordinary application logging through the usage logger — it is never silenced by `LOG_LEVEL`.
+:::
 
 ## Usage
 
@@ -112,20 +159,22 @@ The logger automatically adds context to every log entry:
 
 | Field | Description |
 |-------|-------------|
-| `timestamp` | ISO-8601 formatted timestamp |
-| `request_id` | Unique UUID for request tracing |
+| `timestamp` | ISO-8601 formatted timestamp (UTC) |
+| `logger` | The logger name passed to `get_logger()` |
 | `module` | The module name where the log was called |
 | `func_name` | The function name |
 | `lineno` | The line number |
 | `level` | The log level |
+| `request_id` | Unique UUID for request tracing — only present when the [logging middleware](/backend-common/logging_middleware) is installed |
 
 Example JSON output in production:
 
 ```json
 {
-  "timestamp": "2024-01-15T10:30:45+0000",
+  "timestamp": "2024-01-15T10:30:45.123456Z",
+  "logger": "myapp.services.translator",
   "request_id": "550e8400-e29b-41d4-a716-446655440000",
-  "module": "myapp.services.translator",
+  "module": "translator",
   "func_name": "translate",
   "lineno": 42,
   "level": "info",
@@ -138,39 +187,15 @@ Example JSON output in production:
 
 ### Request Logging Middleware
 
-Create middleware to log all incoming requests:
+Do **not** hand-roll request logging — the package ships a middleware that binds a `request_id` to every log line emitted while handling a request:
 
 ```python
-from fastapi import Request
-from starlette.middleware.base import BaseHTTPMiddleware
-import time
+from dcc_backend_common.fastapi_logging_middleware import add_logging_middleware
 
-from dcc_backend_common.logger import get_logger
-
-logger = get_logger(__name__)
-
-
-class RequestLoggingMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request: Request, call_next):
-        start_time = time.perf_counter()
-        
-        response = await call_next(request)
-        
-        duration_ms = (time.perf_counter() - start_time) * 1000
-        logger.info(
-            "Request completed",
-            method=request.method,
-            path=request.url.path,
-            status_code=response.status_code,
-            duration_ms=round(duration_ms, 2),
-        )
-        
-        return response
-
-
-# Register in app.py
-app.add_middleware(RequestLoggingMiddleware)
+add_logging_middleware(app)
 ```
+
+See [Logging Middleware](/backend-common/logging_middleware) for details.
 
 ## API Reference
 
@@ -223,6 +248,24 @@ logger = get_logger()  # Or get anonymous logger
 
 **Returns:**
 - `BoundLogger`: A structlog bound logger instance
+
+### get_usage_logger()
+
+Get the logger for usage/audit events. Events logged here are always emitted (INFO and up), regardless of `LOG_LEVEL`.
+
+```python
+from dcc_backend_common.logger import get_usage_logger
+
+usage_logger = get_usage_logger()
+usage_logger.info("llm_call", input_tokens=812, output_tokens=134)
+```
+
+**Returns:**
+- `BoundLogger`: A structlog bound logger named `usage`
+
+### USAGE_LOGGER_NAME
+
+Module-level constant holding the usage logger's name (`"usage"`). Use it when filtering log records or configuring downstream tooling.
 
 ::: tip Source Code
 The full implementation is available on GitHub: [dcc_backend_common/logger/logger.py](https://github.com/DCC-BS/backend-common/blob/main/src/dcc_backend_common/logger/logger.py)

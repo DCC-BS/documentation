@@ -3,7 +3,7 @@ outline: deep
 editLink: true
 skillParent: dcc-backend
 skillName: backend-probes
-skillDescription: "dcc_backend_common.fastapi_health_probes module for Kubernetes health checks. Use when mounting health_probe_router(service_dependencies) to expose /health/liveness, /health/readiness, and /health/startup endpoints with external dependency checks."
+skillDescription: "dcc_backend_common.fastapi_health_probes module for Kubernetes health checks. Use when mounting health_probe_router(service_dependencies) to expose /health/liveness, /health/readiness, and /health/startup endpoints with external dependency checks and deduplicated failure logging (Error Signature, First Occurrence, Recovery Summary)."
 ---
 # Health Probes
 
@@ -18,13 +18,14 @@ The module provides:
 - **Startup Probe**: Checks if the application has finished initialization
 - **Automatic log suppression**: Health endpoints excluded from access logs
 - **Dependency health checks**: Configurable external service monitoring
+- **Deduplicated failure logging**: A failing dependency is logged once per failure mode, not once per probe
 
 ## Installation
 
-The health probes module is part of the `dcc-backend-common` package:
+The health probes module is part of the `dcc-backend-common` package and needs the `fastapi` extra (it pulls in `fastapi` and `aiohttp`):
 
 ```bash
-uv add dcc-backend-common
+uv add "dcc-backend-common[fastapi]"
 ```
 
 ## Quick Start
@@ -102,12 +103,14 @@ app.include_router(health_probe_router(service_dependencies))
 {
   "status": "unhealthy",
   "checks": {
-    "database": "error: Connection refused",
-    "external-api": "unhealthy (status: 503)"
+    "database": "error: Cannot connect to host postgres:5432",
+    "external-api": "status 503: upstream overloaded"
   },
-  "error": "Service unavailable"
+  "error": "database: error: Cannot connect to host postgres:5432; external-api: status 503: upstream overloaded"
 }
 ```
+
+Every dependency is probed on every readiness call — there is no short-circuit on the first failure, so each dependency's state advances and `checks` always covers all of them. Each entry carries the failure detail: `status {code}[: body]` for a non-200 response, or `error: {message}` for a transport error.
 
 ### Startup Probe
 
@@ -135,7 +138,7 @@ app.include_router(health_probe_router(service_dependencies))
 Define the external services your application depends on:
 
 ```python
-from dcc_backend_common.fastapi_health_probes import ServiceDependency
+from dcc_backend_common.fastapi_health_probes.router import ServiceDependency
 
 service_dependencies: list[ServiceDependency] = [
     {
@@ -157,6 +160,10 @@ service_dependencies: list[ServiceDependency] = [
 | `health_check_url` | `str` | URL to check for service health |
 | `api_key` | `str \| None` | Optional API key sent as Bearer token |
 
+::: warning Import path
+Only `health_probe_router` is re-exported from the package. The `ServiceDependency` TypedDict must be imported from `dcc_backend_common.fastapi_health_probes.router`. It is a plain `TypedDict`, so a bare `dict` literal works too.
+:::
+
 ### Timeouts
 
 The readiness probe uses a **5 second timeout** for each dependency check. Dependencies that don't respond within this time are marked as unhealthy.
@@ -165,7 +172,49 @@ The readiness probe uses a **5 second timeout** for each dependency check. Depen
 
 ### Automatic Logging Suppression
 
-Health check endpoints are automatically excluded from uvicorn access logs to reduce noise. This prevents log spam from Kubernetes probes hitting your endpoints every few seconds.
+Health check endpoints are automatically excluded from uvicorn access logs to reduce noise. This prevents log spam from Kubernetes probes hitting your endpoints every few seconds. The [logging middleware](/backend-common/logging_middleware) skips `/health/*` for the same reason.
+
+### Deduplicated Failure Logging
+
+Kubernetes calls the readiness probe every few seconds. Logging every failed probe would bury an outage in thousands of identical lines, so the router runs a small per-dependency state machine and logs only the transitions.
+
+The key concept is the **Error Signature** — a stable key that tells one failure apart from another:
+
+| Failure | Signature |
+|---------|-----------|
+| Non-200 HTTP response | `http:{status}` (e.g. `http:503`) |
+| Transport/connection error | The exception class name (e.g. `ClientConnectorError`) |
+
+The volatile message text is deliberately **excluded** from the signature, so a timeout whose duration changes on every call does not defeat suppression.
+
+State transitions:
+
+| Transition | Log | Level | Event |
+|------------|-----|-------|-------|
+| healthy → failing | **First Occurrence** — full detail | `ERROR` | `health check failed` |
+| failing → same signature | **Suppressed Probe** — silent | — | — |
+| failing → different signature | fresh First Occurrence for the new signature | `ERROR` | `health check failed` |
+| failing → healthy | **Recovery Summary** | `INFO` | `health check recovered` |
+
+First Occurrence fields: `service`, `signature`, `detail`.
+
+Recovery Summary fields: `service`, `previous_signature`, `outage_duration_s`, `suppressed_probe_count`, `last_error` — so an operator sees how long the **Outage** lasted, how many probes were suppressed, and what the last error was.
+
+```json
+{
+  "event": "health check recovered",
+  "level": "info",
+  "service": "llm",
+  "previous_signature": "ClientConnectorError",
+  "outage_duration_s": 42.317,
+  "suppressed_probe_count": 8,
+  "last_error": "error: Cannot connect to host llm-service:8080"
+}
+```
+
+::: tip Per-process state
+Dedup state lives in memory for the lifetime of the process, so each pod deduplicates its own probes. A pod restart resets the state and the next failure is logged as a fresh First Occurrence.
+:::
 
 ### Authentication Support
 

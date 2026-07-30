@@ -3,7 +3,7 @@ outline: deep
 editLink: true
 skillParent: dcc-backend
 skillName: backend-llm-agent
-skillDescription: "dcc_backend_common.llm_agent module: a Pydantic AI agent framework (pydantic_ai extra). Use when subclassing BaseAgent, streaming with run/run_stream_text/run_stream_events, configuring LlmConfig, adding postprocessors (trim_text, replace_eszett), or debugging via withDebbuger."
+skillDescription: "dcc_backend_common.llm_agent module: a Pydantic AI agent framework (pydantic_ai extra). Use when subclassing BaseAgent, streaming with run/run_stream_text/run_stream_events/stream_list, configuring LlmConfig (timeout, retries, thinking mode), adding postprocessors (trim_text, replace_eszett), or debugging via withDebbugger."
 ---
 # LLM Agent Module
 
@@ -14,7 +14,10 @@ The `dcc_backend_common.llm_agent` module provides a comprehensive Pydantic AI a
 The module provides:
 
 - **`BaseAgent`**: Abstract base class for creating reusable LLM agents with streaming and postprocessing
-- **`LlmConfig`**: Base configuration class for LLM API settings
+- **`LlmConfig`**: Base configuration class for LLM API settings (model, URL, key, timeout, retries)
+- **Automatic retries**: A tenacity-backed httpx transport that retries transient vLLM/network errors and honours `Retry-After`
+- **Thinking mode**: Opt-in reasoning support for models that expose it
+- **Usage logging**: Every call emits an `llm_call` event on the always-on `usage` logger
 - **Debugging utilities**: Event stream handlers and decorators for detailed agent logging
 - **Postprocessing utilities**: Automatic text normalization and custom postprocessing pipelines
 - **Streaming modes**: Multiple options for streaming responses (text, lists, structured output, events)
@@ -38,10 +41,11 @@ uv sync --group dev --all-extras
 Here's a complete example of creating a simple translation agent:
 
 ```python
-from pydantic_ai import Agent, Model
-from pydantic_ai.models.openai import OpenAIChatModel
+from pydantic_ai import Agent, RunContext
+from pydantic_ai.models import Model
 from dcc_backend_common.llm_agent import BaseAgent
-from dcc_backend_common.config import LlmConfig, get_env_or_throw
+from dcc_backend_common.config import get_env_or_throw
+from dcc_backend_common.config.app_config import LlmConfig
 from typing import override
 
 
@@ -94,20 +98,31 @@ async for chunk in agent.run_stream_text("Hallo Welt"):
 
 The `LlmConfig` class is a base configuration class specifically for LLM-related settings. It extends `AbstractAppConfig` but does not implement `from_env()` or `__str__()` by default.
 
+::: warning Import path
+`LlmConfig` lives in `dcc_backend_common.config.app_config` and is **not** re-exported from `dcc_backend_common.config`:
+
+```python
+from dcc_backend_common.config.app_config import LlmConfig
+```
+:::
+
 ### Available Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `llm_model` | `str` | The model identifier (e.g., `"gpt-4o"`) |
-| `llm_url` | `str` | The URL for the LLM API endpoint |
-| `llm_api_key` | `str` | The API key for authentication |
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `llm_model` | `str` | Required | The model identifier (e.g., `"gemma-3-27b-it"`) |
+| `llm_url` | `str` | Required | The URL for the LLM API endpoint |
+| `llm_api_key` | `str` | Required | The API key for authentication |
+| `llm_timeout` | `int` | `300` | Request timeout in seconds. Applied to both the httpx client and the model settings |
+| `llm_max_retries` | `int` | `2` | Retries for transient failures — `N` retries means `N + 1` total attempts |
 
 ### Creating a Custom Config
 
 Create a subclass of `LlmConfig` and implement `from_env()` and `__str__()`:
 
 ```python
-from dcc_backend_common.config import LlmConfig, get_env_or_throw
+from dcc_backend_common.config import get_env_or_throw
+from dcc_backend_common.config.app_config import LlmConfig
 from typing import override
 
 
@@ -151,9 +166,11 @@ class BaseAgent[DepsType, OutputType](ABC):
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `config` | `LlmConfig` | Required | LLM API configuration |
-| `deps_type` | `type[DepsType]` | `NoneType` | Type for dependencies |
-| `output_type` | `type[OutputType]` | `str` | Expected output type |
-| `enable_thinking` | `bool` | `False` | Enable thinking mode |
+| `deps_type` | `type[DepsType] \| None` | `None` → `NoneType` | Type for dependencies |
+| `output_type` | `type[OutputType] \| None` | `None` → `str` | Expected output type |
+| `enable_thinking` | `bool` | `False` | Enable thinking / reasoning mode |
+
+The constructor builds the `OpenAIProvider`, the `OpenAIChatModel` and the retrying HTTP client, then calls your `create_agent()`. It is configured for self-hosted vLLM-style endpoints via an `OpenAIModelProfile` with multiple system messages and strict tool definitions disabled, and JSON-schema output enabled.
 
 ### Abstract Method
 
@@ -186,6 +203,96 @@ class SummaryAgent(BaseAgent[None, SummaryResult]):
         return Agent(model=model, deps_type=None, output_type=SummaryResult)
 ```
 
+## Retries and Timeouts
+
+`BaseAgent` builds its own `httpx.AsyncClient` with a tenacity retry transport, so transient vLLM/network failures do not surface to your code:
+
+| Aspect | Behaviour |
+|--------|-----------|
+| Retried on | `httpx.TransportError` (connection/transport) and `httpx.HTTPStatusError` (any non-2xx, including 429) |
+| Attempts | `config.llm_max_retries + 1` (default 2 retries = 3 attempts) |
+| Backoff | Honours the `Retry-After` header; otherwise exponential backoff (multiplier 1, max 60s), capped at 300s per wait |
+| Timeout | `config.llm_timeout` on both the httpx client and the model settings |
+| On exhaustion | The last exception is re-raised (`reraise=True`) |
+
+Tune it through the config rather than the agent:
+
+```python
+config = MyLlmConfig(
+    llm_model="gemma-3-27b-it",
+    llm_url="http://vllm:8000/v1",
+    llm_api_key="...",
+    llm_timeout=600,      # long documents
+    llm_max_retries=4,
+)
+```
+
+## Thinking Mode
+
+Pass `enable_thinking=True` to turn on reasoning for models that support it:
+
+```python
+class ReasoningAgent(BaseAgent[None, str]):
+    def __init__(self, config: LlmConfig):
+        super().__init__(config, output_type=str, enable_thinking=True)
+```
+
+This does three things:
+
+- Sends `extra_body={"chat_template_kwargs": {"enable_thinking": True}}` with every request
+- Sets `openai_reasoning_effort` to `"medium"`
+- Sets `thinking_always_enabled` on the model profile
+
+With `enable_thinking=False` (the default) the same `chat_template_kwargs` flag is sent as `False`, which explicitly disables thinking on models that would otherwise default to it.
+
+::: tip Observing thinking
+Thinking tokens arrive as `ThinkingPartDelta` events on `run_stream_events()`; `run_stream_text()` only yields regular text parts. See [Debugging](#debugging) to log them.
+:::
+
+## Per-Call Model Settings
+
+Any `model_settings` you pass to `run()` or a streaming method is **deep-merged** with the agent's instance-level settings, so `extra_body.chat_template_kwargs` (and therefore the thinking flag) is never silently dropped:
+
+```python
+result = await agent.run(
+    "Summarise this",
+    model_settings={"temperature": 0.2},
+)
+```
+
+Your keys win on conflict; keys you do not set keep the instance value.
+
+## Prompt Preprocessing
+
+Override `process_prompt()` to transform the prompt before it reaches the model. It runs for every execution mode:
+
+```python
+class ContextAgent(BaseAgent[MyDeps, str]):
+    @override
+    def process_prompt(self, prompt: UserPrompt, deps: MyDeps | None) -> UserPrompt:
+        if deps is None or not isinstance(prompt, str):
+            return prompt
+        return f"Document language: {deps.language}\n\n{prompt}"
+```
+
+## Usage Logging
+
+Every completed run logs an `llm_call` event through the pinned `usage` logger, so it is emitted regardless of `LOG_LEVEL` (see [Logger](/backend-common/logger#usage-events)):
+
+| Field | Description |
+|-------|-------------|
+| `input_tokens` | Prompt tokens |
+| `output_tokens` | Completion tokens |
+| `total_tokens` | Sum reported by the provider |
+| `tool_calls` | Number of tool calls in the run |
+| `requests` | Number of HTTP requests the run needed |
+| `usage_details` | Provider-specific usage breakdown |
+| `finish_reason` | Why the model stopped |
+
+::: warning Not every mode logs
+`run()`, `stream_list()` and `run_stream_output()` log on completion. `run_stream_events()` — and therefore `run_stream_text()`, which is built on it — does not emit `llm_call`; the usage data is available on the `AgentRunResultEvent` you receive at the end of the event stream.
+:::
+
 ## Streaming Modes
 
 ### Simple Execution - `run()`
@@ -213,32 +320,89 @@ async for chunk in agent.run_stream_text(user_prompt="Hello, world!"):
 **Parameters:**
 - `user_prompt`: The input prompt (default: `None`)
 - `deps`: Dependencies for the agent (default: `None`)
-- `delta`: Stream partial tokens (`True`) or full text chunks (`False`, default)
+- `delta`: `True` (default) yields only the new piece of text per chunk; `False` yields the accumulated text so far on every chunk
 - `**kwargs`: Additional keyword arguments passed to the agent
 
+```python
+# delta=True (default) -> "Hello", " ", "World"
+async for chunk in agent.run_stream_text("Hallo Welt"):
+    print(chunk, end="")
+
+# delta=False -> "Hello", "Hello ", "Hello World"
+async for text in agent.run_stream_text("Hallo Welt", delta=False):
+    render(text)
+```
+
 **Features:**
-- Streams text chunks as they arrive
-- Applies postprocessing to each chunk
+- Emits both the first piece of a text part (from `PartStartEvent`) and every subsequent `PartDeltaEvent`, so no leading text is lost
+- Applies the **stream** postprocessors to each chunk (see [Postprocessing](#postprocessing)) — notably `trim_text` is excluded, since trimming each chunk would eat legitimate whitespace
 - Useful for chat interfaces and real-time feedback
+
+### Streaming List Items - `stream_list()`
+
+Streams the items of a list output progressively. Each emission is the latest state of the **last** item, so callers see one item being built up, then a new emission as the next item starts.
+
+```python
+async for item in agent.stream_list("List 5 animals"):
+    render(item)  # partially built item, then the next one, ...
+```
+
+Internally the agent overrides the run's output type with a `{"list": [...]}` container, so the agent's own `output_type` is not used for this call — the item shape comes from what the model produces under your instructions. Each emission is postprocessed with the full (non-streaming) postprocessor pipeline, and `llm_call` usage is logged when the stream ends.
+
+### Streaming Structured Output - `run_stream_output()`
+
+Streams raw structured output chunks as pydantic-ai validates them — useful when the output type is a model and you want to render fields as they fill in.
+
+```python
+async for partial in agent.run_stream_output("Summarise this document"):
+    render(partial)  # progressively more complete SummaryResult
+```
+
+Each chunk goes through the full postprocessor pipeline.
+
+### Streaming Raw Events - `run_stream_events()`
+
+Yields the raw pydantic-ai event stream (`AgentStreamEvent`, ending with an `AgentRunResultEvent`). **No postprocessing is applied.** Use it when you need tool calls, thinking deltas, or part boundaries:
+
+```python
+from pydantic_ai import PartStartEvent, FunctionToolCallEvent
+
+async for event in agent.run_stream_events("Hello"):
+    if isinstance(event, FunctionToolCallEvent):
+        log_tool(event.part.tool_name)
+```
 
 ## Debugging
 
-### `withDebbuger` Decorator
+### `withDebbugger` Wrapper
 
-Use the `withDebbuger` decorator to inject an event stream debugger into any async function that runs an agent:
+Use `withDebbugger` to inject an event stream debugger into any async function or async generator function that runs an agent:
 
 ```python
-from dcc_backend_common.llm_agent.debugging import withDebbuger
+from dcc_backend_common.llm_agent.debugging.agent_debugger import withDebbugger
 
 agent = TranslationAgent(config)
+
 # without debugger
 result = await agent.run("Hallo Welt")
+
 # with debugger
-result = withDebbuger(agent.run)("Hallo Welt")
+result = await withDebbugger(agent.run, name="TranslationAgent")("Hallo Welt")
+
+# also works on the streaming methods (async generators)
+async for chunk in withDebbugger(agent.run_stream_text, name="TranslationAgent")("Hallo Welt"):
+    print(chunk, end="")
 ```
 
-The decorator automatically:
-- Logs all agent events with the agent name
+::: warning Name and import path
+The function is spelled `withDebbugger` (double `b`), and `debugging/__init__.py` is empty — import from `dcc_backend_common.llm_agent.debugging.agent_debugger`, not from the `debugging` package.
+:::
+
+**Parameters:**
+- `fn`: An async function or async generator function. Anything else raises `TypeError`
+- `name` (`str | None`): Label attached to every logged event (default: `"UnnamedAgent"`)
+
+The wrapper injects `event_stream_handler` into the call's kwargs — but only if the caller did not already pass one, so an explicit handler always wins. All events are logged at `DEBUG` level, so set `LOG_LEVEL=DEBUG` to see them.
 
 ### What Gets Logged
 
@@ -255,17 +419,17 @@ The debugger logs the following event types:
 
 ### Using `create_event_debugger()`
 
-Create a custom event stream handler:
+Build the event stream handler yourself and hand it to any agent call:
 
 ```python
-from dcc_backend_common.llm_agent.debugging import create_event_debugger
-
+from dcc_backend_common.llm_agent.debugging.event_debugger import create_event_debugger
 
 event_handler = create_event_debugger(name="MyAgent")
 
-async for event in agent.run_stream_events(user_prompt="Hello"):
-    await event_handler(ctx=None, event_stream=[event])
+result = await agent.run("Hello", event_stream_handler=event_handler)
 ```
+
+It returns a pydantic-ai `EventStreamHandler`: an async callable taking `(ctx, event_stream)` that consumes the stream and logs each event.
 
 ## Postprocessing
 
@@ -275,17 +439,39 @@ Postprocessing automatically transforms agent outputs after the LLM generates th
 
 Two postprocessors are included by default:
 
-| Function | Description |
-|----------|-------------|
-| `trim_text()` | Removes blank lines from the start of text (only on first chunk in streaming) |
-| `replace_eszett()` | Recursively replaces German ß with "ss" in all string fields |
+| Function | Applied to | Description |
+|----------|------------|-------------|
+| `replace_eszett()` | All outputs | Recursively replaces German ß with "ss" in every string — including inside Pydantic models, mappings, and lists |
+| `trim_text()` | Only when `output_type` is `str` | Strips leading whitespace. Raises `TypeError` on non-string input |
+
+### Two Pipelines
+
+There are two cached pipelines, built once in the constructor:
+
+| Pipeline | Built by | Used by |
+|----------|----------|---------|
+| Postprocessors | `_get_postprocessors()` | `run()`, `stream_list()`, `run_stream_output()` |
+| Stream postprocessors | `_get_stream_postprocessors()` | `run_stream_text()`, applied per chunk |
+
+By default the stream pipeline is the full pipeline **minus** `trim_text` — trimming every chunk would swallow legitimate whitespace mid-stream. Override `_get_stream_postprocessors()` to change that:
+
+```python
+@override
+def _get_stream_postprocessors(self) -> list[Preprocessor]:
+    return [*super()._get_stream_postprocessors(), my_chunk_processor]
+```
+
+::: warning Cached at construction
+Both pipelines are computed in `__init__`. Mutating the returned lists later has no effect — override the methods instead.
+:::
 
 ### Adding Custom Postprocessors
 
 Override the `_get_postprocessors()` method to add custom postprocessing logic:
 
 ```python
-from dcc_backend_common.llm_agent import BaseAgent, Preprocessor, PostprocessingContext
+from dcc_backend_common.llm_agent import BaseAgent, Preprocessor
+from dcc_backend_common.llm_agent.postprocessing import PostprocessingContext
 
 
 class MyAgent(BaseAgent[None, str]):
@@ -314,6 +500,10 @@ Postprocessor functions receive a `PostprocessingContext` object with informatio
 | `index` | `int` | The index of the item being processed (0, 1, 2, ...) |
 | `is_partial` | `bool` | Whether this is a partial (streaming) result |
 
+::: tip Current behaviour
+All built-in call sites pass the sentinel context `PostprocessingContext(is_partial=False, index=0)`, including the per-chunk streaming path. Write postprocessors that behave correctly under that assumption; the fields exist for postprocessors that need the distinction once richer contexts are threaded through.
+:::
+
 ## API Reference
 
 ### Main Classes
@@ -330,15 +520,35 @@ Postprocessor functions receive a `PostprocessingContext` object with informatio
 |--------|-------------|-------------|
 | `run()` | Execute agent and return complete output | `OutputType` |
 | `run_stream_text()` | Stream text output chunk by chunk | `AsyncGenerator[str, None]` |
-| `stream_list()` | Stream list items one-by-one | `AsyncGenerator[T, None]` |
+| `stream_list()` | Stream list items progressively | `AsyncGenerator[T, None]` |
 | `run_stream_output()` | Stream structured output with postprocessing | `AsyncGenerator[Any, None]` |
 | `run_stream_events()` | Stream all events for detailed debugging | `AsyncGenerator[AgentStreamEvent \| AgentRunResultEvent]` |
+
+### Overridable Hooks
+
+| Method | Purpose |
+|--------|---------|
+| `create_agent(model)` | **Required.** Build the pydantic-ai `Agent` |
+| `process_prompt(prompt, deps)` | Transform the prompt before it is sent |
+| `_get_postprocessors()` | Customise the non-streaming postprocessing pipeline |
+| `_get_stream_postprocessors()` | Customise the per-chunk streaming pipeline |
+
+### Exported Names
+
+`dcc_backend_common.llm_agent` re-exports only `BaseAgent`, `Preprocessor` and `UserPrompt`. Everything else comes from its defining module:
+
+| Name | Import from |
+|------|-------------|
+| `LlmConfig` | `dcc_backend_common.config.app_config` |
+| `PostprocessingContext`, `trim_text`, `replace_eszett` | `dcc_backend_common.llm_agent.postprocessing` |
+| `withDebbugger` | `dcc_backend_common.llm_agent.debugging.agent_debugger` |
+| `create_event_debugger` | `dcc_backend_common.llm_agent.debugging.event_debugger` |
 
 ### Debugging Utilities
 
 | Function/Decorator | Location | Description |
 |--------------------|----------|-------------|
-| `withDebbuger` | [agent_debugger.py](https://github.com/DCC-BS/backend-common/blob/main/src/dcc_backend_common/llm_agent/debugging/agent_debugger.py) | Decorator to inject event debugger |
+| `withDebbugger` | [agent_debugger.py](https://github.com/DCC-BS/backend-common/blob/main/src/dcc_backend_common/llm_agent/debugging/agent_debugger.py) | Wrap an async fn / async generator fn to inject an event debugger |
 | `create_event_debugger()` | [event_debugger.py](https://github.com/DCC-BS/backend-common/blob/main/src/dcc_backend_common/llm_agent/debugging/event_debugger.py) | Create event stream handler |
 
 ### Postprocessing Functions

@@ -2,7 +2,7 @@
 outline: deep
 editLink: true
 skillName: dcc-backend
-skillDescription: "Shared Python library dcc-backend-common for FastAPI services. Use when building or maintaining a DCC backend and needing its reusable modules: config (Pydantic AppConfig/LlmConfig), structlog logging, fastapi_health_probes (Kubernetes probes), fastapi_error_handling, usage_tracking, and the Pydantic AI llm_agent framework. Routes to the matching module reference."
+skillDescription: "Shared Python library dcc-backend-common for FastAPI services. Use when building or maintaining a DCC backend and needing its reusable modules: config (Pydantic AppConfig/LlmConfig), structlog logging, fastapi_logging_middleware (request_id correlation), fastapi_health_probes (Kubernetes probes), fastapi_error_handling, usage_tracking, and the Pydantic AI llm_agent framework. Routes to the matching module reference."
 ---
 # Backend Common
 
@@ -24,11 +24,20 @@ Install the base package using [uv](https://docs.astral.sh/uv/):
 uv add dcc-backend-common
 ```
 
-For **LLM Agent** support, install the optional dependencies:
+The base package covers **config**, **logger** and **usage tracking**. The FastAPI and LLM pieces live behind extras:
+
+| Extra | Install | Enables | Pulls in |
+|-------|---------|---------|----------|
+| `fastapi` | `uv add "dcc-backend-common[fastapi]"` | Health probes, error handling, logging middleware | `fastapi`, `aiohttp` |
+| `pydantic_ai` | `uv add "dcc-backend-common[pydantic_ai]"` | LLM Agent framework | `pydantic-ai`, `pydantic-ai-slim[openai]`, `httpx`, `tenacity` |
+
+For a typical backend service you want both:
 
 ```bash
-uv add dcc-backend-common[pydantic_ai]
+uv add "dcc-backend-common[fastapi,pydantic_ai]"
 ```
+
+Requires Python `>=3.12`.
 
 ## Quick Start
 
@@ -40,7 +49,9 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from dcc_backend_common.config import AppConfig
 from dcc_backend_common.logger import init_logger, get_logger
+from dcc_backend_common.fastapi_error_handling import inject_api_error_handler
 from dcc_backend_common.fastapi_health_probes import health_probe_router
+from dcc_backend_common.fastapi_logging_middleware import add_logging_middleware
 
 
 @asynccontextmanager
@@ -65,6 +76,8 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+# Correlate every log line of a request via request_id
+add_logging_middleware(app)
 
 
 # Add Kubernetes health probes
@@ -88,7 +101,8 @@ async def root():
 | Module | Description |
 |--------|-------------|
 | [Configuration](/backend-common/config) | Type-safe configuration management with Pydantic and CLI tools |
-| [Logger](/backend-common/logger) | Structured logging with structlog |
+| [Logger](/backend-common/logger) | Structured logging with structlog, plus the always-on `usage` logger |
+| [Logging Middleware](/backend-common/logging_middleware) | Per-request `request_id` correlation and failure logging |
 | [Health Probes](/backend-common/probes) | Kubernetes liveness, readiness, and startup probes |
 | [Error Handler](/backend-common/error_handler) | Standardized API error handling |
 | [Usage Tracking](/backend-common/usage_tracking) | Usage tracking for the application |
@@ -100,12 +114,20 @@ The package uses environment variables for configuration. Here are the common on
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `IS_PROD` | Yes | Set to `true` for production (enables JSON logging) |
-| `LOG_LEVEL` | No | Logging level (`DEBUG`, `INFO`, `WARNING`, `ERROR`). Default: `INFO` |
+| `IS_PROD` | Yes | Set to `true` for production (enables JSON logging). `init_logger()` raises `AppConfigError` if it is unset |
+| `LOG_LEVEL` | No | Level for application diagnostics (`DEBUG`, `INFO`, `WARNING`, `ERROR`). Default: `INFO`. Does not affect usage events |
 | `DEV_TRACEBACK_STYLE` | No | Traceback style in dev mode (`focused` or `rich`). Default: `focused` |
-| `LOGGER_USER_CODE_PATHS` | No | Comma-separated paths to consider as user code for focused tracebacks. Default: `dcc_backend_common,src/,app/,tests/` |
+| `LOGGER_USER_CODE_PATHS` | No | Comma-separated paths to consider as user code for focused tracebacks. Appended to the defaults `dcc_backend_common,src/,app/,tests/` |
 
 Module-specific environment variables are documented in their respective pages.
+
+## Running the Service
+
+Serve with plain `uvicorn`. `fastapi run` attaches its own Rich handlers, which bypass the JSON logging pipeline:
+
+```bash
+uvicorn my_service.app:app --host 0.0.0.0 --port 8090 --no-access-log
+```
 
 ## Project Structure
 
@@ -223,10 +245,14 @@ Add code to `dcc-backend-common` when it is:
 
    ```
    src/dcc_backend_common/
-   ├── config/           # Configuration utilities
-   ├── logger/           # Logging utilities
-   ├── fastapi_health_probes/  # Health check endpoints
-   └── your_module/      # Your new module
+   ├── config/                      # Configuration utilities
+   ├── logger/                      # Logging utilities
+   ├── usage_tracking/              # Usage/audit events
+   ├── llm_agent/                   # Pydantic AI agent framework
+   ├── fastapi_error_handling/      # Standardized API errors
+   ├── fastapi_health_probes/       # Health check endpoints
+   ├── fastapi_logging_middleware/  # Request correlation
+   └── your_module/                 # Your new module
        ├── __init__.py
        └── implementation.py
    ```
