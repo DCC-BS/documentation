@@ -1,60 +1,51 @@
 ---
+---
 outline: deep
 skillParent: dcc-ui
-skillName: online-status
-skillDescription: "OnlineStatus is a color-coded health indicator (green/red) with tooltip that polls a server health endpoint at a configurable pollInterval, with optional showText and custom isOnlineCheckFunction props. Use when showing live server connectivity status."
+skillName: system-status
+skillDescription: "SystemStatus is an offline-only alert indicator that polls a server health endpoint at a configurable pollInterval, displaying a warning icon with tooltip only when connectivity is lost. Includes optional custom isOnlineCheckFunction prop. Use when showing live server connectivity status."
 ---
-<script setup lang="ts">
-import OnlineStatusExample from '../../../components/OnlineStatusExample.vue';
-</script>
 
-# OnlineStatus
+# SystemStatus
 
-The `OnlineStatus` component displays a real-time health status indicator that checks whether the application is online. It automatically polls the server at configurable intervals to verify connectivity and displays a visual indicator with tooltip information.
-
-## Preview
-
-<OnlineStatusExample />
+The `SystemStatus` component monitors application connectivity by polling the server at configurable intervals. Unlike an always-visible status indicator, `SystemStatus` only renders when the server is **offline** — showing a warning icon and text to alert users of connectivity issues. When the application is online, the component renders nothing, keeping the UI uncluttered.
 
 ## Features
 
 - **Automatic Health Checks**: Configurable polling to verify server connectivity
-- **Visual Indicator**: Color-coded status display (green for online, red for offline)
+- **Offline-Only Display**: Renders only when the server is unreachable, keeping the UI clean when everything is working
+- **Visual Alert**: Warning icon (`i-lucide-triangle-alert`) with red text for offline state
 - **Tooltip Information**: Detailed status information on hover
-- **Optional Text Label**: Show/hide status text alongside indicator
-- **Smooth Transitions**: Animated color changes between states
 - **i18n Integration**: Multilingual support for status messages
-- **Lightweight**: Minimal performance impact
+- **Memory Safe**: Polling interval is properly cleaned up on component unmount
 - **Customizable Polling**: Adjust check frequency to your needs
+- **Custom Health Check**: Provide your own function to determine online status
 
 ## Props
 
 | Prop | Type | Required | Default | Description |
 |------|------|----------|---------|-------------|
-| `showText` | `boolean` | No | `false` | Whether to display text along with the status indicator |
-| `pollInterval` | `number` | No | `30000` | The interval in milliseconds for checking online status (minimum: 1000ms) |
+| `pollInterval` | `number` | No | `30000` | The interval in milliseconds for checking online status |
 | `isOnlineCheckFunction` | `() => Promise<boolean>` | No | `checkIsOnline()` | Custom function to check online status. By default, uses the built-in `checkIsOnline` utility |
 
 ## Usage
 
 ### Basic Implementation
 
-Simple status indicator without text:
-
 ```vue
 <template>
-  <OnlineStatus />
+  <SystemStatus />
 </template>
 ```
 
-### With Text Label
+### Custom Poll Interval
 
-Display status text alongside the indicator:
+Check connectivity at a different frequency:
 
 ```vue
 <template>
-    <!-- Check every 60 seconds -->
-  <OnlineStatus :show-text="true" :poll-interval="60000" />
+  <!-- Check every 60 seconds -->
+  <SystemStatus :poll-interval="60000" />
 </template>
 ```
 
@@ -75,16 +66,16 @@ async function customOnlineCheck() {
 </script>
 
 <template>
-   <OnlineStatus 
+  <SystemStatus 
     :is-online-check-function="customOnlineCheck"
   /> 
 </template>
 ```
 
-### Status Indication
+### Status Behavior
 
-- **Online (Green)**: Server responds successfully
-- **Offline (Red)**: Server request fails or times out
+- **Online**: No indicator is shown — the application is functioning normally
+- **Offline (Red)**: Warning icon with text is displayed, along with a tooltip describing the issue
 
 ## i18n Configuration
 
@@ -94,10 +85,8 @@ The component requires the following translation keys:
 {
     "common-ui": {
         "health_status": {
-        "online_title": "Online",
-        "online_description": "Application is connected to the server",
-        "offline_title": "Offline",
-        "offline_description": "Unable to connect to the server"
+            "offline_title": "System disruption",
+            "offline_description": "Some services are unavailable, features may be limited"
         }
     }
 }
