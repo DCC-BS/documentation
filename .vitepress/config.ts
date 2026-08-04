@@ -1,3 +1,10 @@
+Looking at the diff, I need to:
+1. Add "App Switcher" and "Settings Button" to the Components section
+2. Remove the "Online Status" entry since `OnlineStatus.vue` was deleted and replaced by `SystemStatus.vue` (no system-status.md page listed as newly created)
+
+I'll place the new entries alphabetically within the Components subsection.
+
+```typescript
 import VueI18nPlugin from "@intlify/unplugin-vue-i18n/vite";
 import ui from "@nuxt/ui/vite";
 import tailwindcss from "@tailwindcss/vite";
@@ -88,6 +95,10 @@ export default withMermaid({
                         link: "/user-interface/components/index.md",
                         items: [
                             {
+                                text: "App Switcher",
+                                link: "/user-interface/components/app-switcher.md",
+                            },
+                            {
                                 text: "Changelogs",
                                 link: "/user-interface/components/changelogs.md",
                             },
@@ -128,8 +139,8 @@ export default withMermaid({
                                 link: "/user-interface/components/onboardingrestartbutton.md",
                             },
                             {
-                                text: "Online Status",
-                                link: "/user-interface/components/onlinestatus.md",
+                                text: "Settings Button",
+                                link: "/user-interface/components/settings-button.md",
                             },
                             {
                                 text: "Split Container",
@@ -305,3 +316,4 @@ export default withMermaid({
     },
     lastUpdated: true,
 });
+```
