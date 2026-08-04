@@ -1,4 +1,5 @@
 ---
+---
 outline: deep
 ---
 
@@ -210,7 +211,7 @@ Because the orchestrator watches its cookies reactively, you can re-trigger any 
 | `ChangelogsButton`        | `changelogs-last-read` ← `"0.0.0"` | Surfaces the Changelogs flow with every existing release as "new".  |
 | `OnboardingRestartButton` | (re-invokes the tour) | Restarts the tour without permanently marking it completed.         |
 
-These are wired into the [NavigationBar](./navigationbar.md) by default, so end users always have a way back to any of the three flows.
+`DisclaimerButton` and `ChangelogsButton` are wired into the [DataBsFooter](./databsfooter.md) center slot by default, and `OnboardingRestartButton` is included in the [NavigationBar](./navigationbar.md) right section, so end users always have a way back to any of the three flows.
 
 ::: info
 The `ChangelogsButton` resets `changelogs-last-read` to the sentinel `"0.0.0"` so every existing release counts as newer than the stored value. The orchestrator's `useChangelogsPending` composable re-evaluates and surfaces the Changelogs flow without a page reload.
