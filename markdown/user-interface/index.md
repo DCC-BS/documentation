@@ -1,6 +1,6 @@
 ---
 skillName: dcc-ui
-skillDescription: "Nuxt module of the Kanton Basel-Stadt design system for DCC Basel-Stadt apps: NavigationBar, DataBsFooter, SplitContainer/SplitView, FirstRunOrchestrator, Disclaimer/DisclaimerButton/DisclaimerPage, Changelogs/ChangelogsButton, Onboarding/OnboardingRestartButton, OnlineStatus, UndoRedoButtons, the useUserFeedback and useOnboardingBuilder composables, and the BS color palette. Use when building a DCC Basel-Stadt/Basel-Stadt Vue/nuxt frontend or wiring up the common-ui.bs.js module."
+skillDescription: "Nuxt module of the Kanton Basel-Stadt design system for DCC Basel-Stadt apps: NavigationBar, DataBsFooter, SplitContainer/SplitView, FirstRunOrchestrator, Disclaimer/DisclaimerButton/DisclaimerPage, Changelogs/ChangelogsButton, Onboarding/OnboardingRestartButton, AppSwitcher, SettingsButton, SystemStatus, UndoRedoButtons, the useUserFeedback and useOnboardingBuilder composables, and the BS color palette. Use when building a DCC Basel-Stadt/Basel-Stadt Vue/nuxt frontend or wiring up the common-ui.bs.js module."
 ---
 # User Interface Overview
 
@@ -192,9 +192,7 @@ You can customize the following translation keys in your application:
             "close": "Close"
         },
         "health_status": {
-            "online_title": "Online",
-            "offline_title": "Offline",
-            "online_description": "All services are available",
+            "offline_title": "System disruption",
             "offline_description": "Some services are unavailable, features may be limited"
         },
         "tour": {
@@ -202,7 +200,7 @@ You can customize the following translation keys in your application:
             "next": "Next",
             "prev": "Back",
             "finish": "Finish",
-            "restart": "Restart tour",
+            "restart": "Help",
             "progress": "Step {{current}} of {{total}}"
         }
     },

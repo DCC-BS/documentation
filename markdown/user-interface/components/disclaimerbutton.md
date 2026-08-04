@@ -2,7 +2,7 @@
 outline: deep
 skillParent: dcc-ui
 skillName: disclaimer-button
-skillDescription: "DisclaimerButton is a button (variant outline or ghost) that resets the disclaimer-accepted cookie to re-trigger the disclaimer flow via the FirstRunOrchestrator. Use when users need to re-view terms after acceptance, e.g. in the NavigationBar. NOT the initial modal gate (disclaimer) or full page (disclaimer-page)."
+skillDescription: "DisclaimerButton is a button (variant outline or ghost) that resets the disclaimer-accepted cookie to re-trigger the disclaimer flow via the FirstRunOrchestrator. Use when users need to re-view terms after acceptance, e.g. in the DataBsFooter or NavigationBar. NOT the initial modal gate (disclaimer) or full page (disclaimer-page)."
 ---
 <script setup lang="ts">
 import UiContainer from '../../../components/UiContainer.vue';
@@ -90,22 +90,36 @@ Choose a different button style variant:
 </template>
 ```
 
+### In DataBsFooter
+
+The `DataBsFooter` component includes a `DisclaimerButton` (ghost variant) by default in its center slot, alongside `ChangelogsButton`:
+
+```vue
+<template>
+    <DataBsFooter />
+</template>
+```
+
+::: tip
+If you override the `center` slot of `DataBsFooter`, you will need to add `<DisclaimerButton />` manually to retain the button.
+:::
+
 ### In Navigation Bar
 
-Commonly placed in the navigation bar for easy access (ghost variant is commonly used in navigation):
+You can also place the button in the navigation bar (ghost variant is commonly used in navigation):
 
 ```vue
 <template>
   <NavigationBar>
-    <template #right>
+    <template #rightPreItems>
       <DisclaimerButton variant="ghost" />
     </template>
   </NavigationBar>
 </template>
 ```
 
-::: tip
-The `NavigationBar` component already includes a `DisclaimerButton` (ghost variant) by default in its right section, alongside `ChangelogsButton` and `OnboardingRestartButton`. You only need to add it manually if you override the `right` slot completely.
+::: warning
+The `NavigationBar` no longer includes `DisclaimerButton` in its default right slot. You must add it manually (e.g., via the `rightPreItems` slot) if you want it in the navigation bar.
 :::
 
 ## How It Works
