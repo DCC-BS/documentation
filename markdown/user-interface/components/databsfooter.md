@@ -1,8 +1,9 @@
 ---
+---
 outline: deep
 skillParent: dcc-ui
 skillName: databs-footer
-skillDescription: "DataBsFooter is a branded application footer with default DCC logo/branding and left, center, and right slots for custom links, version, or contact content. Use when adding a page footer."
+skillDescription: "DataBsFooter is a branded application footer with default DCC logo/branding, a size prop for compact mode, and left, center, and right slots. The center slot includes DisclaimerButton and ChangelogsButton by default. Use when adding a page footer."
 ---
 <script setup lang="ts">
 import UiContainer from "../../../components/UiContainer.vue";
@@ -35,7 +36,7 @@ const exampleCode = `<template>
 
 # DataBsFooter
 
-The `DataBsFooter` component provides a branded application footer with customizable content areas. It features the Data Competence Center (DCC) branding by default, including an animated logo, and supports flexible slot-based customization for left, center, and right sections.
+The `DataBsFooter` component provides a branded application footer with customizable content areas. It features the Data Competence Center (DCC) branding by default, including an animated logo, and supports flexible slot-based customization for left, center, and right sections arranged in a three-column grid.
 
 <UiContainer :code="exampleCode">
     <template #element>
@@ -67,7 +68,9 @@ The `DataBsFooter` component provides a branded application footer with customiz
 
 - **Default DCC Branding**: Includes Data Competence Center logo and information
 - **Animated Logo**: Interactive logo with random hover animations (heartbeat or rotate)
+- **Default Center Content**: Includes `DisclaimerButton` and `ChangelogsButton` by default
 - **Flexible Slot System**: Three slots for left, center, and right sections
+- **Size Prop**: Supports `"sm"` and `"md"` sizes for compact or standard logo display
 - **Responsive Design**: Adapts to mobile and desktop screens
 - **External Link**: Logo links to official DCC website
 - **Accessibility**: Proper link attributes for external navigation
@@ -75,21 +78,23 @@ The `DataBsFooter` component provides a branded application footer with customiz
 
 ## Props
 
-This component has no props - it uses slots for all customization.
+| Prop   | Type           | Required | Default | Description                                                        |
+| ------ | -------------- | -------- | ------- | ------------------------------------------------------------------ |
+| `size` | `"sm" \| "md"` | No       | `"md"`  | Controls the logo size. `"sm"` renders a 32px logo, `"md"` renders a 48px logo. |
 
 ## Slots
 
 | Slot     | Description                              | Default Content                                                              |
 | -------- | ---------------------------------------- | ---------------------------------------------------------------------------- |
 | `left`   | Content for the left section             | DCC logo with animated hover effect and organization information             |
-| `center` | Content for the center section           | Empty                                                                        |
-| `right`  | Content for the right section            | Empty                                                                        |
+| `center` | Content for the center section           | `DisclaimerButton` (ghost variant) and `ChangelogsButton`                    |
+| `right`  | Content for the right section            | Empty `<div>`                                                                 |
 
 ## Usage
 
 ### Basic Implementation
 
-Display the footer with default DCC branding:
+Display the footer with default DCC branding and default center content:
 
 ```vue
 <template>
@@ -101,10 +106,25 @@ This displays:
 - Animated DCC logo linking to https://www.bs.ch/ki
 - "Datenwissenschaften und KI" text
 - "Developed with ♥ by DCC - Data Competence Center" tagline (hidden on mobile)
+- `DisclaimerButton` and `ChangelogsButton` in the center section
 
-### With Center Content
+### Compact Size
 
-Add links or additional information in the center:
+Use the `size` prop for a smaller logo, useful in dense layouts:
+
+```vue
+<template>
+    <DataBsFooter size="sm">
+        <template #right>
+            <UButton icon="i-lucide-message-square">Feedback</UButton>
+        </template>
+    </DataBsFooter>
+</template>
+```
+
+### With Custom Center Content
+
+Override the default center content with links or additional information:
 
 ```vue
 <template>
@@ -119,6 +139,10 @@ Add links or additional information in the center:
     </DataBsFooter>
 </template>
 ```
+
+::: tip
+Overriding the `center` slot replaces the default `DisclaimerButton` and `ChangelogsButton`. Include them manually if you want to retain access to those flows from the footer.
+:::
 
 ### With Right Content
 
@@ -183,21 +207,25 @@ Override the default branding and use all slots:
 
 ## Component Structure
 
-The DataBsFooter uses a flexbox layout with three sections:
+The DataBsFooter uses a three-column grid layout:
 
 ```vue
-<div class="px-6 py-3">
-    <div class="flex items-center justify-between gap-4 text-xs text-gray-500">
+<div class="px-6">
+    <div class="grid grid-cols-3 items-center justify-between gap-4 text-xs text-gray-500">
         <!-- Left Section -->
         <slot name="left">
             <!-- Default: Animated DCC logo and branding -->
         </slot>
 
         <!-- Center Section -->
-        <slot name="center" />
+        <slot name="center">
+            <!-- Default: DisclaimerButton + ChangelogsButton -->
+        </slot>
 
         <!-- Right Section -->
-        <slot name="right" />
+        <slot name="right">
+            <!-- Default: empty div -->
+        </slot>
     </div>
 </div>
 ```
