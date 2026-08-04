@@ -1,10 +1,3 @@
-Looking at the diff, I need to:
-1. Add "App Switcher" and "Settings Button" to the Components section
-2. Remove the "Online Status" entry since `OnlineStatus.vue` was deleted and replaced by `SystemStatus.vue` (no system-status.md page listed as newly created)
-
-I'll place the new entries alphabetically within the Components subsection.
-
-```typescript
 import VueI18nPlugin from "@intlify/unplugin-vue-i18n/vite";
 import ui from "@nuxt/ui/vite";
 import tailwindcss from "@tailwindcss/vite";
@@ -316,4 +309,3 @@ export default withMermaid({
     },
     lastUpdated: true,
 });
-```
