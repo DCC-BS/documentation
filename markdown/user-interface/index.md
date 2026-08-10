@@ -1,4 +1,5 @@
 ---
+---
 skillName: dcc-ui
 skillDescription: "Nuxt module of the Kanton Basel-Stadt design system for DCC Basel-Stadt apps: NavigationBar, DataBsFooter, SplitContainer/SplitView, FirstRunOrchestrator, Disclaimer/DisclaimerButton/DisclaimerPage, Changelogs/ChangelogsButton, Onboarding/OnboardingRestartButton, OnlineStatus, UndoRedoButtons, the useUserFeedback and useOnboardingBuilder composables, and the BS color palette. Use when building a DCC Basel-Stadt/Basel-Stadt Vue/nuxt frontend or wiring up the common-ui.bs.js module."
 ---
@@ -127,6 +128,10 @@ The orchestrator owns all cookie writes. Individual flow components (Disclaimer,
 
 ::: tip
 The `ChangelogsButton` and `DisclaimerButton` components can reset these cookies to re-trigger their respective flows on demand.
+:::
+
+::: info Cookie Security in Production
+In production, all first-run cookies are set with `sameSite: "none"`, `secure: true`, and `partitioned: true`. This means your application **must be served over HTTPS** for the cookies to be stored. In development (`import.meta.dev`), cookies use `sameSite: "lax"` and are not secure or partitioned, so local HTTP workflows are unaffected.
 :::
 
 ## Module Features
