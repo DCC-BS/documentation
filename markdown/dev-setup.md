@@ -9,15 +9,22 @@ This guide provides a condensed overview of the tools and configurations require
 
 ## 1. Core Runtime & Package Managers
 
-We use **uv** for Python and **Bun** for JavaScript/TypeScript to ensure the fastest possible dependency resolution and execution.
+We use **[mise](https://mise.jdx.dev/)** to pin and activate the exact runtime
+versions in every project, **uv** for Python package management, and **Bun** for
+JavaScript/TypeScript. Install mise once; entering a project directory activates
+the pinned `bun`, `node`, `python`, and `uv` automatically (run `mise trust` the
+first time). See the [mise tooling standard](/dev-setup/mise) for the canonical
+versions and task names.
 
 | Tool | Purpose | Installation |
 |------|---------|--------------|
+| **[mise](https://mise.jdx.dev/)** | Runtime version manager + task runner (every project's entry point) | [Getting Started](https://mise.jdx.dev/getting-started.html) |
 | **[uv](https://docs.astral.sh/uv/)** | Python package & project management | [Installation Guide](https://docs.astral.sh/uv/getting-started/installation/) |
 | **[Bun](https://bun.sh/)** | JS/TS runtime & package management | [Installation Guide](https://bun.sh/docs/installation) |
 
-- **Python Version:** We target **Python 3.13**.
-- **Node.js Version:** Managed via Bun.
+- **Python Version:** Pinned to **3.13** via mise (`python = "3.13"` in `mise.toml`).
+- **Node.js / Bun Versions:** Pinned via mise (`node = "24.9.0"`, `bun = "1.3.0"`).
+- **Tasks:** Every project is driven through `mise run <task>` (`install`, `dev`, `check`, `test`, …) — see the [standard task names](/dev-setup/mise#standard-task-names).
 
 ## 2. Containerization
 
@@ -53,19 +60,25 @@ Ensure you follow our language-specific guidelines:
 
 ## 5. Local Project Initialization
 
-Once your environment is set up, you can typically start a project with:
+Once your environment is set up, every project is driven through mise. After
+`mise trust`, the `postinstall` hook runs automatically; otherwise start with
+`mise run install`:
 
 ```bash
-# For Python projects
-uv sync
-uv run main.py
+# Any project — install dependencies and prepare the environment
+mise run install
 
-# For Nuxt projects
-bun install
-bun run dev
+# Start the dev server (Python or Nuxt)
+mise run dev
+
+# Run checks / tests
+mise run check
+mise run test
 ```
 
-Check the `README.md` of the specific repository for project-specific instructions and required `.env` variables.
+Run `mise tasks` to see all tasks available in a project. Check the `README.md`
+of the specific repository for project-specific instructions and required `.env`
+variables.
 
 ## 6. Environment Variables & Secrets
 
