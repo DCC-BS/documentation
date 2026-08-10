@@ -39,10 +39,10 @@ A responsive navigation bar with language switching, system status indicator, on
 ## [SystemStatus](systemstatus.md)
 A health status indicator that polls the server to verify connectivity and displays a warning icon with tooltip when offline.
 
-## [AppSwitcher](appswitcher.md)
+## [AppSwitcher](app-switcher.md)
 A Google-style app switcher popover with a grid of app tiles, supporting icons, images, and initials fallback, plus an optional footer link.
 
-## [SettingsButton](settingsbutton.md)
+## [SettingsButton](settings-button.md)
 A cog-trigger dropdown button for settings/options menus, accepting `DropdownMenuItem` entries via props.
 
 ## [Onboarding](onboarding.md)
