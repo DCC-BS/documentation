@@ -144,6 +144,10 @@ export default withMermaid({
                                 link: "/user-interface/components/splitview.md",
                             },
                             {
+                                text: "System Status",
+                                link: "/user-interface/components/systemstatus.md",
+                            },
+                            {
                                 text: "Undo Redo Buttons",
                                 link: "/user-interface/components/undoredobuttons.md",
                             },
