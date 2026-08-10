@@ -31,13 +31,13 @@ Simply place the component wherever you want users to be able to restart the tou
 
 ### In NavigationBar
 
-The `OnboardingRestartButton` is included by default in the `NavigationBar` component's right section, alongside the `DisclaimerButton`, `ChangelogsButton`, and `LanguageSelect`:
+The `OnboardingRestartButton` is included by default in the `NavigationBar` component's right section, alongside the `SystemStatus`, `LanguageSelect`, and optionally `AppSwitcher`:
 
 ```vue
 <template>
     <NavigationBar>
         <template #rightPostItems>
-            <OnlineStatus />
+            <SettingsButton :items="settingsItems" />
         </template>
     </NavigationBar>
 </template>
@@ -46,10 +46,10 @@ The `OnboardingRestartButton` is included by default in the `NavigationBar` comp
 The default right section renders in this order:
 
 1. `rightPreItems` slot
-2. `DisclaimerButton` (ghost variant)
-3. `ChangelogsButton`
+2. `SystemStatus`
+3. `LanguageSelect`
 4. **`OnboardingRestartButton`**
-5. `LanguageSelect`
+5. `AppSwitcher` (only if `otherApps` prop is provided)
 6. `rightPostItems` slot
 
 ### Standalone Placement
@@ -89,8 +89,8 @@ The button label uses the `common-ui.tour.restart` translation key.
 
 | Locale | Key                     | Value             |
 | ------ | ----------------------- | ----------------- |
-| en     | `common-ui.tour.restart` | `Restart tour`   |
-| de     | `common-ui.tour.restart` | `Tour neu starten` |
+| en     | `common-ui.tour.restart` | `Help`           |
+| de     | `common-ui.tour.restart` | `Hilfe`          |
 
 You can override this translation in your application's i18n configuration files.
 
@@ -98,5 +98,5 @@ You can override this translation in your application's i18n configuration files
 
 - [Onboarding](./onboarding.md) — The renderless tour driver component
 - [NavigationBar](./navigationbar.md) — Includes the `OnboardingRestartButton` by default
-- [DisclaimerButton](./disclaimerbutton.md) — Similar pattern for re-triggering the disclaimer flow
-- [Changelogs](./changelogs.md) — Similar pattern for re-triggering the changelogs flow
+- [DisclaimerButton](./disclaimerbutton.md) — Similar pattern for re-triggering the disclaimer flow (now part of `DataBsFooter`)
+- [Changelogs](./changelogs.md) — Similar pattern for re-triggering the changelogs flow (now part of `DataBsFooter`)

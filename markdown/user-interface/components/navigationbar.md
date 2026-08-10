@@ -2,7 +2,7 @@
 outline: deep
 skillParent: dcc-ui
 skillName: navigation-bar
-skillDescription: "NavigationBar is a responsive top nav bar with left/center/right slots plus rightPreItems/rightPostItems, including built-in SystemStatus, LanguageSelect, OnboardingRestartButton, and AppSwitcher with i18n app-name branding. Use when building the app header/top navigation."
+skillDescription: "NavigationBar is a responsive top nav bar with left/center/right slots plus rightPreItems/rightPostItems, including built-in SystemStatus, LanguageSelect, OnboardingRestartButton, and conditional AppSwitcher with i18n app-name branding. Use when building the app header/top navigation."
 ---
 <script setup lang="ts">
 import UiContainer from "../../../components/UiContainer.vue";
@@ -52,8 +52,9 @@ The `NavigationBar` component provides a flexible, responsive navigation bar wit
 - **Flexible Slot System**: Multiple slots for left, center, and right sections
 - **System Status**: Built-in system status indicator
 - **Language Switcher**: Built-in language selection component
+- **System Status**: Built-in system status indicator (shows only when offline)
 - **Onboarding Restart**: Built-in button to restart the onboarding tour
-- **App Switcher**: Optional app switcher when `otherApps` are provided
+- **App Switcher**: Optional app switcher when `otherApps` prop is provided
 - **Toggle Visibility**: Control individual built-in components via props
 - **Default Branding**: App name displayed by default on the left
 - **Nested Slot Support**: Fine-grained control over right section items
@@ -71,13 +72,29 @@ The `NavigationBar` component provides a flexible, responsive navigation bar wit
 | `showLanguageSelect`    | `boolean`            | `true`  | Whether to show the built-in LanguageSelect component.                                   |
 | `showOnboardingRestart` | `boolean`            | `true`  | Whether to show the built-in OnboardingRestartButton component.                          |
 
+### AppSwitcherApp Type
+
+```typescript
+interface AppSwitcherApp {
+    name: string;
+    /** Router path (internal SPA nav) or absolute URL (full app switch). */
+    to: string;
+    /** Nuxt Icon name, e.g. "i-lucide-mail". Takes precedence over `image`. */
+    icon?: string;
+    /** URL or public/ path to a raster image. Used only when `icon` is unset. */
+    image?: string;
+    /** Optional alt text for the image; defaults to `name`. */
+    alt?: string;
+}
+```
+
 ## Slots
 
 | Slot             | Description                                                                 | Default Content                                                                   |
 | ---------------- | --------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
 | `left`           | Content for the left section of the navigation bar                          | App name from `navigation.app` translation                                        |
 | `center`         | Content for the center section                                              | Empty                                                                             |
-| `right`          | Complete override of the right section                                      | SystemStatus + LanguageSelect + OnboardingRestartButton + AppSwitcher + nested slots |
+| `right`          | Complete override of the right section                                      | SystemStatus + LanguageSelect + OnboardingRestartButton + AppSwitcher (conditional) + nested slots |
 | `rightPreItems`  | Items to appear before the system status (within default right section)     | Empty                                                                             |
 | `rightPostItems` | Items to appear after the app switcher (within default right section)       | Empty                                                                             |
 
@@ -184,9 +201,10 @@ Add items before the system status:
 <template>
     <NavigationBar>
         <template #rightPreItems>
-            <button class="px-3 py-2 hover:bg-gray-100 rounded">
-                <UIcon name="i-lucide-bell" />
-            </button>
+            <AppSwitcher
+                :apps="apps"
+                footer-to="https://about.example.com/products/"
+                footer-label="More" />
         </template>
     </NavigationBar>
 </template>
@@ -197,10 +215,22 @@ Add items before the system status:
 Add items after the app switcher:
 
 ```vue
+<script setup lang="ts">
+import type { DropdownMenuItem } from '#ui/types';
+import { SettingsButton } from '@dcc-bs/common-ui.bs.js/components';
+
+const settingsItems = [
+    {
+        label: "Test Settings",
+        icon: "i-lucide-shield-check"
+    }
+] as DropdownMenuItem[];
+</script>
+
 <template>
     <NavigationBar>
         <template #rightPostItems>
-            <OnlineStatus />
+            <SettingsButton :items="settingsItems" />
         </template>
     </NavigationBar>
 </template>
@@ -216,7 +246,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-    <NavigationBar>
+    <NavigationBar :other-apps="apps">
         <template #left>
             <div class="flex items-center gap-2 ml-4">
                 <img src="/logo.png" alt="Logo" class="h-10" />
@@ -236,7 +266,7 @@ const { t } = useI18n();
         </template>
 
         <template #rightPostItems>
-            <OnlineStatus />
+            <SettingsButton :items="settingsItems" />
         </template>
     </NavigationBar>
 </template>
@@ -303,7 +333,7 @@ Use in your layout for consistent navigation:
                 <nav><!-- Your nav items --></nav>
             </template>
             <template #rightPostItems>
-                <OnlineStatus />
+                <SettingsButton :items="settingsItems" />
             </template>
         </NavigationBar>
 
