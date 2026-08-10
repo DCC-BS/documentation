@@ -27,7 +27,7 @@ const exampleCode = `<template>
 
 # NavigationBar
 
-The `NavigationBar` component provides a flexible, responsive navigation bar with customizable content areas. It includes built-in support for language switching, system status indicator, onboarding restart, and optional app switcher, with multiple slot areas for complete customization of the navigation layout.
+The `NavigationBar` component provides a flexible, responsive navigation bar with customizable content areas. It includes built-in support for system status, language switching, onboarding restart, and optional app switching, plus multiple slot areas for complete customization of the navigation layout.
 
 <UiContainer :code="exampleCode">
     <template #element>
@@ -50,10 +50,12 @@ The `NavigationBar` component provides a flexible, responsive navigation bar wit
 ## Features
 
 - **Flexible Slot System**: Multiple slots for left, center, and right sections
+- **System Status**: Built-in system status indicator
 - **Language Switcher**: Built-in language selection component
 - **System Status**: Built-in system status indicator (shows only when offline)
 - **Onboarding Restart**: Built-in button to restart the onboarding tour
 - **App Switcher**: Optional app switcher when `otherApps` prop is provided
+- **Toggle Visibility**: Control individual built-in components via props
 - **Default Branding**: App name displayed by default on the left
 - **Nested Slot Support**: Fine-grained control over right section items
 - **Responsive Design**: Adapts to mobile, tablet, and desktop screens
@@ -62,9 +64,13 @@ The `NavigationBar` component provides a flexible, responsive navigation bar wit
 
 ## Props
 
-| Prop        | Type                | Required | Default | Description                                                        |
-| ----------- | ------------------- | -------- | ------- | ------------------------------------------------------------------ |
-| `otherApps` | `AppSwitcherApp[]`  | No       | —       | Array of apps for the built-in AppSwitcher. If omitted, the AppSwitcher is not rendered. |
+| Prop                    | Type                 | Default | Description                                                                              |
+| ----------------------- | -------------------- | ------- | ---------------------------------------------------------------------------------------- |
+| `otherApps`             | `AppSwitcherApp[]`   | —       | List of other apps to display in the AppSwitcher. If omitted, no AppSwitcher is shown.   |
+| `showAppSwitcher`       | `boolean`            | `true`  | Whether to show the AppSwitcher (requires `otherApps` to be provided).                   |
+| `showSystemStatus`      | `boolean`            | `true`  | Whether to show the built-in SystemStatus component.                                     |
+| `showLanguageSelect`    | `boolean`            | `true`  | Whether to show the built-in LanguageSelect component.                                   |
+| `showOnboardingRestart` | `boolean`            | `true`  | Whether to show the built-in OnboardingRestartButton component.                          |
 
 ### AppSwitcherApp Type
 
@@ -107,25 +113,48 @@ Simple navigation bar with default elements:
 This displays:
 
 - App name on the left (from `navigation.app` translation)
-- System status indicator on the right (visible only when offline)
+- System status indicator on the right
 - Language switcher on the right
 - Onboarding restart button on the right
 
+### Hiding Built-in Components
+
+Control which built-in components are visible using the boolean props:
+
+```vue
+<template>
+    <NavigationBar
+        :show-system-status="false"
+        :show-language-select="false"
+        :show-onboarding-restart="false"
+    />
+</template>
+```
+
 ### With App Switcher
 
-Pass the `otherApps` prop to render a built-in AppSwitcher in the right section:
+Provide a list of apps to display the AppSwitcher:
 
 ```vue
 <script setup lang="ts">
-const apps = [
-    { name: "Mail", to: "https://mail.example.com", icon: "i-lucide-mail" },
-    { name: "Calendar", to: "https://calendar.example.com", icon: "i-lucide-calendar" },
-    { name: "Drive", to: "https://drive.example.com" },
+import type { AppSwitcherApp } from "@dcc-bs/common-ui.bs.js/components";
+
+const otherApps: AppSwitcherApp[] = [
+    { name: "App A", url: "https://app-a.example.com" },
+    { name: "App B", url: "https://app-b.example.com" },
 ];
 </script>
 
 <template>
-    <NavigationBar :other-apps="apps" />
+    <NavigationBar :other-apps="otherApps" />
+</template>
+```
+
+To hide the AppSwitcher while keeping other defaults:
+
+```vue
+<template>
+    <NavigationBar :other-apps="otherApps" :show-app-switcher="false" />
 </template>
 ```
 
@@ -245,7 +274,7 @@ const { t } = useI18n();
 
 ### Override Right Section Completely
 
-Replace the entire right section if you don't want the default buttons:
+Replace the entire right section if you don't want the default components:
 
 ```vue
 <template>
@@ -261,7 +290,9 @@ Replace the entire right section if you don't want the default buttons:
 </template>
 ```
 
-**Note:** When you override the `right` slot, the `rightPreItems` and `rightPostItems` slots are not rendered, and you lose the default SystemStatus, LanguageSelect, OnboardingRestartButton, and AppSwitcher components unless you add them manually.
+::: warning
+When you override the `right` slot, the `rightPreItems` and `rightPostItems` slots are not rendered, and you lose the default SystemStatus, LanguageSelect, OnboardingRestartButton, and AppSwitcher components unless you add them manually. The `show*` props also have no effect in this case.
+:::
 
 ## i18n Configuration
 
@@ -353,10 +384,13 @@ The NavigationBar uses a flexbox layout with three main sections:
   <slot name="right">
     <div class="flex items-center gap-2">
       <slot name="rightPreItems" />
-      <SystemStatus />
-      <LanguageSelect />
-      <OnboardingRestartButton />
-      <AppSwitcher v-if="otherApps" :apps="otherApps" />
+      <SystemStatus v-if="props.showSystemStatus" />
+      <LanguageSelect v-if="props.showLanguageSelect" />
+      <OnboardingRestartButton v-if="props.showOnboardingRestart" />
+      <AppSwitcher
+        v-if="props.showAppSwitcher && props.otherApps"
+        :apps="props.otherApps"
+      />
       <slot name="rightPostItems" />
     </div>
   </slot>
@@ -377,18 +411,18 @@ If you don't provide a `left` slot, the component displays:
 
 ### Default Right Content
 
-The default `right` slot includes:
+The default `right` slot includes (in order):
 
 1. Content from `rightPreItems` slot
-2. SystemStatus (visible only when the system is offline)
-3. LanguageSelect
-4. OnboardingRestartButton
-5. AppSwitcher (only rendered when `otherApps` prop is provided)
+2. SystemStatus (if `showSystemStatus` is `true`)
+3. LanguageSelect (if `showLanguageSelect` is `true`)
+4. OnboardingRestartButton (if `showOnboardingRestart` is `true`)
+5. AppSwitcher (if `showAppSwitcher` is `true` and `otherApps` is provided)
 6. Content from `rightPostItems` slot
 
 ### Nested Slots vs Complete Override
 
-- **Use `rightPreItems` and `rightPostItems`**: When you want to keep the SystemStatus, LanguageSelect, OnboardingRestartButton, and AppSwitcher
+- **Use `rightPreItems` and `rightPostItems`**: When you want to keep the default SystemStatus, LanguageSelect, OnboardingRestartButton, and AppSwitcher
 - **Use `right` slot**: When you want complete control over the entire right section
 
 ## Styling

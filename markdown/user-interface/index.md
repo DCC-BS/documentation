@@ -129,6 +129,10 @@ The orchestrator owns all cookie writes. Individual flow components (Disclaimer,
 The `ChangelogsButton` and `DisclaimerButton` components can reset these cookies to re-trigger their respective flows on demand.
 :::
 
+::: info Cookie Security in Production
+In production, all first-run cookies are set with `sameSite: "none"`, `secure: true`, and `partitioned: true`. This means your application **must be served over HTTPS** for the cookies to be stored. In development (`import.meta.dev`), cookies use `sameSite: "lax"` and are not secure or partitioned, so local HTTP workflows are unaffected.
+:::
+
 ## Module Features
 
 When using this Nuxt module:
