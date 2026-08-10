@@ -1,8 +1,9 @@
 ---
+---
 outline: deep
 skillParent: dcc-ui
 skillName: navigation-bar
-skillDescription: "NavigationBar is a responsive top nav bar with left/center/right slots plus rightPreItems/rightPostItems, including built-in DisclaimerButton, ChangelogsButton, OnboardingRestartButton, and LanguageSelect with i18n app-name branding. Use when building the app header/top navigation."
+skillDescription: "NavigationBar is a responsive top nav bar with left/center/right slots plus rightPreItems/rightPostItems, including built-in SystemStatus, LanguageSelect, OnboardingRestartButton, and AppSwitcher with i18n app-name branding. Use when building the app header/top navigation."
 ---
 <script setup lang="ts">
 import UiContainer from "../../../components/UiContainer.vue";
@@ -27,7 +28,7 @@ const exampleCode = `<template>
 
 # NavigationBar
 
-The `NavigationBar` component provides a flexible, responsive navigation bar with customizable content areas. It includes built-in support for language switching, disclaimer button, changelogs access, onboarding restart, and multiple slot areas for complete customization of the navigation layout.
+The `NavigationBar` component provides a flexible, responsive navigation bar with customizable content areas. It includes built-in support for system status, language switching, onboarding restart, and optional app switching, plus multiple slot areas for complete customization of the navigation layout.
 
 <UiContainer :code="exampleCode">
     <template #element>
@@ -50,10 +51,11 @@ The `NavigationBar` component provides a flexible, responsive navigation bar wit
 ## Features
 
 - **Flexible Slot System**: Multiple slots for left, center, and right sections
+- **System Status**: Built-in system status indicator
 - **Language Switcher**: Built-in language selection component
-- **Disclaimer Button**: Integrated disclaimer access
-- **Changelogs Button**: Built-in access to changelogs on demand
 - **Onboarding Restart**: Built-in button to restart the onboarding tour
+- **App Switcher**: Optional app switcher when `otherApps` are provided
+- **Toggle Visibility**: Control individual built-in components via props
 - **Default Branding**: App name displayed by default on the left
 - **Nested Slot Support**: Fine-grained control over right section items
 - **Responsive Design**: Adapts to mobile, tablet, and desktop screens
@@ -62,7 +64,13 @@ The `NavigationBar` component provides a flexible, responsive navigation bar wit
 
 ## Props
 
-This component has no props - it uses slots for all customization.
+| Prop                    | Type                 | Default | Description                                                                              |
+| ----------------------- | -------------------- | ------- | ---------------------------------------------------------------------------------------- |
+| `otherApps`             | `AppSwitcherApp[]`   | —       | List of other apps to display in the AppSwitcher. If omitted, no AppSwitcher is shown.   |
+| `showAppSwitcher`       | `boolean`            | `true`  | Whether to show the AppSwitcher (requires `otherApps` to be provided).                   |
+| `showSystemStatus`      | `boolean`            | `true`  | Whether to show the built-in SystemStatus component.                                     |
+| `showLanguageSelect`    | `boolean`            | `true`  | Whether to show the built-in LanguageSelect component.                                   |
+| `showOnboardingRestart` | `boolean`            | `true`  | Whether to show the built-in OnboardingRestartButton component.                          |
 
 ## Slots
 
@@ -70,9 +78,9 @@ This component has no props - it uses slots for all customization.
 | ---------------- | --------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
 | `left`           | Content for the left section of the navigation bar                          | App name from `navigation.app` translation                                        |
 | `center`         | Content for the center section                                              | Empty                                                                             |
-| `right`          | Complete override of the right section                                      | DisclaimerButton + ChangelogsButton + OnboardingRestartButton + LanguageSelect + nested slots |
-| `rightPreItems`  | Items to appear before the disclaimer button (within default right section) | Empty                                                                             |
-| `rightPostItems` | Items to appear after the language select (within default right section)    | Empty                                                                             |
+| `right`          | Complete override of the right section                                      | SystemStatus + LanguageSelect + OnboardingRestartButton + AppSwitcher + nested slots |
+| `rightPreItems`  | Items to appear before the system status (within default right section)     | Empty                                                                             |
+| `rightPostItems` | Items to appear after the app switcher (within default right section)       | Empty                                                                             |
 
 ## Usage
 
@@ -89,10 +97,50 @@ Simple navigation bar with default elements:
 This displays:
 
 - App name on the left (from `navigation.app` translation)
-- Disclaimer button on the right
-- Changelogs button on the right
-- Onboarding restart button on the right
+- System status indicator on the right
 - Language switcher on the right
+- Onboarding restart button on the right
+
+### Hiding Built-in Components
+
+Control which built-in components are visible using the boolean props:
+
+```vue
+<template>
+    <NavigationBar
+        :show-system-status="false"
+        :show-language-select="false"
+        :show-onboarding-restart="false"
+    />
+</template>
+```
+
+### With App Switcher
+
+Provide a list of apps to display the AppSwitcher:
+
+```vue
+<script setup lang="ts">
+import type { AppSwitcherApp } from "@dcc-bs/common-ui.bs.js/components";
+
+const otherApps: AppSwitcherApp[] = [
+    { name: "App A", url: "https://app-a.example.com" },
+    { name: "App B", url: "https://app-b.example.com" },
+];
+</script>
+
+<template>
+    <NavigationBar :other-apps="otherApps" />
+</template>
+```
+
+To hide the AppSwitcher while keeping other defaults:
+
+```vue
+<template>
+    <NavigationBar :other-apps="otherApps" :show-app-switcher="false" />
+</template>
+```
 
 ### With Custom Left Content
 
@@ -131,7 +179,7 @@ Add navigation links in the center:
 
 ### With Right Pre Items
 
-Add items before the disclaimer button:
+Add items before the system status:
 
 ```vue
 <template>
@@ -147,7 +195,7 @@ Add items before the disclaimer button:
 
 ### With Right Post Items
 
-Add items after the language select:
+Add items after the app switcher:
 
 ```vue
 <template>
@@ -197,7 +245,7 @@ const { t } = useI18n();
 
 ### Override Right Section Completely
 
-Replace the entire right section if you don't want the default buttons:
+Replace the entire right section if you don't want the default components:
 
 ```vue
 <template>
@@ -213,7 +261,9 @@ Replace the entire right section if you don't want the default buttons:
 </template>
 ```
 
-**Note:** When you override the `right` slot, the `rightPreItems` and `rightPostItems` slots are not rendered, and you lose the default DisclaimerButton, ChangelogsButton, OnboardingRestartButton, and LanguageSelect components unless you add them manually.
+::: warning
+When you override the `right` slot, the `rightPreItems` and `rightPostItems` slots are not rendered, and you lose the default SystemStatus, LanguageSelect, OnboardingRestartButton, and AppSwitcher components unless you add them manually. The `show*` props also have no effect in this case.
+:::
 
 ## i18n Configuration
 
@@ -292,7 +342,7 @@ Make the navigation bar stick to the top:
 The NavigationBar uses a flexbox layout with three main sections:
 
 ```vue
-<div class="flex justify-between gap-2 p-2 w-full z-50">
+<div class="flex justify-between gap-2 px-4 py-2 w-full z-50">
   <!-- Left Section -->
   <slot name="left">
     <!-- Default: App name -->
@@ -305,10 +355,13 @@ The NavigationBar uses a flexbox layout with three main sections:
   <slot name="right">
     <div class="flex items-center gap-2">
       <slot name="rightPreItems" />
-      <DisclaimerButton variant="ghost" />
-      <ChangelogsButton />
-      <OnboardingRestartButton />
-      <LanguageSelect />
+      <SystemStatus v-if="props.showSystemStatus" />
+      <LanguageSelect v-if="props.showLanguageSelect" />
+      <OnboardingRestartButton v-if="props.showOnboardingRestart" />
+      <AppSwitcher
+        v-if="props.showAppSwitcher && props.otherApps"
+        :apps="props.otherApps"
+      />
       <slot name="rightPostItems" />
     </div>
   </slot>
@@ -322,25 +375,25 @@ The NavigationBar uses a flexbox layout with three main sections:
 If you don't provide a `left` slot, the component displays:
 
 ```vue
-<div class="text-xl font-bold mt-4 ml-4">
+<div class="text-xl font-bold">
   {{ t("navigation.app") }}
 </div>
 ```
 
 ### Default Right Content
 
-The default `right` slot includes:
+The default `right` slot includes (in order):
 
 1. Content from `rightPreItems` slot
-2. DisclaimerButton with `ghost` variant
-3. ChangelogsButton
-4. OnboardingRestartButton
-5. LanguageSelect component
+2. SystemStatus (if `showSystemStatus` is `true`)
+3. LanguageSelect (if `showLanguageSelect` is `true`)
+4. OnboardingRestartButton (if `showOnboardingRestart` is `true`)
+5. AppSwitcher (if `showAppSwitcher` is `true` and `otherApps` is provided)
 6. Content from `rightPostItems` slot
 
 ### Nested Slots vs Complete Override
 
-- **Use `rightPreItems` and `rightPostItems`**: When you want to keep the DisclaimerButton, ChangelogsButton, OnboardingRestartButton, and LanguageSelect
+- **Use `rightPreItems` and `rightPostItems`**: When you want to keep the default SystemStatus, LanguageSelect, OnboardingRestartButton, and AppSwitcher
 - **Use `right` slot**: When you want complete control over the entire right section
 
 ## Styling
@@ -349,32 +402,6 @@ The component uses utility classes for layout:
 
 - `flex justify-between`: Distributes space between sections
 - `gap-2`: Spacing between elements
-- `p-2`: Padding around the entire bar
+- `px-4 py-2`: Horizontal and vertical padding around the bar
 - `w-full`: Full width
 - `z-50`: High z-index for layering
-
-## Migration Guide
-
-If you're migrating from an older version with only `center` and `right` slots:
-
-**Old:**
-
-```vue
-<NavigationBar>
-  <template #right>
-    <OnlineStatus />
-  </template>
-</NavigationBar>
-```
-
-**New:**
-
-```vue
-<NavigationBar>
-  <template #rightPostItems>
-    <OnlineStatus />
-  </template>
-</NavigationBar>
-```
-
-This allows you to keep the default DisclaimerButton, ChangelogsButton, OnboardingRestartButton, and LanguageSelect while adding your custom content.
