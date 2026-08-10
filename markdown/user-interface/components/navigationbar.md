@@ -1,5 +1,4 @@
 ---
----
 outline: deep
 skillParent: dcc-ui
 skillName: navigation-bar
