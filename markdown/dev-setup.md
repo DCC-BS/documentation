@@ -73,7 +73,7 @@ mise run dev
 
 # Run checks / tests
 mise run check
-mise run test
+mise run test:unit
 ```
 
 Run `mise tasks` to see all tasks available in a project. Check the `README.md`

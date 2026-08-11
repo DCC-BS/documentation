@@ -60,7 +60,7 @@ to guess. Run `mise tasks` in any project to see what is available.
 
 ### JavaScript / Nuxt apps
 
-`install`, `dev`, `build`, `preview`, `tsc`, `lint`, `check`, `test`,
+`install`, `dev`, `build`, `preview`, `tsc`, `lint`, `check`, `test:unit`,
 `test:watch`, `test:coverage`, `test:e2e`, `test:e2e:ui`, `docker:up`,
 `docker:down`.
 
@@ -69,13 +69,13 @@ Apps that use varlock also expose `env-check` (alias `env`) and `dummy`
 
 ### Python backends
 
-`install`, `dev`, `run`, `check`, `ci-check`, `test`, `ci`, `docker:up`,
+`install`, `dev`, `run`, `check`, `ci-check`, `test:unit`, `ci`, `docker:up`,
 `docker:down`, `docker:logs`. Projects with extra needs add `integration`,
 `build`, or `env-example`.
 
 ### Libraries (`.bs.js` modules, `backend-common`)
 
-A reduced set: `install`, `dev`, `build`/`prepack`, `check`, `lint`, `test`,
+A reduced set: `install`, `dev`, `build`/`prepack`, `check`, `lint`, `test:unit`,
 `release`. Libraries do **not** use varlock/pass-cli, so they have no hooks.
 
 ## Secrets hooks
