@@ -209,11 +209,16 @@ class SummaryAgent(BaseAgent[None, SummaryResult]):
 
 | Aspect | Behaviour |
 |--------|-----------|
-| Retried on | `httpx.TransportError` (connection/transport) and `httpx.HTTPStatusError` (any non-2xx, including 429) |
+| Retried on | `httpx.TransportError` (excluding `httpx.ConnectError`) and `httpx.HTTPStatusError` (any non-2xx, including 429) |
+| Not retried | `httpx.ConnectError` (fails fast when connection is refused/down, avoiding wasted delays per request; `ConnectTimeout` is still retried) |
 | Attempts | `config.llm_max_retries + 1` (default 2 retries = 3 attempts) |
 | Backoff | Honours the `Retry-After` header; otherwise exponential backoff (multiplier 1, max 60s), capped at 300s per wait |
 | Timeout | `config.llm_timeout` on both the httpx client and the model settings |
 | On exhaustion | The last exception is re-raised (`reraise=True`) |
+
+::: tip Single-layer retry guarantee
+The underlying OpenAI SDK client is configured with `max_retries=0`. All retry logic is centralized in the tenacity transport layer, preventing exponential attempt multiplication between the SDK and transport retries.
+:::
 
 Tune it through the config rather than the agent:
 
