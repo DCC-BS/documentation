@@ -140,3 +140,77 @@ run = [
 For a monorepo of independent packages (e.g. `nuxt-layers`), a single root
 `mise.toml` pins `bun` + `node` so every sub-package inherits the same
 toolchain. Per-package `package.json` and `biome.json` stay in place.
+
+## System packages (`bootstrap.packages`)
+
+mise can ensure **machine-global system packages** are installed via the
+`[bootstrap.packages]` section, applied with `mise bootstrap`. These are kept
+separate from `[tools]`: they are not version-pinned per-project, do not get
+shims, and are installed by the platform's package manager (e.g. `apt`).
+
+```toml
+[bootstrap.packages]
+"apt:libcairo2" = "latest"
+"apt:libcups2t64" = "latest"
+"apt:fonts-liberation" = "latest"
+```
+
+Entries are keyed `"manager:package"` — the manager prefix is required — and the
+value is a version (`"latest"` or a native pin). Entries are **OS-filtered**
+(`apt:` lines are ignored on macOS), **declarative/additive**, and mise **never
+installs system packages implicitly** — only `mise bootstrap` does.
+
+Useful commands:
+
+```bash
+mise bootstrap packages status            # requested vs installed
+mise bootstrap packages status --missing  # exit 1 if out of sync (CI check)
+mise bootstrap packages apply             # install whatever is missing
+mise bootstrap packages apply --yes       # skip the confirmation prompt
+mise bootstrap packages apply --dry-run   # preview without installing
+```
+
+Linux package managers require root; mise elevates with `sudo` (prompts for a
+password, or errors with the exact command in non-interactive shells). In
+containers you are typically already root, so `mise bootstrap packages apply --yes`
+runs without prompts.
+
+## Playwright browser setup
+
+JavaScript/Nuxt projects that run Playwright E2E tests need both the **Playwright
+browser binaries** and the **OS-level libraries** they depend on. In this repo
+both are wired through mise:
+
+- **Browser binaries** — installed by the `playwright:install-browser` task
+  (run from the `install` task). It calls `bunx playwright install chromium`,
+  which is a no-op when the matching revision already exists in
+  `~/.cache/ms-playwright/`:
+
+  ```bash
+  mise run playwright:install-browser
+  ```
+
+  Pass `--with-deps` to also install the OS libraries via the system package
+  manager (useful for bootstrapping a fresh machine):
+
+  ```bash
+  mise run playwright:install-browser --with-deps
+  ```
+
+- **OS-level libraries** — declared declaratively as `[bootstrap.packages]` with
+  the `apt:` prefix, mirroring the chromium + tools lists Playwright ships for
+  Ubuntu (e.g. `libasound2t64`, `libatk1.0-0t64`, `libnss3`, `libgtk-3-0t64`,
+  `fonts-liberation`, `xvfb`). Apply them with:
+
+  ```bash
+  mise bootstrap packages apply
+  ```
+
+  This replaces ad-hoc `bunx playwright install --with-deps` calls and is
+  idempotent — already-installed packages are skipped.
+
+To see the exact package list a given Playwright version needs, run:
+
+```bash
+bunx playwright install-deps chromium --dry-run
+```

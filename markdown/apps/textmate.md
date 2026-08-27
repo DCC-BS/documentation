@@ -31,6 +31,17 @@ Available in German and English.
 - Frontend: [github.com/DCC-BS/text-mate-frontend](https://github.com/DCC-BS/text-mate-frontend)
 - Backend: [github.com/DCC-BS/text-mate-backend](https://github.com/DCC-BS/text-mate-backend)
 
+## Local Development
+
+TextMate is driven entirely through **mise**. After `mise trust`, run
+`mise run install` to install dependencies and prepare the environment, then
+`mise run dev` to start the Nuxt dev server.
+
+E2E tests use Playwright. The browser binaries are installed via the
+`playwright:install-browser` task, and the required OS-level libraries are
+declared as `[bootstrap.packages]` and applied with `mise bootstrap packages apply`.
+See the [mise guide](/dev-setup/mise#playwright-browser-setup) for details.
+
 ## Architecture Overview
 
 ```mermaid
