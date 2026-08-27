@@ -4,7 +4,7 @@ import { VPTeamMembers } from 'vitepress/theme'
 const members = [
   {
     avatar: 'https://avatars.githubusercontent.com/u/5276871?v=4',
-    name: 'Tobias Bolinger',
+    name: 'Tobias Bollinger',
     title: 'Developer',
     links: [
       { icon: 'github', link: 'https://github.com/swordbreaker' },
