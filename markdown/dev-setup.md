@@ -22,8 +22,7 @@ versions and task names.
 | **[uv](https://docs.astral.sh/uv/)** | Python package & project management | [Installation Guide](https://docs.astral.sh/uv/getting-started/installation/) |
 | **[Bun](https://bun.sh/)** | JS/TS runtime & package management | [Installation Guide](https://bun.sh/docs/installation) |
 
-- **Python Version:** Pinned to **3.13** via mise (`python = "3.13"` in `mise.toml`).
-- **Node.js / Bun Versions:** Pinned via mise (`node = "24.9.0"`, `bun = "1.3.0"`).
+- **Tool Versions:** Pinned per project in `mise.toml` — no global installs needed. See the [mise tooling standard](/dev-setup/mise) for details.
 - **Tasks:** Every project is driven through `mise run <task>` (`install`, `dev`, `check`, `test`, …) — see the [standard task names](/dev-setup/mise#standard-task-names).
 
 ## 2. Containerization
@@ -60,25 +59,35 @@ Ensure you follow our language-specific guidelines:
 
 ## 5. Local Project Initialization
 
-Once your environment is set up, every project is driven through mise. After
-`mise trust`, the `postinstall` hook runs automatically; otherwise start with
-`mise run install`:
+Once your environment is set up, every project is driven through mise. Getting
+started is always the same three steps:
 
 ```bash
-# Any project — install dependencies and prepare the environment
-mise run install
+# 1. Approve the project's mise.toml (once per project)
+mise trust
 
-# Start the dev server (Python or Nuxt)
+# 2. Provision the pinned toolchain and install dependencies
+#    (also installs system packages declared in [bootstrap.packages])
+mise bootstrap packages apply
+mise install
+
+# 3. Run the app
 mise run dev
-
-# Run checks / tests
-mise run check
-mise run test:unit
 ```
 
-Run `mise tasks` to see all tasks available in a project. Check the `README.md`
-of the specific repository for project-specific instructions and required `.env`
-variables.
+The `postinstall` hook usually runs the `install` task automatically after
+`mise install`; otherwise start with `mise run install`.
+
+Common tasks in any project:
+
+```bash
+mise run check        # lint, format, type-check
+mise run test:unit    # unit tests
+mise tasks            # list all tasks available in this project
+```
+
+Check the `README.md` of the specific repository for project-specific
+instructions and required `.env` variables.
 
 ## 6. Environment Variables & Secrets
 

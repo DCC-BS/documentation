@@ -98,16 +98,30 @@ IS_BUILDTIME=not(eq($APP_MODE, prod))
 
 ### Docker Integration
 
-The Dockerfile uses varlock as entrypoint for runtime validation:
+The Dockerfile uses varlock as entrypoint for runtime validation. The varlock
+binary is **not** copied from a separate image anymore — it is assembled into
+`/runtime` by the shared `assemble-runtime` script on the
+[mise base image](/coding/docker-images):
 
 ```dockerfile
 # Runtime stage
 ENV APP_MODE=prod
-COPY --from=ghcr.io/dmno-dev/varlock:latest /usr/local/bin/varlock /usr/local/bin/varlock
-ENTRYPOINT ["varlock", "run", "--", "node", "./server/index.mjs"]
+ENV PATH="/runtime/varlock:/app/.venv/bin:$PATH"
+COPY --from=build --chown=app:app /runtime /runtime
+ENTRYPOINT ["/bin/sh", "-c", "varlock load && varlock run -- uvicorn text_mate_backend.app:app --host 0.0.0.0 --port \"${PORT:-8090}\" --no-access-log"]
 ```
 
-This ensures env vars are validated before the app starts.
+For Nuxt/node apps the npm varlock package is assembled into `/runtime/varlock`
+and run directly with the runtime node:
+
+```dockerfile
+ENV PATH="/runtime/node/bin:$PATH"
+COPY --from=build --chown=node:node /runtime /runtime
+ENTRYPOINT ["node", "/runtime/varlock/bin/cli.js", "run", "--", "node", "./server/index.mjs"]
+```
+
+This ensures env vars are validated before the app starts. See the
+[Shared Docker Images](/coding/docker-images) page for the full templates.
 
 ### Type Generation
 

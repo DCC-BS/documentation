@@ -24,7 +24,7 @@ features:
     linkText: View Applications
 
   - title: Docker
-    details: Container standards, best practices for Dockerfiles, and deployment configurations.
+    details: Container standards, best practices for Dockerfiles, and the shared DCC-BS base image and templates.
     icon: 
       light: https://cdn.simpleicons.org/docker
       dark: https://cdn.simpleicons.org/docker/white

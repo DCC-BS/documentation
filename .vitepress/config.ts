@@ -64,6 +64,10 @@ export default withMermaid({
                 link: "/coding/index.md",
                 items: [
                     { text: "Docker", link: "/coding/docker.md" },
+                    {
+                        text: "Shared Docker Images",
+                        link: "/coding/docker-images.md",
+                    },
                     { text: "Python", link: "/coding/python" },
                     { text: "Nuxt / Vue", link: "/coding/nuxt" },
                 ],
