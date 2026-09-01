@@ -1,0 +1,24 @@
+[tools]
+bun = "1.3.14"
+usage = "4.1.0"
+node = "24.19.0"
+
+[hooks]
+postinstall = { task = "install" }
+
+[tasks.install]
+env = { APP_MODE = "build" }
+description = "install npm packages"
+run = "bun install"
+
+[tasks.dev]
+description = "start the development server"
+run = "bunx vitepress dev"
+
+[tasks.build]
+description = "build the production bundle"
+run = "bunx vitepress build"
+
+[tasks.check]
+description = "check and fix linting issues"
+run = "bunx biome check --fix"

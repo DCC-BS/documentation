@@ -41,6 +41,7 @@ function writeCookie(
     if (options.domain) parts.push(`Domain=${options.domain}`);
     if (options.secure) parts.push("Secure");
     if (options.sameSite) parts.push(`SameSite=${options.sameSite}`);
+    // biome-ignore lint/suspicious/noDocumentCookie: intentional synchronous cookie write for the SSR-compatible useCookie shim
     document.cookie = parts.join("; ");
 }
 

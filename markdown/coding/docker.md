@@ -53,6 +53,13 @@ dist
 
 * Minimal Base Images: Prefer `alpine` or `slim` (only if `alpine` fails) variants to reduce image size and download time.
 
+::: tip Shared Base Image
+DCC-BS apps should build on the shared [mise base image](/coding/docker-images)
+(`ghcr.io/dcc-bs/dcc-docker-images/mise`) and copy in the
+[`fastapi`/`nuxt` templates](/coding/docker-images) rather than hand-rolling
+their own base image. This keeps the runtime-assembly logic in one place.
+:::
+
 ## Multi-Stage Builds
 
 Use multi-stage builds to separate build dependencies (compilers, headers, full CLI tools) from runtime dependencies.
@@ -149,98 +156,123 @@ For comprehensive documentation on Nuxt layer configuration and all available la
 
 ```dockerfile
 # Stage 1: Build
-FROM node:24-alpine AS build
+FROM ghcr.io/dcc-bs/dcc-docker-images/mise:13-slim AS build
 
-# Install Bun
-RUN npm install -g bun
+ENV APP_MODE=build
+ARG AUTH_LAYER_URI="github:DCC-BS/nuxt-layers/azure-auth"
+ARG LOGGER_LAYER_URI="github:DCC-BS/nuxt-layers/pino-logger"
+ENV NODE_ENV=production
+ENV DOCKER_BUILD=1
 
 WORKDIR /app
 
-# Build arguments for Nuxt layer configuration (see section above)
-ARG AUTH_LAYER_URI
-ARG LOGGER_LAYER_URI
+# Set Node.js memory limit for build process
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 
-# Dependency caching layer
-COPY package.json bun.lock ./
-RUN bun install --frozen-lockfile
+# Copy mise.toml, package.json and bun.lock
+COPY ./mise.toml ./package*.json ./bun.lock* ./
 
-# Build layer - ARGs are injected as env vars, Nuxt reads via process.env
+# Install the pinned toolchain (node, varlock) from mise.toml
+RUN mise trust -a && mise install
+
+# Copy source code
 COPY . .
-RUN bun x nuxi prepare
-RUN bun x nuxi build
 
-# Stage 2: Runtime (ARGs not needed - layers compiled into .output)
-FROM node:24-alpine
+# Build the application
+RUN mise run nuxt:prepare
+RUN mise run build
+
+# Assemble a minimal runtime: only node + varlock
+RUN assemble-runtime node
+
+# Stage 2: Runtime
+FROM debian:13-slim
 
 WORKDIR /app
 
 # Security: Set non-root user
+RUN useradd --create-home --uid 1000 node
+
+ENV NODE_ENV=production
+ENV APP_MODE=prod
+ENV NITRO_PORT=3000
+
+# Runtime node is the one assembled from mise in the build stage
+ENV PATH="/runtime/node/bin:$PATH"
+
+# Copy artifacts and the minimal runtime (node + varlock)
+COPY --from=build --chown=node:node /app/.output ./
+COPY --from=build --chown=node:node /app/env.d.ts /app/
+COPY --chown=node:node .env*.schema /app/
+COPY --from=build --chown=node:node /runtime /runtime
+
 USER node
 
-# Copy artifacts
-COPY --from=build --chown=node:node /app/.output ./
-
 EXPOSE 3000
-ENV NODE_ENV=production
 
-ENTRYPOINT ["node", "./server/index.mjs"]
+# Start the application: run varlock's CLI directly with the runtime node
+ENTRYPOINT ["node", "/runtime/varlock/bin/cli.js", "run", "--", "node", "./server/index.mjs"]
 ```
 
-### Python (Alpine)
-```
+### Python (uv)
+
+```dockerfile
 # Stage 1: Builder
-FROM python:3.13-alpine as builder
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+FROM ghcr.io/dcc-bs/dcc-docker-images/mise:13-slim AS build
 
-WORKDIR /app
+# Optional GitHub token to raise the API rate limit when mise resolves varlock
+ARG GITHUB_TOKEN=""
+ENV GITHUB_TOKEN="${GITHUB_TOKEN}"
 
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+ENV APP_MODE=build
+ENV DOCKER_BUILD=1
 ENV UV_COMPILE_BYTECODE=1
 ENV UV_LINK_MODE=copy
-
-# Install build dependencies
-RUN apk add --no-cache gcc musl-dev
-
-# Copy dependency files
-COPY pyproject.toml uv.lock ./
-
-# Install dependencies
-# --locked: Sync with lockfile
-# --no-dev: Exclude development dependencies
-# --no-install-project: Install dependencies only (caching layer)
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --locked --no-dev --no-install-project --no-editable
-
-# Copy application code
-COPY . /app
-
-# Sync project
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --locked --no-dev --no-editable
-
-# Stage 2: Runtime
-FROM python:3.13-alpine
+ENV UV_HTTP_TIMEOUT=120
+# uv installs its own python here; a stable path so the runtime copy below
+# never hardcodes the python version or architecture.
+ENV UV_PYTHON_INSTALL_DIR="/uv-python"
 
 WORKDIR /app
 
-# Create non-root user (Alpine syntax)
-RUN addgroup -S app && adduser -S app -G app
+# Copy source code (the `install` task's `uv sync` installs the project
+# editable, so source must be present before `mise install` runs)
+COPY . .
 
-# Copy the environment, but not the source code
-COPY --from=builder --chown=app:app /app/.venv /app/.venv
+# Install the pinned toolchain (uv, varlock) from mise.toml. The postinstall
+# hook runs the `install` task, which does `uv sync --locked --no-dev` (because
+# DOCKER_BUILD=1) and auto-installs the python pinned by `requires-python`.
+RUN mise trust -a && mise install
 
-# Copy application code
-COPY . /app
+# Assemble a minimal runtime: only python + varlock
+RUN assemble-runtime python
 
-# Enable virtual environment
-ENV PATH="/app/.venv/bin:$PATH"
+# Stage 2: Runtime
+FROM debian:13-slim
 
-RUN chown -R app:app /app
+WORKDIR /app
+
+# Create non-root user
+RUN useradd --create-home --uid 1000 app
+
+ENV APP_MODE=prod
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# Runtime python is the one assembled from uv in the build stage
+ENV PATH="/runtime/varlock:/app/.venv/bin:$PATH"
+
+# Copy the built application and the minimal runtime (python + varlock)
+COPY --from=build --chown=app:app /app /app
+COPY --from=build --chown=app:app /runtime /runtime
+COPY --chown=app:app .env*.schema /app/
 
 USER app
 
-CMD ["uv", "run", "main"]
+EXPOSE 8000
+
+# Start the application: load env via varlock, then run uvicorn with the runtime python
+ENTRYPOINT ["/bin/sh", "-c", "varlock load && varlock run -- uvicorn text_mate_backend.app:app --host 0.0.0.0 --port \"${PORT:-8090}\" --no-access-log"]
 ```
 
 # 3. Orchestration & Composition

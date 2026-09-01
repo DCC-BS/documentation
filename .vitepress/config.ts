@@ -1,8 +1,8 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import VueI18nPlugin from "@intlify/unplugin-vue-i18n/vite";
 import ui from "@nuxt/ui/vite";
 import tailwindcss from "@tailwindcss/vite";
-import path from "path";
-import { fileURLToPath } from "url";
 import type { Plugin } from "vitepress";
 import llmstxt from "vitepress-plugin-llms";
 import { withMermaid } from "vitepress-plugin-mermaid";
@@ -47,9 +47,16 @@ export default withMermaid({
                 text: "Setup & Tooling",
                 items: [
                     { text: "Dev Setup", link: "/dev-setup" },
+                    { text: "Tooling (mise)", link: "/dev-setup/mise" },
                     { text: "Envroment variables", link: "/dev-setup/varlock" },
-                    { text: "AI Assisted Coding", link: "/dev-setup/ai-coding" },
-                    { text: "Development Workflow", link: "/dev-setup/development-workflow" },
+                    {
+                        text: "AI Assisted Coding",
+                        link: "/dev-setup/ai-coding",
+                    },
+                    {
+                        text: "Development Workflow",
+                        link: "/dev-setup/development-workflow",
+                    },
                 ],
             },
             {
@@ -57,6 +64,10 @@ export default withMermaid({
                 link: "/coding/index.md",
                 items: [
                     { text: "Docker", link: "/coding/docker.md" },
+                    {
+                        text: "Shared Docker Images",
+                        link: "/coding/docker-images.md",
+                    },
                     { text: "Python", link: "/coding/python" },
                     { text: "Nuxt / Vue", link: "/coding/nuxt" },
                 ],

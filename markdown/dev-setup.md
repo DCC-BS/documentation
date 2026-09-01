@@ -9,15 +9,21 @@ This guide provides a condensed overview of the tools and configurations require
 
 ## 1. Core Runtime & Package Managers
 
-We use **uv** for Python and **Bun** for JavaScript/TypeScript to ensure the fastest possible dependency resolution and execution.
+We use **[mise](https://mise.jdx.dev/)** to pin and activate the exact runtime
+versions in every project, **uv** for Python package management, and **Bun** for
+JavaScript/TypeScript. Install mise once; entering a project directory activates
+the pinned `bun`, `node`, `python`, and `uv` automatically (run `mise trust` the
+first time). See the [mise tooling standard](/dev-setup/mise) for the canonical
+versions and task names.
 
 | Tool | Purpose | Installation |
 |------|---------|--------------|
+| **[mise](https://mise.jdx.dev/)** | Runtime version manager + task runner (every project's entry point) | [Getting Started](https://mise.jdx.dev/getting-started.html) |
 | **[uv](https://docs.astral.sh/uv/)** | Python package & project management | [Installation Guide](https://docs.astral.sh/uv/getting-started/installation/) |
 | **[Bun](https://bun.sh/)** | JS/TS runtime & package management | [Installation Guide](https://bun.sh/docs/installation) |
 
-- **Python Version:** We target **Python 3.13**.
-- **Node.js Version:** Managed via Bun.
+- **Tool Versions:** Pinned per project in `mise.toml` — no global installs needed. See the [mise tooling standard](/dev-setup/mise) for details.
+- **Tasks:** Every project is driven through `mise run <task>` (`install`, `dev`, `check`, `test`, …) — see the [standard task names](/dev-setup/mise#standard-task-names).
 
 ## 2. Containerization
 
@@ -53,19 +59,35 @@ Ensure you follow our language-specific guidelines:
 
 ## 5. Local Project Initialization
 
-Once your environment is set up, you can typically start a project with:
+Once your environment is set up, every project is driven through mise. Getting
+started is always the same three steps:
 
 ```bash
-# For Python projects
-uv sync
-uv run main.py
+# 1. Approve the project's mise.toml (once per project)
+mise trust
 
-# For Nuxt projects
-bun install
-bun run dev
+# 2. Provision the pinned toolchain and install dependencies
+#    (also installs system packages declared in [bootstrap.packages])
+mise bootstrap packages apply
+mise install
+
+# 3. Run the app
+mise run dev
 ```
 
-Check the `README.md` of the specific repository for project-specific instructions and required `.env` variables.
+The `postinstall` hook usually runs the `install` task automatically after
+`mise install`; otherwise start with `mise run install`.
+
+Common tasks in any project:
+
+```bash
+mise run check        # lint, format, type-check
+mise run test:unit    # unit tests
+mise tasks            # list all tasks available in this project
+```
+
+Check the `README.md` of the specific repository for project-specific
+instructions and required `.env` variables.
 
 ## 6. Environment Variables & Secrets
 
