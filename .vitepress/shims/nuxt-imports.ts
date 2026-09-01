@@ -1,5 +1,4 @@
-/** biome-ignore-all lint/suspicious/noExplicitAny: <explanation> */
-import type { Head } from "@unhead/vue";
+/** biome-ignore-all lint/suspicious/noExplicitAny: shims mirror Nuxt's untyped API surface */
 import { type App, computed, type Ref, ref } from "vue";
 
 /**
@@ -250,8 +249,8 @@ export function defineShortcuts(shortcuts: any) {
  * Shim for Nuxt's useRuntimeHook
  */
 export function useRuntimeHook(
-    name: string,
-    callback: (...args: any[]) => any,
+    _name: string,
+    _callback: (...args: any[]) => any,
 ) {
     // No-op for VitePress
     return () => {};
@@ -260,6 +259,6 @@ export function useRuntimeHook(
 /**
  * Shim for Nuxt's clearError
  */
-export function clearError(options?: any) {
+export function clearError(_options?: any) {
     // No-op for VitePress
 }

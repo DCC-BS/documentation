@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import {
     Disclaimer,
-    DisclaimerButton,
 } from "@dcc-bs/common-ui.bs.js/components";
 import { computed, onMounted, ref } from "vue";
 import { useCookie } from "../.vitepress/shims/nuxt-imports";
@@ -26,6 +25,7 @@ onMounted(() => {
 
 function showDisclaimer() {
     disclaimerAcceptedVersion.value = undefined;
+    isDisclaimerOpen.value = true;
 }
 
 const scriptClose = "</" + "script>";
@@ -56,7 +56,7 @@ ${scriptClose}
             <Disclaimer v-if="isDisclaimerOpen" :confirmation-text="props.confirmationText" :app-name="props.appName"
                 :content-html="props.contentHtml" :postfix-html="props.postfixHtml" @finished="isDisclaimerOpen = false"></Disclaimer>
 
-            <button @click="isDisclaimerOpen = true">
+            <button type="button" @click="showDisclaimer">
                 Show Disclaimer
             </button>
         </template>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { codeToHtml } from "shiki";
-import { nextTick, onMounted, ref, watch } from "vue";
+import { nextTick, onMounted, ref, type VNode, watch } from "vue";
 
 const props = defineProps<{
     code?: string;
@@ -36,23 +36,26 @@ watch(
 
 function formatHTML(html: string): string {
     // Remove leading/trailing whitespace
-    html = html.trim();
+    const trimmed = html.trim();
 
     // Basic formatting: add indentation
+    const lines = trimmed.split(/>\s*</).map((rawLine, index, all) => {
+        let line = rawLine;
+        if (index > 0) line = `<${line}`;
+        if (index < all.length - 1) line = `${line}>`;
+        return line;
+    });
+
     let formatted = "";
     let indent = 0;
-    const lines = html.split(/>\s*</);
 
-    lines.forEach((line, index) => {
-        if (index > 0) line = "<" + line;
-        if (index < lines.length - 1) line = line + ">";
-
+    lines.forEach((line) => {
         // Decrease indent for closing tags
         if (line.match(/^<\/\w/)) indent = Math.max(0, indent - 1);
 
         // Add the line with current indentation
         if (line.trim()) {
-            formatted += "  ".repeat(indent) + line.trim() + "\n";
+            formatted += `${"  ".repeat(indent)}${line.trim()}\n`;
         }
 
         // Increase indent for opening tags (but not self-closing or closing tags)
@@ -63,8 +66,8 @@ function formatHTML(html: string): string {
 }
 
 const slots = defineSlots<{
-    element?: any;
-    code?: any;
+    element?: () => VNode[];
+    code?: () => VNode[];
 }>();
 </script>
 
@@ -79,12 +82,12 @@ const slots = defineSlots<{
 
         <!-- Code Toggle Button -->
         <div class="toggle-section">
-            <button @click="showCode = !showCode" class="toggle-button">
-                <svg v-if="!showCode" class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button type="button" @click="showCode = !showCode" class="toggle-button">
+                <svg v-if="!showCode" aria-hidden="true" class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
                 </svg>
-                <svg v-else class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg v-else aria-hidden="true" class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
                 <span>{{ showCode ? "Hide Code" : "Show Code" }}</span>
@@ -151,12 +154,12 @@ const slots = defineSlots<{
 
 /* Remove margins from slotted code blocks */
 .code-section :deep(div[class*="language-"]) {
-    margin: 0 !important;
-    border-radius: 0 !important;
+    margin: 0;
+    border-radius: 0;
 }
 
-.code-section :deep(pre) {
-    margin: 0 !important;
+.code-section :deep(div[class*="language-"] pre) {
+    margin: 0;
 }
 
 /* Fallback plain code styling */

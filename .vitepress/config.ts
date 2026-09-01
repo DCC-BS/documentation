@@ -1,8 +1,8 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import VueI18nPlugin from "@intlify/unplugin-vue-i18n/vite";
 import ui from "@nuxt/ui/vite";
 import tailwindcss from "@tailwindcss/vite";
-import path from "path";
-import { fileURLToPath } from "url";
 import type { Plugin } from "vitepress";
 import llmstxt from "vitepress-plugin-llms";
 import { withMermaid } from "vitepress-plugin-mermaid";
