@@ -189,16 +189,18 @@ async function buildSitemap(
         if (!hasIndexReference) return { sitemap: "", subSkillsCount: 0 };
         return {
             sitemap:
-                `\n### Reference Guidelines\n` +
-                `Detailed guidelines are available in the \`references/index.md\` file inside this skill.\n`,
+                "\n### Reference Guidelines\n" +
+                "Detailed guidelines are available in the `references/index.md` file inside this skill.\n",
             subSkillsCount: 0,
         };
     }
 
-    let sitemap = `\n### Reference Sub-Guidelines\n`;
-    sitemap += `The following reference sub-guides are available in this skill directory. Read them using your file reading tools as needed:\n\n`;
+    let sitemap = "\n### Reference Sub-Guidelines\n";
+    sitemap +=
+        "The following reference sub-guides are available in this skill directory. Read them using your file reading tools as needed:\n\n";
     if (hasIndexReference) {
-        sitemap += `- **[Overview](references/index.md)**: Module overview, setup, and shared conventions.\n`;
+        sitemap +=
+            "- **[Overview](references/index.md)**: Module overview, setup, and shared conventions.\n";
     }
 
     let subSkillsCount = 0;

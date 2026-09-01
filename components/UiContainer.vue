@@ -19,16 +19,20 @@ onMounted(async () => {
     }
 });
 
-watch(() => props.code, async () => {
-    displayCode.value = await codeToHtml(props.code || capturedCode.value, {
-        lang: "vue",
-        themes: {
-            light: "github-light",
-            dark: "github-dark",
-        },
-        defaultColor: false,
-    });
-}, { immediate: true});
+watch(
+    () => props.code,
+    async () => {
+        displayCode.value = await codeToHtml(props.code || capturedCode.value, {
+            lang: "vue",
+            themes: {
+                light: "github-light",
+                dark: "github-dark",
+            },
+            defaultColor: false,
+        });
+    },
+    { immediate: true },
+);
 
 function formatHTML(html: string): string {
     // Remove leading/trailing whitespace

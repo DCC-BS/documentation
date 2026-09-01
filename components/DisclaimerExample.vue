@@ -4,8 +4,8 @@ import {
     DisclaimerButton,
 } from "@dcc-bs/common-ui.bs.js/components";
 import { computed, onMounted, ref } from "vue";
-import UiContainer from "./UiContainer.vue";
 import { useCookie } from "../.vitepress/shims/nuxt-imports";
+import UiContainer from "./UiContainer.vue";
 
 const props = defineProps<{
     confirmationText: string;
@@ -17,7 +17,7 @@ const props = defineProps<{
 const isDisclaimerOpen = ref(false);
 
 const disclaimerAcceptedVersion = useCookie<string | undefined>(
-    "disclaimer-accepted"
+    "disclaimer-accepted",
 );
 
 onMounted(() => {
@@ -29,7 +29,8 @@ function showDisclaimer() {
 }
 
 const scriptClose = "</" + "script>";
-const code = computed(() => `<script setup lang="ts">
+const code = computed(
+    () => `<script setup lang="ts">
 const content = \`${props.contentHtml}\`;
 const postfix = \`${props.postfixHtml}\`;
 const confirmationText = "${props.confirmationText}";
@@ -45,7 +46,8 @@ ${scriptClose}
     />
 
     <DisclaimerButton variant="ghost" />
-</template>`);
+</template>`,
+);
 </script>
 
 <template>

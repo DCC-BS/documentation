@@ -1,5 +1,5 @@
 {
-    "$schema": "https://biomejs.dev/schemas/2.3.9/schema.json",
+    "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
     "vcs": {
         "enabled": true,
         "clientKind": "git",
@@ -28,12 +28,31 @@
     "linter": {
         "enabled": true,
         "rules": {
-            "recommended": true
+            "preset": "recommended",
+            "style": {
+                "noParameterAssign": "error",
+                "useAsConstAssertion": "error",
+                "useDefaultParameterLast": "error",
+                "useEnumInitializers": "error",
+                "useSelfClosingElements": "error",
+                "useSingleVarDeclarator": "error",
+                "noUnusedTemplateLiteral": "error",
+                "useNumberNamespace": "error",
+                "noInferrableTypes": "error",
+                "noUselessElse": "error"
+            }
+        }
+    },
+    "html": {
+        "experimentalFullSupportEnabled": true,
+        "formatter": {
+            "indentScriptAndStyle": false
         }
     },
     "javascript": {
         "formatter": {
-            "quoteStyle": "double"
+            "quoteStyle": "double",
+            "semicolons": "always"
         }
     },
     "css": {
