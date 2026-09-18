@@ -48,7 +48,7 @@ export default withMermaid({
                 items: [
                     { text: "Dev Setup", link: "/dev-setup" },
                     { text: "Tooling (mise)", link: "/dev-setup/mise" },
-                    { text: "Envroment variables", link: "/dev-setup/varlock" },
+                    { text: "Environment variables", link: "/dev-setup/varlock" },
                     {
                         text: "AI Assisted Coding",
                         link: "/dev-setup/ai-coding",
