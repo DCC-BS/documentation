@@ -7,6 +7,8 @@ A Docling plugin that provides high-accuracy document layout detection using the
 ## Features
 - **High Accuracy:** Utilizes the RT-DETR instance segmentation framework.
 - **Polygon Support:** Gracefully flattens complex polygon masks into Docling-compatible bounding boxes.
+- **List Detection:** The model has no list class, so the plugin detects list items from bullets and enumerator sequences after OCR (`PP_DOC_LAYOUT_LIST_DETECTION=rules`, default), optionally with docling's Heron model as a second opinion (`heron`).
+- **Keeps Handwriting:** The default confidence threshold is 0.3 (`PP_DOC_LAYOUT_CONFIDENCE_THRESHOLD`), so handwriting and text in photos are kept.
 - **Scalability:** Supports configurable batch sizing to optimize GPU VRAM usage and prevent OOM errors.
 - **Auto-Registration:** Automatically registers itself as a layout engine upon installation.
 
