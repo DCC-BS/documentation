@@ -39,4 +39,4 @@ The plugins read their own variables, listed on their pages.
 
 ## Releases
 
-Images are published to `ghcr.io/dcc-bs/dcc-docling-serve[-cpu|-cu128|-cu130]` when a version tag is pushed. The tag names the upstream docling-serve release: `v1.36.0` builds on upstream `v1.36.0`, and `v1.36.0-1` releases our own changes on the same upstream version.
+Images are published to `ghcr.io/dcc-bs/dcc-docling-serve[-cpu|-cu128|-cu130]` by a manually dispatched workflow that takes a docling-serve release tag. Our image gets the same tag: `dcc-docling-serve:v1.36.0` is docling-serve v1.36.0 with our plugins and patches.
