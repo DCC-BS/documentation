@@ -24,3 +24,15 @@ from docling_pp_doc_layout.options import PPDocLayoutV3Options
 
 pipeline_options.layout_options = PPDocLayoutV3Options(batch_size=8)
 ```
+
+## Environment Variables
+
+| Variable | Description | Default |
+| --- | --- | --- |
+| `PP_DOC_LAYOUT_MODEL_NAME` | HuggingFace repo or local path of the model | `PaddlePaddle/PP-DocLayoutV3_safetensors` |
+| `PP_DOC_LAYOUT_CONFIDENCE_THRESHOLD` | Minimum detection confidence | `0.3` |
+| `PP_DOC_LAYOUT_BATCH_SIZE` | Pages per inference batch | `8` |
+| `PP_DOC_LAYOUT_LIST_DETECTION` | `rules`, `heron` or `off` | `rules` |
+| `PP_DOC_LAYOUT_CREATE_ORPHAN_CLUSTERS` | Create clusters for orphaned elements | `true` |
+| `PP_DOC_LAYOUT_KEEP_EMPTY_CLUSTERS` | Keep empty clusters | `false` |
+| `PP_DOC_LAYOUT_SKIP_CELL_ASSIGNMENT` | Skip table-cell assignment | `false` |

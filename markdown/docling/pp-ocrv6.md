@@ -25,3 +25,15 @@ pipeline_options.ocr_options = PPOCRv6Options(return_word_box=True)
 ```
 
 With docling-serve: `{ "options": { "do_ocr": true, "ocr_engine": "pp-ocrv6" } }`. Options can also be set with `PPOCRV6_*` environment variables (e.g. `PPOCRV6_LANG`, `PPOCRV6_WHOLE_PAGE`).
+
+## Environment Variables
+
+| Variable | Description | Default |
+| --- | --- | --- |
+| `PPOCRV6_LANG` | Comma-separated languages | German-led European set |
+| `PPOCRV6_TEXT_SCORE` | Minimum recognition score | `0.5` |
+| `PPOCRV6_USE_DET` / `_USE_CLS` / `_USE_REC` | Run detection / angle classification / recognition | `true` |
+| `PPOCRV6_WHOLE_PAGE` | Read every page as one picture | `false` |
+| `PPOCRV6_RETURN_WORD_BOX` | Return a box per OCR'd word | `false` |
+| `PPOCRV6_DET_REPO` / `_REC_REPO` | HuggingFace repos of the ONNX models | `PaddlePaddle/PP-OCRv6_medium_{det,rec}_onnx` |
+| `PPOCRV6_DET_MODEL_PATH` / `_REC_MODEL_PATH` / `_REC_KEYS_PATH` / `_CLS_MODEL_PATH` | Local model files instead of the repos | auto |

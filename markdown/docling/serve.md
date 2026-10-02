@@ -26,6 +26,17 @@ A `docling-serve` image with the DCC docling plugins and a few patches for speed
 - **Word boxes:** Add `"include_word_boxes": true` (needs a `dlparse` PDF backend, the default). With PP-OCRv6 this also reads each page whole and returns a box per OCR'd word.
 - **UI:** Open `http://localhost:5001/ui`.
 
+## Environment Variables
+
+| Variable | Description | Default |
+| --- | --- | --- |
+| `DCC_WORD_BOXES` | `0` leaves the API as upstream has it (no `include_word_boxes`) | `1` |
+| `DCC_OCR_IGNORE_SHAPES` | `0` restores docling's OCR rule for vector shapes | `1` |
+| `DCC_MUTE_HEALTH_LOGS` | `0` logs health probes again | `1` |
+| `DCC_MUTE_HEALTH_PATHS` | Comma-separated request paths muted in the access log | `/health` |
+
+The plugins read their own variables, listed on their pages.
+
 ## Releases
 
 Images are published to `ghcr.io/dcc-bs/dcc-docling-serve[-cpu|-cu128|-cu130]` when a version tag is pushed. The tag names the upstream docling-serve release: `v1.36.0` builds on upstream `v1.36.0`, and `v1.36.0-1` releases our own changes on the same upstream version.
