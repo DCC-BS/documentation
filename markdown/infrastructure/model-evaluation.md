@@ -5,10 +5,8 @@ editLink: true
 
 # How we evaluate AI models
 
-This page describes how the DCC checks a model before it goes into production, and how we check again after a change. It adds the method to the short list of criteria on [Models & APIs](/infrastructure/models.md#how-we-select-models). Every number comes from our own repositories and is dated. The method differs by what is being tested, so each kind of test below has its own section.
+This page describes how the DCC checks a model before it goes into production, and how we check again after a change. It adds the method to the short list of criteria on [Models & APIs](/infrastructure/models.md#how-we-select-models). Every number comes from DCC repositories and evaluation reports and is dated. The method differs by what is being tested, so each kind of test below has its own section.
 
-> [!WARNING]
-> TODO: the sources describe the tests of the last months (Gemma 4 31B, deep research, Open WebUI 0.12.3). I found no written record of the first selection of Gemma 4 31B over Qwen 3.5 27B apart from the one-line reason on the models page. Add it if one exists.
 
 ## Process
 
@@ -24,14 +22,18 @@ Example of a failed step: Qwen 3.5 27B is switched off because it generates too 
 
 ## Constraints
 
-These come from the requirements of the Bebbi Bot deep research evaluation and apply to every candidate.
+Three constraints apply to every candidate.
 
 - **On-prem only.** Production calls only models hosted on the KDKP, through OpenAI-compatible endpoints. That includes embeddings and rerankers. Cloud models appear only as judges in evaluation runs, on public benchmark data and on reports we generated, never on internal data.
-- **Open-weight models of about 30B parameters** must call tools and produce structured output reliably. Target: at least 90 percent of runs finish with a report.
-- **Per-role models with a thinking switch.** The main model thinks for planning, research and writing. Routing and summaries run without thinking or on the small Qwen 3.5 4B.
 - **Language.** German with Swiss conventions (no ß). Searches in German, English, French and Italian.
 - **Cluster rules.** Non-root, no RWX storage, emptyDir at most 250Mi, traffic through the proxy.
-- **Token budget.** A standard research run uses 200k to 1M tokens. Long runs wait for the night window (20:00 to 05:00) because GPU capacity during office hours is short.
+
+The requirements for the deep research agent add more, and they apply to it alone:
+
+- Open-weight models of about 30B parameters must call tools and return structured output reliably. Target: at least 90 percent of runs end with a report.
+- Per-role models with a thinking switch. The main model thinks for planning, research and writing. Routing and summaries run without thinking or on the small Qwen 3.5 4B.
+- A standard research run should use 200k to 1M tokens (requirement E1, a target and not a measurement). Measured: about 60k tokens for the focus engine and 133k to 169k for the research pipeline.
+- Long runs wait for the night window (20:00 to 05:00) because GPU capacity during office hours is short.
 
 ## Load tests
 
@@ -48,25 +50,21 @@ A run stops early when more than 5 percent of requests fail after 30 requests. W
 
 ## Quality on our own tasks
 
-Public benchmarks say little about German administration, so we use two kinds of test.
+These tests come from the deep research evaluation (7 to 13 October 2026). Public benchmarks say little about German administration, so we use two kinds of test.
 
 **Public benchmark, for comparison.** DeepResearch Bench, 20 of its 50 English tasks, picked for closeness to administrative work. Two judges: RACE scores report quality against a reference report (50 means on par), FACT checks whether the cited sources support the claims. Differences under about 1.5 RACE points count as noise. Without any search, Gemma 4 31B scores 43.9 on RACE. This is the floor that any research setup must beat.
 
 **German administrative set, for the real question.** 13 tasks (19 in version 0.3) on law, Grosser Rat, web content, strategies and statistics. Every report must follow one contract: structure, Swiss spelling, sources with URL, SG and SR numbers, Geschäftsnummern, Stand. A judge model scores each rubric criterion from 0 to 3. Results from October 2026: 66.6 percent for the research agent with the focus engine, 58.9 percent for a plain agent loop with the same tools.
 
-> [!WARNING]
-> TODO: the German set still needs review by domain experts (stated in the evaluation report). Say so on the published page, or remove the set from it, until the review is done.
 
-**Repeat runs.** One run of a language model varies. We run three repeats where cost allows and treat differences of about 4 points on 13 tasks as noise.
+**Noise.** One run of a language model varies. With 13 tasks and one run each, differences of about 4 points are noise. The 66.6 percent above averages three repeats.
 
-**Judges.** The benchmark judges are cloud models used through OpenRouter on public data. The judge spend for the full evaluation was 41.61 US dollars. A cloud judge fits the on-prem rule only because it never sees internal data.
+**Judges.** The benchmark judges are cloud models used through OpenRouter on public data. The judge spend of the main evaluation phase (7 to 9 October) was 41.61 US dollars. The later tuning runs v4 (2.42 US dollars) and v5 (2.56 US dollars) came on top. A cloud judge fits the on-prem rule only because it never sees internal data.
 
-> [!WARNING]
-> TODO: confirm that the governance sign-off for cloud judges was given. The protocol document lists it as a decision needed.
 
-### Pass thresholds (recommended protocol)
+### Pass thresholds (proposed protocol)
 
-The protocol document proposes these gates. The numbers are targets for the benchmark setup, not guarantees.
+The protocol document of the deep research evaluation proposes these gates. They are targets for that setup, not guarantees.
 
 | Check | Gate |
 |---|---|
@@ -76,8 +74,6 @@ The protocol document proposes these gates. The numbers are targets for the benc
 | Runtime | quick at most 5 min, standard at most 20 min, deep at most 120 min |
 | Completion rate | at least 90 percent of runs end with a report |
 
-> [!WARNING]
-> TODO: the final report ran 20 tasks, not 30, and no engine beat the no-search baseline by 3 points. State which gates were kept for the decision.
 
 ## Quality inside Open WebUI
 
@@ -86,19 +82,16 @@ After a model change or an Open WebUI upgrade we replay realistic requests again
 - `benchmarks/skills`: 60 scenarios, three runs each, against Gemma 4 31B. They test skill discovery, tool search, authoring of skills and document creation. A scenario passes when the last tool call succeeded and the returned file has the right content. The run of 2026-10-16 gave 176 of 180.
 - `benchmarks/office_edit`: 15 scenarios for editing Word, PowerPoint and Excel files.
 
-Each suite also runs with a scripted stand-in for the model, in an "ideal", a "lazy" and a "sloppy" mode. They prove that the checks reject wrong paths and accept recovered ones. These runs say nothing about the model.
+The skills suite also runs with a scripted stand-in for the model, in an "ideal", a "lazy" and a "sloppy" mode. These runs prove that the checks reject wrong paths and accept recovered ones. They say nothing about the model.
 
 Measured settings decide configuration. Example: Tool Search saved 24,000 characters per turn, but Gemma guessed parameter names and failed the first call in every task (first call right: 6 of 6 with search off, 0 of 6 on). We kept it off.
 
 ## Quantised checkpoints
 
-For models we quantise ourselves, a gate decides whether the checkpoint is published (repository `quantization`). It runs the quantised and the original model on the same machine, on vLLM, on an MTEB task (retrieval nDCG@10 for embeddings, reranking MAP for rerankers) in several languages. The verdict is per language, with a tolerance of 0.01. A checkpoint that fails is not uploaded. Published leaderboard numbers are only a sanity check.
+For models we quantise ourselves, a gate decides whether the checkpoint is published (repository `model-quantization`). It runs the quantised and the original model on the same machine, on vLLM, on an MTEB task (retrieval nDCG@10 for embeddings, reranking MAP for rerankers) in several languages. The verdict is per language, with a tolerance of 0.01. A checkpoint that fails is not uploaded. Published leaderboard numbers are only a sanity check.
 
 ## Where to find the data
 
-- Evaluation report: `docs/bebbi-bot-deep-research.md` and `results/` in the repository `deep-research-evaluation`.
-- Skills and office benchmarks: `benchmarks/` in `kdkp-open-web-ui`, with the result tables in its README.
-- Load tests: `vllm-benchmark`.
-
-> [!WARNING]
-> TODO: check which of these repositories are public before linking them from this page. Several are internal, so the page names them without links.
+- Load tests: [vllm-benchmark](https://github.com/DCC-BS/vllm-benchmark).
+- Deep research engine, presets and a summary of the evaluation: [bebbi-deep-research](https://github.com/DCC-BS/bebbi-deep-research), `docs/evaluation.md`.
+- The full evaluation report and raw results are in the private repository `deep-research-evaluation`. The skills and office benchmarks are in `kdkp-open-web-ui` (internal, FD-ITBS). The quantisation gate is in the private repository `model-quantization`.

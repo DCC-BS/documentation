@@ -34,13 +34,15 @@ The deep research models ("Deep Research · Recht", "Deep Research · Grosser Ra
 
 Two more models exist but stay hidden from users: Gemma 4 31B and Qwen 3.5 4B as plain base models. The four models above build on the first one, and Open WebUI uses the small Qwen model for background tasks such as chat titles and follow-up questions.
 
-## Images in knowledge bases
+## Images in documents
 
-Images inside documents of a knowledge base (Wissensspeicher) are not recognised. The text extraction for uploads (Docling, selected by `CONTENT_EXTRACTION_ENGINE=docling`) is called with `image_export_mode: "placeholder"` in `docling_async/docling_async_loader.py`, so each picture becomes a placeholder in the markdown. No picture description is configured in `DOCLING_PARAMS` (the k8s values only set OCR, the PDF backend and table mode). Only text is chunked and embedded, and charts, photos and diagrams are missing from the answers.
+The content of pictures inside documents is not understood: charts, photos and diagrams. This holds for documents in a knowledge base (Wissensspeicher) and for documents attached to a chat. Text is not affected, including printed text on scanned pages, because OCR is on (`do_ocr: true` in `DOCLING_PARAMS`).
 
-An image uploaded directly into a chat is different. It goes to the vision-capable model (Gemma 4 31B accepts image input) and is analysed.
+The cause is the text extraction for uploads. Docling is selected by `CONTENT_EXTRACTION_ENGINE=docling`, and `docling_async/docling_async_loader.py` calls it with `image_export_mode: "placeholder"`, so each picture becomes a placeholder in the markdown. No picture description is configured. Only text is chunked and embedded.
 
-Workaround: upload the image into the chat together with the question. If a fact lives only in a picture of a knowledge-base document, add it to the document as text.
+Only an image file uploaded directly into a chat goes to the vision-capable model (Gemma 4 31B accepts image input) and is analysed.
+
+Workaround: upload the image into the chat together with the question. If a fact lives only in a picture of a document, add it to the document as text.
 
 ## Architecture
 

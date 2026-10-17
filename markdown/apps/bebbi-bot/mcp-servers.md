@@ -9,23 +9,19 @@ The DCC runs three [MCP](https://modelcontextprotocol.io/) servers that give AI 
 
 | Server | Data source | Endpoint | Code |
 |---|---|---|---|
-| Grossrat-MCP | Grosser Rat Basel-Stadt: business items, documents, transcripts since 1973 | `https://mcp-grosserrat.statistik.bs.ch/mcp` | TODO: repository `grossrat-bs-mcp` (image `ghcr.io/dcc-bs/grossrat-bs-mcp`) is not visible in the DCC-BS organisation; add the link or mark it private |
+| Grossrat-MCP | Grosser Rat Basel-Stadt: business items, documents, transcripts since 1973 | `https://mcp-grosserrat.statistik.bs.ch/mcp` | Container image `ghcr.io/dcc-bs/grossrat-bs-mcp` (source repository not public) |
 | OGD MCP | Open data portal [data.bs.ch](https://data.bs.ch) | `https://mcp.data.bs.ch/mcp` | [mcp-data-bs](https://github.com/DCC-BS/mcp-data-bs) |
 | Statistik Portal MCP | Indikatorenportal [statistik.bs.ch](https://statistik.bs.ch) | `https://mcp.statistik.bs.ch/mcp` | [mcp-statistikportal](https://github.com/DCC-BS/mcp-statistikportal) |
 
-All three speak streamable HTTP on the path `/mcp`. The OGD and Statistik servers need no authentication (their READMEs say so). The `dcc-mcp-facade` repository routes the three hostnames to the right container: nginx terminates TLS, Traefik routes by hostname. See its [README](https://github.com/DCC-BS/dcc-mcp-facade).
+All three speak streamable HTTP on the path `/mcp`. The OGD and Statistik servers need no authentication according to their READMEs. The `dcc-mcp-facade` repository routes the three hostnames to the right container: nginx terminates TLS, Traefik routes by hostname. See its [README](https://github.com/DCC-BS/dcc-mcp-facade).
 
-> [!WARNING]
-> TODO: confirm whether the endpoints are reachable from outside the cantonal network and whether the Grossrat server needs authentication. The sources I could read do not say.
 
 ## Where they are used
 
-- The [deep research agent](/apps/bebbi-bot/deep-research.md) calls them in its presets: `grossrat` uses the Grossrat server, `statistik` uses the Statistik and OGD servers, and the legal and administration presets use parts of them.
-- They are **not** seeded into Bebbi Bot as tool servers. Only OpenCaseLaw is (see [Tools and workspace content](/apps/bebbi-bot/tools.md#opencaselaw)). Anyone can add an endpoint by hand in Open WebUI under Settings, Tools.
+- The [deep research agent](/apps/bebbi-bot/deep-research.md) calls them in its presets. The `grossrat` preset uses the Grossrat server. The `statistik` preset uses the Statistik, OGD and Grossrat servers. The legal and administration presets use parts of them. Since 2026-10-09 the Statistik server is switched off in the presets (`enabled: false`) because its container could not reach statistik.bs.ch. A later change (`STATISTIK_PORTAL_API_URL`, fetching over port 80) is meant to fix this.
+- They are **not** seeded into Bebbi Bot as tool servers. Only OpenCaseLaw is (see [Tools and workspace content](/apps/bebbi-bot/tools.md#opencaselaw)). Admins can add an endpoint as a tool server under Admin Settings.
 - Other MCP clients (Claude Desktop, Cursor, ChatGPT connectors) can use the same endpoints. The two open-source servers also run locally over stdio with `uvx`.
 
-> [!WARNING]
-> TODO: state whether the three servers are meant to be offered to all Bebbi Bot users (as a tool-server file in `seeder/content/tool-servers/`) or stay deep-research only.
 
 ## Grossrat-MCP
 
@@ -33,8 +29,6 @@ All three speak streamable HTTP on the path `/mcp`. The OGD and Statistik server
 
 **Data source.** The server's own index of all Geschäfte, documents and transcripts since 1973, with full texts.
 
-> [!WARNING]
-> TODO: name the upstream source of the data (Parlamentsdienst export, open data set, scraper?) and how often the index refreshes. The server code is not in the repositories I could read.
 
 **Tools** (names and descriptions from the research agent's configuration, `config/presets.yaml`, section `mcp_servers.grossrat`):
 
@@ -45,8 +39,10 @@ All three speak streamable HTTP on the path `/mcp`. The OGD and Statistik server
 | `search_documents` | Full-text search for passages in all documents. Returns snippets with a citation link and `dok_laufnr` |
 | `get_document` | Text of one document by `dok_laufnr`, 20,000 characters per window, continue with `offset` |
 | `list_facets` | Allowed values for the filters `partei`, `geschaeftsart`, `status`, `dokumentart` |
+| `get_corpus_stats` | Corpus statistics (exact output not documented) |
+| `search`, `fetch` | A search and fetch pair for ChatGPT-style connectors. It duplicates `search_documents` and `get_document` |
 
-The server may offer more tools. The research agent uses these five only.
+The research agent uses the first five only. The descriptions of `get_corpus_stats`, `search` and `fetch` are not documented; the evaluation notes mention that they exist.
 
 **Examples.**
 
@@ -59,14 +55,12 @@ The server may offer more tools. The research agent uses these five only.
 - `find_geschaefte` returned 100 items by default (over 8,000 characters). Clients should send `limit`.
 - `search_documents` hits had empty `urheber` and `partei`.
 
-> [!WARNING]
-> TODO: check whether these limits are fixed. The note dates from 2026-10-13.
 
 ## OGD MCP (data.bs.ch)
 
 **Purpose.** Find and query datasets of the open data portal of Basel-Stadt.
 
-**Data source.** The Explore 2.1 API of the portal (Huwise, formerly Opendatasoft), `https://<domain>/api/explore/v2.1`. The server reads the portal domain from `DATA_PORTAL_DOMAIN`, so the same code serves any portal on that platform. Our deployment points at `data.bs.ch`.
+**Data source.** The Explore 2.1 API of the portal (Huwise, formerly Opendatasoft), `https://<domain>/api/explore/v2.1`. The server reads the portal domain from `DATA_PORTAL_DOMAIN`, so the same code serves any portal on that platform. The DCC deployment points at `data.bs.ch`.
 
 **Tools** (from the README and `main.py` of `mcp-data-bs`):
 
@@ -95,7 +89,7 @@ Without a server, the repository also ships an agent skill (`skills/data-bs/SKIL
 
 **Purpose.** Look up statistical indicators of the Statistisches Amt and read their time series.
 
-**Data source.** The public JSON endpoints of the [Indikatorenportal](https://statistik.bs.ch). The server keeps the indicator index (about 1,080 indicators shown in the portal) in memory for one hour (`INDEX_CACHE_TTL`). About 2,500 indicator files exist; the ones outside the index can only be read by id.
+**Data source.** The public JSON endpoints of the [Indikatorenportal](https://statistik.bs.ch), including the web table endpoint. The server keeps the indicator index (about 1,080 indicators shown in the portal) in memory for one hour (`INDEX_CACHE_TTL`). About 2,500 indicator files exist; the ones outside the index can only be read by id.
 
 **Tools** (from `mcp-statistikportal`):
 
@@ -104,6 +98,7 @@ Without a server, the repository also ships an agent skill (`skills/data-bs/SKIL
 | `search_indicators` | Ranked search over the index. German terms only. Tolerates umlaut spellings (`ä`, `ae`, `a`), plural endings and compounds. Filters `thema`, `unterthema`, `kennzahlenset`, `raeumliche_gliederung`. Hits show `id`, `title`, `unit`, `aktualisierungsdatum`, `portal_url` |
 | `get_indicator` | Metadata of one indicator: unit, reading aid (`lesehilfe`), explanations |
 | `get_indicator_data` | Values of one indicator by id: headers, rows (newest kept, `max_rows`), unit, source, `latest` period, notes on series breaks |
+| `get_table` | One web table (Webtabelle): the Excel tables of the statistical yearbook, about 220 of them. Returns the sheet list, one sheet as columns and rows, footnotes, the Steckbrief, an Excel download link and a CSV link. Accepts the file name, the table code or the download URL. Rows page with `offset` and `from_end` |
 | `get_facets` | Valid filter values with counts for `search_indicators` |
 | `search_portal` | Optional. Full-text search over all portal content (articles, reports, tables, maps, datasets). Only registered when `MEILISEARCH_URL` and `MEILISEARCH_KEY` are set |
 
@@ -113,16 +108,15 @@ Without a server, the repository also ships an agent skill (`skills/data-bs/SKIL
 search_indicators(search="Arbeitslosenquote")
 search_indicators(search="Leerwohnungen", raeumliche_gliederung="Wohnviertel")
 get_indicator_data(indicator_id=5813, max_rows=24)
+get_table(table="t03.4.04", max_rows=12, from_end=True)
 ```
 
-> [!WARNING]
-> TODO: the evaluation notes of 2026-10-13 say the production container could not reach statistik.bs.ch and the server was switched off in the research agent. Confirm the current state before publishing.
 
 ## Connecting a client
 
 For the open-source servers, the READMEs give these routes.
 
-- **Open WebUI:** Settings, Tools, add the endpoint URL from the table above.
+- **Open WebUI:** an admin adds the endpoint URL from the table above as a tool server under Admin Settings.
 - **Local, over stdio:** `uvx --from git+https://github.com/DCC-BS/mcp-data-bs data-bs-mcp` (with `DATA_PORTAL_DOMAIN=data.bs.ch`) and `uvx --from git+https://github.com/DCC-BS/mcp-statistikportal statistik-bs-mcp`.
 - **API reference:** the HTTP servers serve an OpenAPI description at `/openapi.json` and Swagger UI at `/docs`.
 
