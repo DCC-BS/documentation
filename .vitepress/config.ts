@@ -41,6 +41,28 @@ export default withMermaid({
                     { text: "TextMate", link: "/apps/textmate.md" },
                     { text: "BS-Übersetzer", link: "/apps/bs-uebersetzer.md" },
                     { text: "Transcribo", link: "/apps/transcribo.md" },
+                    {
+                        text: "Bebbi Bot",
+                        link: "/apps/bebbi-bot/index.md",
+                        items: [
+                            {
+                                text: "Custom image",
+                                link: "/apps/bebbi-bot/image.md",
+                            },
+                            {
+                                text: "Seeder and janitor",
+                                link: "/apps/bebbi-bot/seeder-janitor.md",
+                            },
+                            {
+                                text: "Tools and workspace content",
+                                link: "/apps/bebbi-bot/tools.md",
+                            },
+                            {
+                                text: "Deep research",
+                                link: "/apps/bebbi-bot/deep-research.md",
+                            },
+                        ],
+                    },
                 ],
             },
             {
