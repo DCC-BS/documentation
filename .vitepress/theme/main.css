@@ -12,6 +12,13 @@
 @source ".vitepress/theme";
 @source "../../";
 
+/* Tailwind's `container` utility would match VitePress's own `.container` elements (nav bar,
+   doc, footer) and, because of `important`, cap their width at the current breakpoint. That
+   centers the nav bar narrower than the sidebar, so the logo no longer lines up with it.
+   Nothing here uses Tailwind's container (the word also appears in plain text that is scanned
+   for classes), so never generate it. */
+@source not inline("container");
+
 /* Additional CSS variable overrides for better integration */
 * {
     --ui-primary: rgb(var(--color-primary-600));
