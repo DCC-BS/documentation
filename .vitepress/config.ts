@@ -307,6 +307,10 @@ export default withMermaid({
                         text: "Models & APIs",
                         link: "/infrastructure/models.md",
                     },
+                    {
+                        text: "Model evaluation",
+                        link: "/infrastructure/model-evaluation.md",
+                    },
                 ],
             },
             {
