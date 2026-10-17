@@ -15,6 +15,7 @@ We do not fork Open WebUI. We run the upstream project and add our own pieces ar
 | [Seeder and janitor](/apps/bebbi-bot/seeder-janitor.md) | How models, tools and settings get into Open WebUI from git, and the daily cleanup job |
 | [Tools and workspace content](/apps/bebbi-bot/tools.md) | The tools, filters, skills, prompts and tool servers that ship with Bebbi Bot |
 | [Deep research](/apps/bebbi-bot/deep-research.md) | The research agent, and an explanation of pipes |
+| [MCP servers](/apps/bebbi-bot/mcp-servers.md) | Grossrat-MCP, OGD MCP and Statistik Portal MCP for data of Basel-Stadt |
 
 ## What users see
 

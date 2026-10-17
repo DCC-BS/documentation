@@ -61,6 +61,10 @@ export default withMermaid({
                                 text: "Deep research",
                                 link: "/apps/bebbi-bot/deep-research.md",
                             },
+                            {
+                                text: "MCP servers",
+                                link: "/apps/bebbi-bot/mcp-servers.md",
+                            },
                         ],
                     },
                 ],
