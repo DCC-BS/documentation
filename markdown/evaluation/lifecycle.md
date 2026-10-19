@@ -1,46 +1,44 @@
-# Model Lifecycle
+# Model lifecycle
 
-AI models age quickly. We assume a model that is a year old has been overtaken by newer open models. So we review the models on the KDKP on a schedule, and we replace them in steps that let us go back.
+AI models get old fast. We assume that after about a year, newer open models will do the same job better. So we review our models on a fixed schedule, and we switch in small steps that let us go back if needed.
 
-This page describes those steps and the record we keep for each change. The DCC AI team runs the process. A governance board for model decisions is being established.
+This page describes those steps and what we write down for each change. The DCC AI team runs this process. We are setting up a governance board for model decisions.
 
-The status of each model today is in [Models & APIs](/infrastructure/models). Full detail is in the [repository doc](https://github.com/DCC-BS/ai-model-evaluation/blob/main/docs/lifecycle.md).
+[Models & APIs](/infrastructure/models) shows which models are in use today. The [repository](https://github.com/DCC-BS/ai-model-evaluation/blob/main/docs/lifecycle.md) has more detail.
 
-## Cadence
+## How often we review
 
-We review models every 6 to 12 months. We do not wait for a failure before we look at alternatives.
+Every 6 to 12 months we look at what is available and compare it with what we run. We start looking before something breaks.
 
-## Steps
+## How a switch works
 
-1. **Candidate.** A new model is proposed. It has to pass the [hard gates](/evaluation/selection-standard#hard-gates).
-2. **Evaluation.** We run layers 1 to 4 from [How We Test](/evaluation/how-we-test).
-3. **Transition phase.** The old and new model run side by side. Apps and processes adapt. We compare the two and collect what we see in real use.
-4. **Cutover.** Apps switch to the new API URL. We deactivate the old model first and retire it later.
+1. **Candidate.** Someone proposes a new model. It has to pass the [five basic checks](/evaluation/selection-standard#the-five-basic-checks).
+2. **Testing.** We run rounds 1 to 4 from [How we test](/evaluation/how-we-test).
+3. **Running both.** The old and the new model run side by side for a while. Apps and workflows get adjusted, and we compare the two in real use.
+4. **Switching over.** The apps move to the new model. We first switch the old model off, and remove it completely some time later.
 
-## Rollback
+## Going back
 
-Rollback is a real outcome. We have deactivated a model after a switch because its reasoning traces were far longer than the tasks needed. [Models & APIs](/infrastructure/models) shows its current status.
+Sometimes we go back. Once we switched off a new model again because it wrote long chains of reasoning for tasks that needed a short answer. Its status is on [Models & APIs](/infrastructure/models).
 
-## Model Decision Record
+## Model decision record
 
-We write one record for each model change. The records are private. We publish that they exist and what they contain, not the contents. The template is public: [decision record template](https://github.com/DCC-BS/ai-model-evaluation/blob/main/docs/decision-record-template.md).
+For every model change we fill in a decision record. These records are internal. The empty [template](https://github.com/DCC-BS/ai-model-evaluation/blob/main/docs/decision-record-template.md) is public, so you can see what we write down:
 
-Fields:
+- what changes, and why now
+- which models we considered, and how each did in the five basic checks
+- the test results from each round, and a note on anything we didn't measure
+- load test results before and after the switch
+- when the two models ran side by side, what went wrong, and when we would go back
+- what we decided, who decided, and when
+- the governance board's approval, once the board exists
 
-- the change and why it happens now
-- candidates considered, with the result of each hard gate
-- evaluation runs per layer, with all relevant metrics and a note on any not measured
-- load-test results before and after
-- transition dates, issues seen and rollback criteria
-- the decision, who decided and when
-- governance board sign-off, once a board exists
+## Other records we keep
 
-## Other records
+- The status of each model (in use, switched off or removed) in the public [model list](/infrastructure/models).
+- An internal page and the change history of our infrastructure.
+- Load test results and earlier test results. These are private.
 
-- Active, deactivated and retired status in the public model catalog.
-- An internal page and the infrastructure change history.
-- Load-test results and the evaluation result history. These are private.
+## What we still need to improve
 
-## Gaps
-
-At our last model switch we did not capture every relevant metric. The decision record asks for all relevant metrics per layer so that this does not repeat. We have not yet used it across a full cycle.
+When we last switched models, we didn't record every measurement we should have. The decision record now asks for all of them, round by round. We introduced it recently, so it hasn't gone through a full switch yet.

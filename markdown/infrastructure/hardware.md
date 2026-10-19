@@ -16,8 +16,8 @@ Below is a direct comparison of the key hardware metrics for both server generat
 | **Server Hardware** | HPE ProLiant DL385 Gen11 | HPE ProLiant DL380a Gen12 |
 | **CPU Cores** | 2x AMD EPYC (32 Cores total) | 2x Intel Xeon 6530P (64 Cores total, 2.3 GHz) |
 | **System RAM** | 512 GB DDR5 | 2 TB DDR5-6400 |
-| **Graphics Processing (GPUs)** | 2x NVIDIA H100 | 2x NVIDIA H200 NVL |
-| **GPU VRAM** | 80 GB HBM3 per GPU (160 GB total) | 141 GB HBM3e per GPU (282 GB total) |
+| **Graphics Processing (GPUs)** | 2x NVIDIA H100 NVL | 2x NVIDIA H200 NVL |
+| **GPU VRAM** | 94 GB HBM3 per GPU (188 GB total) | 141 GB HBM3e per GPU (282 GB total) |
 | **Local Disk Space** | 2x 480 GB NVMe SSD boot drives | 6x 3.2 TB NVMe Gen4 SSD (19.2 TB local storage) + 2x 480 GB RAID-1 boot drives |
 
 

@@ -1,62 +1,52 @@
-# Selection Standard
+# Selection standard
 
-Before a model runs on the KDKP, it has to pass five yes-or-no checks. If it fails one, we drop it, however well it scores elsewhere. Models that pass are then examined for the job they would do.
+Every model on the KDKP has to pass five basic checks. A model that fails one of them is out, however well it scores in public rankings. For the models that pass, we then look closer at the job they would do.
 
-This page lists the checks and what we look at for each kind of model. It does not list which models we chose. For that, see [Models & APIs](/infrastructure/models).
+This page lists the checks and what we look at for each kind of model. The models we picked are listed on [Models & APIs](/infrastructure/models).
 
-The DCC AI team applies this standard. A governance board for model decisions is being established. Full detail is in the [selection standard in the repository](https://github.com/DCC-BS/ai-model-evaluation/blob/main/docs/selection-standard.md).
+The DCC AI team applies this standard. We are setting up a governance board for model decisions. The [selection standard in the repository](https://github.com/DCC-BS/ai-model-evaluation/blob/main/docs/selection-standard.md) has the full technical detail.
 
-## Hard gates
+## The five basic checks
 
-1. **Fits our GPUs.** Weights plus KV cache for the target context length and number of parallel users must fit. Today we run H100 80 GB GPUs. An H200 NVL 141 GB is planned. See [GPU Compute Cluster](/infrastructure/hardware).
-2. **Fits one server.** We do not serve one model across several servers, because it costs latency and speed. Splitting a model across the GPUs inside one server is fine.
-3. **Served by vLLM.** This gives us one serving stack and an OpenAI-compatible API. One exception is documented: speech-to-text runs on FasterWhisper with BentoML. STT candidates without vLLM support, for example NeMo models, can be benchmarked but need a separate serving decision. See [Inference Software Stack](/infrastructure/software).
-4. **Permissive licence.** The licence must allow how we use the model.
-5. **Hosted on Hugging Face.** We pull the weights from there.
+1. **It fits on our graphics cards.** The model and its working memory must fit on our GPUs, with room for long texts and many users at once. Today we use NVIDIA H100 NVL cards with 94 GB of memory each. Cards with 141 GB (H200 NVL) are planned. See [GPU Compute Cluster](/infrastructure/hardware).
+2. **It runs on a single server.** Spreading one model over several servers makes it slower, so we don't do it. Using several graphics cards inside the same server is fine.
+3. **It runs on vLLM.** We use one program, vLLM, to run all our language models. That keeps operations simple and gives every app the same kind of interface. Speech-to-text is the one exception. It runs on FasterWhisper with BentoML. If a speech model doesn't work with vLLM, we can still test it, and then decide separately how we would run it. See [Inference Software Stack](/infrastructure/software).
+4. **Its licence allows our use.** We read the licence and check that it covers what we want to do with the model.
+5. **It is published on Hugging Face.** We download all our models from there.
 
-## Investigation per task type
+## What we look at for each kind of model
 
-Leaderboards are inputs, not decisions. The decision rests on the gates, our own evaluations, load tests and hands-on use. The layers are described in [How We Test](/evaluation/how-we-test).
+Public rankings help us decide which models are worth a closer look. The decision itself comes from the five checks, our own tests, load tests and our own experience with the model. [How we test](/evaluation/how-we-test) describes these rounds.
 
-### Large language models
+### Language models
 
-[Artificial Analysis](https://artificialanalysis.ai/) is our main outside reference. It is a third-party service with its own method, which we do not control. We read cost, speed, supported inputs, reasoning and whether its effort can be steered, size and memory use, coding, legal and other text tasks, tool use, verbosity, openness and bias.
+Our main outside source is [Artificial Analysis](https://artificialanalysis.ai/). It is an independent website with its own way of measuring, which we have no say in. There we compare price, speed, which kinds of input a model accepts, how well it reasons and whether we can control how long it thinks, its size and memory needs, how well it writes code, handles legal and other texts and uses tools, how wordy it is, how open its makers are about it, and how biased it is.
 
-Then we check what leaderboards do not show:
+Then we check the things rankings can't tell us:
 
-- Memory for our target context length and quantisation, estimated with [`hf-mem`](https://pypi.org/project/hf-mem/).
-- Which quantisation formats are fast and stable on our GPUs, meaning no looping output, and whether the KV cache can be quantised.
-- Supported context length.
-- Known vLLM issues for that model.
-- Community reports and open issues.
-- Hands-on use on our own development machines.
+- How much memory the model needs for our text lengths. The tool [`hf-mem`](https://pypi.org/project/hf-mem/) gives us a first estimate.
+- Which compressed version of the model runs fast and reliably on our cards. A reliable version doesn't get stuck repeating itself.
+- How long a text the model can handle.
+- Known problems with the model in vLLM.
+- What other users report about it.
+- How it feels to work with it on our own computers.
 
-### Layout and OCR
+### Reading documents (layout and OCR)
 
-We start from public benchmarks such as olmOCR-Bench, OCRBench v2, OmniDocBench and ParseBench. Then we run our own [OCR benchmark](https://github.com/DCC-BS/ai-model-evaluation/blob/main/ocr/README.md) and the document-conversion suite in [dcc-docling-serve](https://github.com/DCC-BS/dcc-docling-serve/tree/main/benchmarks). The full list is in the [repository doc](https://github.com/DCC-BS/ai-model-evaluation/blob/main/docs/selection-standard.md#layout-and-ocr).
+We start with public tests such as olmOCR-Bench, OCRBench v2, OmniDocBench and ParseBench. Then we run our own [OCR test](https://github.com/DCC-BS/ai-model-evaluation/blob/main/ocr/README.md) and the document conversion tests in [dcc-docling-serve](https://github.com/DCC-BS/dcc-docling-serve/tree/main/benchmarks). The [repository](https://github.com/DCC-BS/ai-model-evaluation/blob/main/docs/selection-standard.md#layout-and-ocr) has the full list.
 
 ### Speech-to-text
 
-We run our own [benchmark](https://github.com/DCC-BS/ai-model-evaluation/blob/main/stt/README.md) on German and Swiss German recordings and measure word error rate (WER), character error rate (CER) and BLEU. Speaker separation and API behaviour are tested in [bentoml-faster-whisper](https://github.com/DCC-BS/bentoml-faster-whisper).
+We run our own [test](https://github.com/DCC-BS/ai-model-evaluation/blob/main/stt/README.md) with German and Swiss German recordings. We count how many words and letters the model gets wrong. The tests in [bentoml-faster-whisper](https://github.com/DCC-BS/bentoml-faster-whisper) check whether the service tells speakers apart correctly and whether it behaves as expected.
 
-### Embeddings and reranking
+### Search (embeddings and reranking)
 
-We start from the [MTEB leaderboard](https://huggingface.co/spaces/mteb/leaderboard).
+We start with the public [MTEB leaderboard](https://huggingface.co/spaces/mteb/leaderboard).
 
-### Text-to-speech
+### Synthetic voices (text-to-speech)
 
-No automated metric tells us whether a voice pronounces a Basel place name acceptably. The team listens, using a [written protocol](https://github.com/DCC-BS/ai-model-evaluation/blob/main/tts/LISTENING_PROTOCOL.md): intelligibility, pronunciation of Swiss names and places, naturalness and voice consistency. This is a human judgement, and we say so.
+We know of no automatic test that tells us whether a voice says "Kleinhüningen" properly. So we listen ourselves and follow a [written checklist](https://github.com/DCC-BS/ai-model-evaluation/blob/main/tts/LISTENING_PROTOCOL.md). It covers whether we understand the voice, whether it pronounces Swiss names and places correctly, whether it sounds natural, and whether it stays the same voice from sentence to sentence. In the end this is a human judgement.
 
-### PII/NER and decision models
+### Anonymisation and decision models
 
-We evaluate anonymisation (PII/NER) models and decision models on our own benchmarks. The code is not public yet. See [pii-ner](https://github.com/DCC-BS/ai-model-evaluation/blob/main/pii-ner/README.md) and [decision-models](https://github.com/DCC-BS/ai-model-evaluation/blob/main/decision-models/README.md) for what we test.
-
-## Technical detail: memory check
-
-`hf-mem` reads a model's metadata from Hugging Face and estimates its memory without downloading the weights:
-
-```bash
-uvx hf-mem --model-id <org>/<model> --experimental --max-model-len 32768 --batch-size 8 --kv-cache-dtype fp8
-```
-
-The KV-cache figure is an estimate. We use it as a first filter for gate 1 and confirm with a real vLLM start on the target hardware. The flags are explained in the [repository doc](https://github.com/DCC-BS/ai-model-evaluation/blob/main/docs/selection-standard.md#memory-check-with-hf-mem).
+We also test models that find personal data in texts, and models that support decisions, with our own tests. That code isn't public yet. The short descriptions in [pii-ner](https://github.com/DCC-BS/ai-model-evaluation/blob/main/pii-ner/README.md) and [decision-models](https://github.com/DCC-BS/ai-model-evaluation/blob/main/decision-models/README.md) say what we test.
