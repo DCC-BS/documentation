@@ -16,19 +16,9 @@ All KDKP Large Language Models, embeddings, and rerankers are exposed via OpenAI
 
 ## How We Select Models
 
-Before we deploy a model, we evaluate it against a fixed set of criteria. The goal is to pick models that fit the hardware, the use case, and the available context budget — not just the highest-ranked model on a leaderboard.
+Every candidate model must pass five hard gates (GPU fit, one server, vLLM, licence, Hugging Face), then we test it on our own data, in our apps and under load. Leaderboards such as [Artificial Analysis](https://artificialanalysis.ai/) are inputs, not the decision.
 
-We ask the following questions for every candidate model:
-
-* **Infrastructure fit** — Can the model run on the available KDKP infrastructure?
-* **Modalities** — Which modalities (text, image, video, audio) does it need to process or generate?
-* **Efficiency** — How efficient is the model? (tokens generated relative to benchmark results)
-* **Context size** — How long can the input texts be at most?
-* **Speed** — How fast is the model on the given hardware?
-* **Benchmark quality** — How well does the model score in benchmarks?
-* **Censorship & bias** — Is the model censored or biased, and is that relevant for the specific use case?
-
-As external reference points for benchmark and efficiency comparisons we use the **[Artificial Analysis](https://artificialanalysis.ai/)** leaderboards and the **OpenRouter** leaderboard. These are inputs to the decision, not the decision itself — final selection always depends on the criteria above and our own tests on KDKP hardware.
+The full method is described in [selection standard](/evaluation/selection-standard).
 
 ---
 

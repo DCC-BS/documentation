@@ -324,6 +324,28 @@ export default withMermaid({
                 ],
             },
             {
+                text: "AI Model Evaluation",
+                link: "/evaluation/index.md",
+                items: [
+                    {
+                        text: "Overview",
+                        link: "/evaluation/index.md",
+                    },
+                    {
+                        text: "Selection Standard",
+                        link: "/evaluation/selection-standard.md",
+                    },
+                    {
+                        text: "How We Test",
+                        link: "/evaluation/how-we-test.md",
+                    },
+                    {
+                        text: "Model Lifecycle",
+                        link: "/evaluation/lifecycle.md",
+                    },
+                ],
+            },
+            {
                 text: "Team",
                 link: "/team",
             },

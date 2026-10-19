@@ -110,5 +110,13 @@ features:
       dark: https://cdn.simpleicons.org/nvidia/white
     link: /infrastructure/index.md
     linkText: Explore Infrastructure
+
+  - title: AI Model Evaluation
+    details: How the DCC AI team selects, tests and replaces the models on the KDKP, with links to the public evaluation code.
+    icon: 
+      light: https://cdn.simpleicons.org/huggingface
+      dark: https://cdn.simpleicons.org/huggingface/white
+    link: /evaluation/index.md
+    linkText: How We Evaluate
 ---
 
