@@ -1,37 +1,37 @@
-# AI Model Evaluation
+# AI model evaluation
 
-The Canton of Basel-Stadt runs open AI models on its own platform, the KDKP. Before a model goes into use, someone has to decide whether it is good enough for the task and fits our hardware and serving setup. This section describes how we make that decision.
+The Canton of Basel-Stadt runs open AI models on its own platform, the KDKP. Before we put a model into use, we check whether it does the job well and whether it runs on our servers. This section explains how we do that.
 
-The DCC AI team selects and evaluates all models on the KDKP. A governance board for model decisions is being established. It does not exist yet, so for now the responsibility sits with the team.
+The DCC AI team chooses and tests every model on the KDKP. We are setting up a governance board for these decisions. Until it exists, the team carries the responsibility.
 
-We publish the method: the criteria, the steps and the evaluation code. We do not publish test data, scores or rankings. Our test data contains work content from real people, so it stays private. The section on [limits](#what-we-do-not-publish-and-what-is-missing) lists what you cannot check from the outside.
+We publish how we work, including our rules, our steps and our test code. We keep our test data and our results to ourselves, because the data comes from the daily work of real people. Further down this page we list what you can't check from the outside.
 
-## Principles
+## How we work
 
-- **Our own data before leaderboards.** A public ranking tells us where to look. We then test on German and Swiss German material close to our work.
-- **No single number decides.** A model must pass hard gates, then we look at several measures, load behaviour and hands-on use.
-- **People decide.** The team makes the call and writes it down. Scores support the decision, they do not make it.
-- **Transition before cutover.** The old and the new model run side by side until we have seen the new one in real use. A model can be rolled back.
-- **Method public, data and results private.** You can read and run the code. You cannot reproduce our internal numbers.
+- **We test on our own material.** Public rankings help us find candidates. After that, we test with German and Swiss German texts and recordings that look like our daily work.
+- **We look at many things at once.** A model first has to pass five basic checks. Then we compare test results, see how it copes with many users at the same time, and use it ourselves.
+- **People make the decision.** The team decides and writes down why. Test results help us, and the final call is ours.
+- **We switch over slowly.** For a while, the old and the new model run side by side. If the new one causes problems, we go back to the old one.
+- **We share the method and keep the data.** You can read and run our test code. You can't repeat our results, because they come from our internal data.
 
-## In this section
+## Pages in this section
 
 | Page | What it covers |
 |---|---|
-| [Selection Standard](/evaluation/selection-standard) | The five hard gates and what we look at for each task type |
-| [How We Test](/evaluation/how-we-test) | Five test layers, with links to the code |
-| [Model Lifecycle](/evaluation/lifecycle) | Review cadence, transition, rollback and the decision record |
+| [Selection standard](/evaluation/selection-standard) | The five basic checks, and what else we look at for each kind of model |
+| [How we test](/evaluation/how-we-test) | The five rounds of testing, with links to the code |
+| [Model lifecycle](/evaluation/lifecycle) | How often we review models, how we switch, and what we write down |
 
-The current model catalog is on [Models & APIs](/infrastructure/models). The hardware the gates refer to is on [GPU Compute Cluster](/infrastructure/hardware), and the serving stack is on [Inference Software Stack](/infrastructure/software).
+The list of models we run today is on [Models & APIs](/infrastructure/models). Our servers are described on [GPU Compute Cluster](/infrastructure/hardware), and the software that runs the models on [Inference Software Stack](/infrastructure/software).
 
-## What we do not publish, and what is missing
+## What we don't publish, and what is still missing
 
-- Test data, results, scores and rankings.
-- Code for PII/NER (anonymisation) and decision-model evaluation. We evaluate these models on our own benchmarks, but the code is not public yet.
-- Text-to-speech is judged by listening, with a written protocol. No automated metric backs it.
-- The governance board is not set up.
-- At our last model switch we did not capture every relevant metric. The [decision record](/evaluation/lifecycle#model-decision-record) is meant to prevent that.
+- We don't publish test data, results, scores or rankings.
+- We also test models that find personal data in texts (for anonymisation) and models that support decisions. That test code isn't public yet.
+- We judge synthetic voices by listening to them, following a written checklist. We have no automatic score for voices.
+- The governance board doesn't exist yet.
+- When we last switched models, we didn't record every measurement we should have. The [decision record](/evaluation/lifecycle#model-decision-record) now asks for all of them.
 
 ## For other cantons
 
-You can reuse the method. Start with the [selection standard](https://github.com/DCC-BS/ai-model-evaluation/blob/main/docs/selection-standard.md) and the [decision record template](https://github.com/DCC-BS/ai-model-evaluation/blob/main/docs/decision-record-template.md). The [data policy](https://github.com/DCC-BS/ai-model-evaluation/blob/main/docs/data-policy.md) explains how to run the evaluation suites on your own data. The full repository is at [DCC-BS/ai-model-evaluation](https://github.com/DCC-BS/ai-model-evaluation). Its [quick start](https://github.com/DCC-BS/ai-model-evaluation/blob/main/README.md#quick-start) lists the prerequisites: uv, a running model server, and Docker with a GPU to serve models.
+You are welcome to reuse our approach. Good starting points are the [selection standard](https://github.com/DCC-BS/ai-model-evaluation/blob/main/docs/selection-standard.md) and the [decision record template](https://github.com/DCC-BS/ai-model-evaluation/blob/main/docs/decision-record-template.md). The [data policy](https://github.com/DCC-BS/ai-model-evaluation/blob/main/docs/data-policy.md) explains how to run the tests on your own data. All code is in [DCC-BS/ai-model-evaluation](https://github.com/DCC-BS/ai-model-evaluation). To run it you need uv, a running model server and Docker with a GPU. The [quick start](https://github.com/DCC-BS/ai-model-evaluation/blob/main/README.md#quick-start) walks you through the setup.
