@@ -95,7 +95,21 @@ function open(source: HTMLElement) {
         clone.removeAttribute("style");
         clone.setAttribute("width", String(contentWidth));
         clone.setAttribute("height", String(contentHeight));
-        clone.removeAttribute("id");
+
+        // Mermaid scopes its stylesheet with `#<svg-id> { ... }`.
+        // Ensure the cloned SVG has an id that matches its inner <style> tag.
+        const originalId = svg.id;
+        const styleEl = clone.querySelector("style");
+        if (originalId) {
+            const zoomId = `${originalId}-zoom`;
+            clone.id = zoomId;
+            if (styleEl?.textContent) {
+                styleEl.textContent = styleEl.textContent.replaceAll(
+                    `#${originalId}`,
+                    `#${zoomId}`,
+                );
+            }
+        }
         label.value = "Diagram";
         content = clone;
     }
