@@ -11,6 +11,9 @@ import { withMermaid } from "vitepress-plugin-mermaid";
 export default withMermaid({
     srcDir: "markdown",
     base: process.env.NODE_ENV === "production" ? "/documentation/" : "/",
+    mermaid: {
+        suppressErrorRendering: true,
+    },
     title: "DCC Dev Guidelines",
     description: "Guidelines for the DCC Developers",
     themeConfig: {

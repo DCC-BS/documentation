@@ -80,3 +80,11 @@ textarea {
     height: 25px;
     background-color: transparent;
 }
+
+/* Suppress transient mermaid error flash during client hydration / re-renders */
+[aria-roledescription="error"],
+.error-icon,
+.error-text {
+    display: none !important;
+}
+
