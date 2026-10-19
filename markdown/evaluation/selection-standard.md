@@ -8,7 +8,7 @@ The DCC AI team applies this standard. A governance board for model decisions is
 
 ## Hard gates
 
-1. **Fits our GPUs.** Weights plus KV cache for the target context length and number of parallel users must fit. Today we run H100 80 GB GPUs. An H200 NVL 141 GB is planned. See [GPU Compute Cluster](/infrastructure/hardware).
+1. **Fits our GPUs.** Weights plus KV cache for the target context length and number of parallel users must fit. Today we run H100 NVL 94 GB GPUs. An H200 NVL 141 GB is planned. See [GPU Compute Cluster](/infrastructure/hardware).
 2. **Fits one server.** We do not serve one model across several servers, because it costs latency and speed. Splitting a model across the GPUs inside one server is fine.
 3. **Served by vLLM.** This gives us one serving stack and an OpenAI-compatible API. One exception is documented: speech-to-text runs on FasterWhisper with BentoML. STT candidates without vLLM support, for example NeMo models, can be benchmarked but need a separate serving decision. See [Inference Software Stack](/infrastructure/software).
 4. **Permissive licence.** The licence must allow how we use the model.
