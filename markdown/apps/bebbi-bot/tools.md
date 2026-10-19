@@ -92,7 +92,7 @@ For implementation details and endpoints of the Basel-Stadt servers, see the [MC
 
 Open WebUI 0.12 ships tools that the model can call without any setup: time and date, memory, task lists, sub-agents, the code interpreter and `ask_user`. Our models switch these on selectively and describe them in the system prompt, so the model uses them unprompted. Examples: it asks a clarifying question through `ask_user` instead of guessing, it runs numeric work in the code interpreter instead of doing arithmetic in its head, and it calls the date tool for "next Friday".
 
-Switched off on our models: the built-in web search and image generation, notes, channels, calendar and automations. The code interpreter runs in the browser, and the [image](/apps/bebbi-bot/image.md#python-packages-in-the-browser) bundles its libraries.
+Switched off on our models: the built-in web search and image generation, notes, channels, calendar and automations. The code interpreter runs in the browser, and the [image](/apps/bebbi-bot/image.md#python-packages-in-the-browser) bundles its libraries. It is on by default in every chat (`defaultFeatureIds`), because Open WebUI only offers `execute_code` while the chat's code interpreter switch is on; the model-written Python runs in the user's browser (Pyodide), including in the web search models.
 
 ## Prompts
 
