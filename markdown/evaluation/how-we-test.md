@@ -24,7 +24,7 @@ Question: is this model worth a closer look? We read outside benchmarks and lead
 
 Question: how good is it on our kind of data? These suites live in [ai-model-evaluation](https://github.com/DCC-BS/ai-model-evaluation).
 
-- **Speech-to-text** ([stt](https://github.com/DCC-BS/ai-model-evaluation/blob/main/stt/README.md)): German and Swiss German recordings, scored with WER, CER and BLEU. It runs on a small public sample.
+- **Speech-to-text** ([stt](https://github.com/DCC-BS/ai-model-evaluation/blob/main/stt/README.md)): German and Swiss German recordings, scored with WER, CER and BLEU. The public sample is Standard German read speech (FLEURS). It only shows that the pipeline runs. Swiss German results stay private.
 - **OCR** ([ocr](https://github.com/DCC-BS/ai-model-evaluation/blob/main/ocr/README.md)): vision-language models on a public German handwriting dataset, scored with CER and WER.
 - **Text-to-speech** ([tts](https://github.com/DCC-BS/ai-model-evaluation/blob/main/tts/README.md)): judged by listening with a [written protocol](https://github.com/DCC-BS/ai-model-evaluation/blob/main/tts/LISTENING_PROTOCOL.md). There is no automated score.
 - **PII/NER and decision models**: we evaluate them on our own benchmarks. The code is not public yet.
