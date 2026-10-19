@@ -1,6 +1,6 @@
 # Model Lifecycle
 
-AI models age quickly. A model that is a year old has usually been overtaken by newer open models. So we review the models on the KDKP on a schedule, and we replace them in steps that let us go back.
+AI models age quickly. We assume a model that is a year old has been overtaken by newer open models. So we review the models on the KDKP on a schedule, and we replace them in steps that let us go back.
 
 This page describes those steps and the record we keep for each change. The DCC AI team runs the process. A governance board for model decisions is being established.
 

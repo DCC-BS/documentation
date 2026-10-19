@@ -1,6 +1,6 @@
 # AI Model Evaluation
 
-The Canton of Basel-Stadt runs open AI models on its own platform, the KDKP. Before a model goes into use, someone has to decide whether it is good enough, safe to run and worth the cost. This section describes how we make that decision.
+The Canton of Basel-Stadt runs open AI models on its own platform, the KDKP. Before a model goes into use, someone has to decide whether it is good enough for the task and fits our hardware and serving setup. This section describes how we make that decision.
 
 The DCC AI team selects and evaluates all models on the KDKP. A governance board for model decisions is being established. It does not exist yet, so for now the responsibility sits with the team.
 

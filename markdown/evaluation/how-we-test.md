@@ -9,11 +9,11 @@ Details per layer are in the [repository doc](https://github.com/DCC-BS/ai-model
 ## The five layers
 
 ```mermaid
-flowchart LR
-    A["1. Public benchmarks<br/>worth a closer look?"] --> B["2. Own benchmarks<br/>good on our data?"]
-    B --> C["3. App and API evals<br/>does the app still work?"]
-    C --> D["4. Load tests<br/>holds under traffic?"]
-    D --> E["5. Transition in production<br/>behaves in real use?"]
+flowchart TB
+    A["1. Public benchmarks"] --> B["2. Own benchmarks"]
+    B --> C["3. App and API evals"]
+    C --> D["4. Load tests"]
+    D --> E["5. Transition in production"]
 ```
 
 ## Layer 1: public benchmarks
