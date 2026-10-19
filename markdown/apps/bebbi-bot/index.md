@@ -45,6 +45,17 @@ graph TB
     OWUI --> FC[Firecrawl<br/>in-cluster]
     OWUI -- web search --> Serper[Serper]
 
+    subgraph ExternalMCP["External MCP Servers"]
+        OCL[Open Case Law<br/>mcp.opencaselaw.ch]
+        STAT[Statistik.bs MCP<br/>mcp.statistik.bs.ch]
+        DATA[Data.bs.ch MCP<br/>mcp.data.bs.ch]
+        GR[Grosser Rat MCP<br/>mcp-grosserrat.statistik.bs.ch]
+    end
+    OWUI -- MCP (streamable HTTP) --> OCL
+    OWUI -- MCP (streamable HTTP) --> STAT
+    OWUI -- MCP (streamable HTTP) --> DATA
+    OWUI -- MCP (streamable HTTP) --> GR
+
     subgraph KDKP["KDKP"]
         LLM[Gemma 4 31B<br/>Qwen 3.5 4B]
         EMB[Embeddings<br/>and reranker]
@@ -67,7 +78,7 @@ graph TB
 * A [custom container image](/apps/bebbi-bot/image.md) built on upstream's slim image. It adds root certificates, extra Python packages for the in-browser code runner, the canton's Office templates, a nested-group login fix for Entra ID and a few small patches.
 * A [seeder](/apps/bebbi-bot/seeder-janitor.md) that keeps models, tools, functions, skills, prompts, tool servers and admin settings in git instead of in the database.
 * A [janitor](/apps/bebbi-bot/seeder-janitor.md#janitor) that deletes what Open WebUI leaves behind and enforces a policy on models users build themselves.
-* [Tools](/apps/bebbi-bot/tools.md) to create and edit Office files, a web search tool with a review step, and a connection to the OpenCaseLaw MCP server.
+* [Tools](/apps/bebbi-bot/tools.md) to create and edit Office files, a web search tool with a review step, and connections to external MCP servers (Open Case Law, [Statistik.bs MCP](/mcp/statistik-bs.md), [Data.bs.ch MCP](/mcp/data-bs.md), and [Grosser Rat MCP](/mcp/grosser-rat.md)).
 * A [deep research agent](/apps/bebbi-bot/deep-research.md), connected to Open WebUI through a pipe function.
 
 ## Deployment

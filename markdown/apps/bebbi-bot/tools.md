@@ -77,9 +77,16 @@ The search itself runs on Serper. The web search toggle of Open WebUI is off on 
 
 `context_usage` is a global filter. It adds a line under each answer with the tokens used and how full the context window is, for example when a long chat approaches the 256k limit of Gemma 4. Window sizes per model are valves of the function.
 
-## OpenCaseLaw
+## MCP tool servers
 
-The file `tool-servers/opencaselaw.json` connects the MCP server `mcp.opencaselaw.ch`, a directory of Swiss legislation and court decisions. Its tools are offered to all users. The [deep research agent](/apps/bebbi-bot/deep-research.md) uses the same server for its legal preset.
+Open WebUI connects to external MCP servers over streamable HTTP, making their tools available to cantonal staff and models:
+
+* **Open Case Law (`mcp.opencaselaw.ch`).** Seeded via `tool-servers/opencaselaw.json`, offering tools to search Swiss federal and cantonal legislation and court decisions. The [deep research agent](/apps/bebbi-bot/deep-research.md) uses it for legal research.
+* **[Statistik.bs MCP](/mcp/statistik-bs.md) (`mcp.statistik.bs.ch/mcp`).** Indicator search, metadata, and time series from the statistical portal of Basel-Stadt, plus Excel web tables.
+* **[Data.bs.ch MCP](/mcp/data-bs.md) (`mcp.data.bs.ch/mcp`).** Direct access to cantonal open government data (OGD), with ODSQL query and dataset metadata filtering.
+* **[Grosser Rat MCP](/mcp/grosser-rat.md) (`mcp-grosserrat.statistik.bs.ch/mcp`).** Search and retrieval across parliamentary proceedings, motions, council minutes, and official records of the Grosser Rat Basel-Stadt since 1973.
+
+For implementation details and endpoints of the Basel-Stadt servers, see the [MCP section](/mcp/index.md).
 
 ## Built-in tools
 

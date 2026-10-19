@@ -22,6 +22,7 @@ export default withMermaid({
         },
         nav: [
             { text: "Home", link: "/" },
+            { text: "MCP", link: "/mcp/" },
             { text: "Team", link: "/team" },
         ],
         footer: {
@@ -66,11 +67,25 @@ export default withMermaid({
                 ],
             },
             {
+                text: "MCP Servers",
+                link: "/mcp/index.md",
+                items: [
+                    { text: "Overview", link: "/mcp/index.md" },
+                    { text: "Data.bs.ch (OGD)", link: "/mcp/data-bs.md" },
+                    { text: "Statistik.bs", link: "/mcp/statistik-bs.md" },
+                    { text: "Grosser Rat", link: "/mcp/grosser-rat.md" },
+                    { text: "Hosting & Facade", link: "/mcp/hosting.md" },
+                ],
+            },
+            {
                 text: "Setup & Tooling",
                 items: [
                     { text: "Dev Setup", link: "/dev-setup" },
                     { text: "Tooling (mise)", link: "/dev-setup/mise" },
-                    { text: "Environment variables", link: "/dev-setup/varlock" },
+                    {
+                        text: "Environment variables",
+                        link: "/dev-setup/varlock",
+                    },
                     {
                         text: "AI Assisted Coding",
                         link: "/dev-setup/ai-coding",

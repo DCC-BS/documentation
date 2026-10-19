@@ -16,12 +16,20 @@ hero:
 
 features:
   - title: AI Web Applications
-    details: Overview of TextMate, BS-Übersetzer, and Transcribo. Features, interfaces, and architecture.
+    details: Overview of Bebbi Bot (Open WebUI), TextMate, BS-Übersetzer, and Transcribo. Features, interfaces, and architecture.
     icon:
       light: https://cdn.simpleicons.org/chainguard
       dark: https://cdn.simpleicons.org/chainguard/white
     link: /apps/index.md
     linkText: View Applications
+
+  - title: MCP Servers
+    details: Canton Basel-Stadt Model Context Protocol servers for Data.bs.ch (OGD), Statistik.bs, and Grosser Rat.
+    icon:
+      light: https://cdn.simpleicons.org/anthropic
+      dark: https://cdn.simpleicons.org/anthropic/white
+    link: /mcp/index.md
+    linkText: Explore MCP Servers
 
   - title: Docker
     details: Container standards, best practices for Dockerfiles, and the shared DCC-BS base image and templates.
