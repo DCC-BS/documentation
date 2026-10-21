@@ -38,6 +38,7 @@ Do our apps still work correctly with the new model?
 - [text-mate-backend](https://github.com/DCC-BS/text-mate-backend/tree/main/evals) tests the advice and simplification features of TextMate.
 - [transcribo-backend](https://github.com/DCC-BS/transcribo-backend) and [bs-translator-backend](https://github.com/DCC-BS/bs-translator-backend) have tests that also run against a live model.
 - [deep-research-evaluation](https://github.com/DCC-BS/deep-research-evaluation) tests the research assistant in Bebbi Bot.
+- The MCP citation suite in kdkp-open-web-ui (`mcp_citations/e2e/`) asks Bebbi Bot 115 questions over all tools of the four MCP servers in the real chat interface. It checks that the needed tools are called, that answers with sources cite with `[n]`, and that every number points to the right source.
 
 ## 4. Load tests
 

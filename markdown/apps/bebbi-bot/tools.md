@@ -79,12 +79,28 @@ The search itself runs on Serper. The web search toggle of Open WebUI is off on 
 
 ## MCP tool servers
 
-Open WebUI connects to external MCP servers over streamable HTTP, making their tools available to cantonal staff and models:
+Open WebUI connects to MCP servers over streamable HTTP and offers their tools in the chat. All four are seeded from `tool-servers/` in the seeder:
 
-* **Open Case Law (`mcp.opencaselaw.ch`).** Seeded via `tool-servers/opencaselaw.json`, offering tools to search Swiss federal and cantonal legislation and court decisions. The [deep research agent](/apps/bebbi-bot/deep-research.md) uses it for legal research.
-* **[Statistik.bs MCP](/mcp/statistik-bs.md) (`mcp.statistik.bs.ch/mcp`).** Indicator search, metadata, and time series from the statistical portal of Basel-Stadt, plus Excel web tables.
-* **[Data.bs.ch MCP](/mcp/data-bs.md) (`mcp.data.bs.ch/mcp`).** Direct access to cantonal open government data (OGD), with ODSQL query and dataset metadata filtering.
-* **[Grosser Rat MCP](/mcp/grosser-rat.md) (`mcp-grosserrat.statistik.bs.ch/mcp`).** Search and retrieval across parliamentary proceedings, motions, council minutes, and official records of the Grosser Rat Basel-Stadt since 1973.
+* **Open Case Law (`mcp.opencaselaw.ch`), external, shared with everyone.** Swiss federal and cantonal law and court decisions. The connection offers 10 of the server's 42 tools (`function_name_filter_list`):
+  * `search_decisions`, `get_decision`, `get_erwaegung`, `get_regeste`, `find_leading_cases`, `cite`
+  * `search_laws`, `get_law`, `search_legislation`, `get_legislation`
+
+  Every search tool comes with its get tool. Left out: the tools that send a draft to the server's own external LLM judge (`attest_response`, `check_claim_support`), generation of mock decisions and exam questions, duplicates, scholarship, commentaries, legislative materials, statistics. Tool definitions went from about 57,000 to 21,000 characters per request.
+* **[Statistik.bs MCP](/mcp/statistik-bs.md) (`mcp.statistik.bs.ch/mcp`).** Indicator search, metadata and time series from the statistical portal, plus Excel web tables.
+* **[Data.bs.ch MCP](/mcp/data-bs.md) (`mcp.data.bs.ch/mcp`).** Cantonal open government data, with ODSQL queries and dataset metadata.
+* **[Grosser Rat MCP](/mcp/grosser-rat.md) (`mcp-grosserrat.statistik.bs.ch/mcp`).** Business items, motions, minutes and records of the Grosser Rat since 1973.
+
+The three Basel-Stadt servers are seeded without access grants for now, so only admins see them.
+
+### Citations from MCP results
+
+Open WebUI only turns the results of its own retrieval tools into citation sources. For MCP results the [custom image](/apps/bebbi-bot/image.md#mcp-citations-instructions-and-retries) adds this:
+
+* **Citation badges.** Each result item with a public URL becomes a source: a Geschäft, decision, article, dataset or indicator. The model cites it as `[n]` and the chat shows a badge that opens the source. The label comes from the server's `citation_label`, or from rules in the image where a server has none yet.
+* **Own instructions.** A server's `instructions` land in every system message. opencaselaw sends 25,794 characters of house rules, including a mandatory Markdown link for every decision. The image replaces the instructions of all four servers with short texts of about 1,200 to 1,700 characters: which tool for what, cite with `[n]`, `[1]` also for a single source, no number where there is no source.
+* **Cleanup.** The global filter function `citation_cleanup` removes every `[n]` without a source after an answer: a count in brackets, an internal document number, a list position past the last source.
+
+For MCP results, about 75 to 100 % of answers that have sources cite with `[n]`, depending on the server. An end-to-end suite (115 scenarios over all tools of the four servers) checks this before a change goes live.
 
 For implementation details and endpoints of the Basel-Stadt servers, see the [MCP section](/mcp/index.md).
 

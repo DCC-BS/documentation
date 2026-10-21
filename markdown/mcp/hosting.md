@@ -82,6 +82,12 @@ To update the `grossrat` server with a newer data release:
 docker compose pull grossrat && docker compose up -d grossrat
 ```
 
+### 503 bursts
+
+All three hosts answer `503 Service Unavailable` in bursts of seconds to minutes, often at the same time. The responses come from the Airlock/Apache front (`Server: Apache`, cookie `AL_SESS-S`), not from the containers.
+
+In Bebbi Bot a 503 at connection time leaves the chat without the server's tools. A 503 during a tool call cancels the chat. Bebbi Bot now retries 502/503/504 for about 15 seconds, which covers short bursts only. Investigation: [dcc-mcp-facade#5](https://github.com/DCC-BS/dcc-mcp-facade/issues/5).
+
 ## Local Testing
 
 Test endpoints locally by providing the target `Host` header directly to Traefik's port:

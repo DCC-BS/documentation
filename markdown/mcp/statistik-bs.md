@@ -43,7 +43,9 @@ get_table(table="t03.4.04", max_rows=12, from_end=True)
 get_table(table="t10.1.04", sheet="Jul")
 ```
 
-Every result that can be cited has `title`, `portal_url` and `aktualisierungsdatum` (the Stand). For web tables, `source` and `aktualisierungsdatum` come from the Steckbrief.
+Every result that can be cited has `title`, `portal_url` and `aktualisierungsdatum` (the Stand), and a `citation_label` (`statistik.bs.ch · <title>, <subtitle>`). For web tables, `source` and `aktualisierungsdatum` come from the Steckbrief.
+
+The server's `instructions` route between the tools. They used to end with "always cite … and link portal_url or download_url", which made models write Markdown links instead of the client's citation markers; that sentence is gone ([#5](https://github.com/DCC-BS/mcp-statistikportal/pull/5)). `get_facets` values have no URL yet, so a count from them has no source ([#6](https://github.com/DCC-BS/mcp-statistikportal/issues/6)).
 
 ## How the search works
 

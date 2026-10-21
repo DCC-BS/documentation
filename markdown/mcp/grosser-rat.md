@@ -90,3 +90,9 @@ The deep research evaluation of October 2026 produced a list of requested change
 * No tool returns legislature periods, so "in der laufenden Legislatur" needs the dates from the user.
 * `find_geschaefte` returns 100 items by default, over 8,000 characters. Clients should send a `limit`.
 * `search_documents` hits had empty `urheber` and `partei`.
+
+The citation tests of Bebbi Bot added more, tracked in [Feedback#367](https://github.com/DCC-BS/Feedback/issues/367):
+
+* `find_geschaefte` items have no `url`; clients build `https://grosserrat.bs.ch/?gnr=<signatur>` themselves. Every citable item should carry `url` and a `citation_label` such as `GR 23.5544 · Motion …`.
+* Persons, committees and counts (`search_entities`, `explore_entity`, `group_by`) have no public URL, so answers based on them have no source.
+* The instructions are 3,520 characters and ask to "cite the signature and this URL". Bebbi Bot replaces them with a shorter text without a citation rule. Grosser Rat answers with `[n]` markers went from 36 % to 66–84 % of the answers that had sources.

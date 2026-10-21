@@ -52,6 +52,14 @@ Microsoft's token for a user does not list nested group memberships when the ten
 
 Only groups assigned to the enterprise application are synced, and no extra Graph permissions or admin consent are needed. Assignments are cached for five minutes, so changes in the Azure portal show up without a restart. The feature is switched on with `DCC_ENABLE_ENTRA_TRANSITIVE_GROUP_SYNC`.
 
+## MCP: citations, instructions and retries
+
+Three hooks on Open WebUI's MCP handling (`mcp_citations/`, `mcp_instructions/`, `mcp_http_retry/` in kdkp-open-web-ui). See [Tools](/apps/bebbi-bot/tools.md#citations-from-mcp-results) for what users see.
+
+* **Citation sources from MCP results.** Open WebUI makes citation sources only from its own retrieval tools. The hook adds the tools of the configured MCP servers (`DCC_MCP_CITATION_SERVERS`). Each result item with a public URL becomes one source, and the source's tag in the model's context carries a short excerpt. Without the excerpt, the model rarely wrote `[n]`.
+* **Own instructions.** Replaces the `instructions` an MCP server sends with a text from the image, per server. Open WebUI appends them in full to every system message, and the servers' own texts asked for Markdown links instead of citation markers.
+* **Retries.** The front of the *.bs.ch MCP hosts answers `503` in bursts. Without retries, a 503 during a tool call cancelled the whole chat and left an empty answer. The MCP HTTP client now retries 502/503/504 and connection errors up to five times, over about 15 seconds.
+
 ## Other changes
 
 * **Model picker for knowledge admins.** Users who may create models in the workspace could not choose the hidden base models, because the dropdown listed them for global admins only. A build-time patch of the compiled frontend lifts that restriction. The chat model picker is unaffected, so normal users still do not see the base models.

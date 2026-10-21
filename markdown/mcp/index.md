@@ -62,11 +62,21 @@ The servers follow the same rules. Most of them came out of evaluation runs with
 
 **Every result can be cited.** Results carry the public URL, the title and the date of the source (`url`, `portal_url`, `citation_url`, `modified`, `aktualisierungsdatum`). A model can quote the result of a single call and link the source without a second lookup.
 
+* Each item also gets a short `citation_label` with the number an answer repeats, for example `data.bs.ch · Leerstehende Wohnungen` or `GR 23.5544 · Motion …`. Bebbi Bot shows it in its citation badges.
+* Counts and aggregates link the public page that lists what was counted. For example, a publisher's dataset count links the data.bs.ch catalog filtered on that publisher.
+* A result without a public page has no URL, and clients treat the answer as having no source.
+
+Status: data.bs.ch [mcp-data-bs#9](https://github.com/DCC-BS/mcp-data-bs/pull/9), statistik.bs.ch [mcp-statistikportal#5](https://github.com/DCC-BS/mcp-statistikportal/pull/5) and [#6](https://github.com/DCC-BS/mcp-statistikportal/issues/6), Grosser Rat [Feedback#367](https://github.com/DCC-BS/Feedback/issues/367).
+
 **Results fit into the context.** Large results are capped at about 12,000 characters (20,000 for Grosser Rat documents). A cut result says so with `truncated: true` and a `hint`, and offers `next_offset` to page on. The model knows that it has not seen everything.
 
 **Errors tell the model what to do.** API failures come back as an MCP `ToolError` with the portal's own message, for example a wrong ODSQL field name, or with a pointer to the right tool ("check the indicator id with search_indicators"). A generic "Error executing tool" would leave the model guessing.
 
-**Short tool descriptions.** Tool descriptions are sent with every model call, so they stay at one to three sentences. Longer guidance goes into the server's `instructions`, which clients read once.
+**Short tool descriptions and instructions.** Tool descriptions are sent with every model call, so they stay at one to three sentences.
+
+Longer guidance goes into the server's `instructions`. Open WebUI appends them to the system message of every chat that has the server switched on, so they stay short as well (under about 1,500 characters) and only route: which tool answers what, and what the fields mean.
+
+They prescribe no citation format. Rules like "link portal_url" or "cite the signature and this URL" made Gemma write Markdown links instead of Bebbi Bot's citation badges.
 
 **Stateless streamable HTTP.** The MCP endpoint is `/mcp`. Requests need no `initialize` handshake and no session id, so any replica can answer and a restart loses nothing. `GET /healthz` answers `{"status":"ok"}` for the container healthcheck.
 
