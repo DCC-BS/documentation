@@ -24,7 +24,7 @@ data.bs.ch runs on Huwise, formerly Opendatasoft. Every portal on that platform 
 | `get_datasets` | Searches the catalog. `semantic` mode (default) ranks by meaning through Huwise's `vector_similarity` endpoint and finds synonyms and other languages. `lexical` mode matches the exact words. `refine` filters by facet, `next_offset` pages |
 | `get_dataset` | Metadata of one dataset: title, URL, modified date, publisher and the fields with name, type, label, unit and whether they can be sorted or faceted |
 | `get_records` | Rows of a dataset with ODSQL `select`, `where`, `group_by`, `order_by` and `limit`. The result carries `dataset_id`, `url`, `title` and `modified`, so it can be cited on its own |
-| `get_facets` | Valid filter values for the catalog: publisher, keyword, theme, features, modified, language |
+| `get_facets` | Valid filter values for the catalog with dataset counts: publisher, keyword, theme, features, modified, language. Values come largest first. Each value has a `url` to the catalog filtered on it (`?refine.publisher=Statistisches%20Amt`), so a count can be cited |
 | `export_dataset_url` | Download link for an export, optionally filtered. Formats: `csv`, `json`, `geojson`, `xlsx`, `shp`, `parquet`, `gpx`, `kml`, `rdfxml`, `jsonld`, `turtle` |
 
 A typical call sequence:
@@ -45,6 +45,8 @@ These came up in the deep research evaluation, and the tools and the agent's hin
 * **Big results.** `get_records` caps its output at about 12,000 characters. When it cuts rows it sets `truncated: true` and a `hint` that suggests `select`, `group_by`, a smaller `limit` or `next_offset`.
 
 `get_records` looks up the title and modified date in the catalog and keeps them in memory for one hour, so a records call costs at most one extra request.
+
+Every result carries a `citation_label` (`data.bs.ch · <title>`). The server sends short `instructions` that repeat the rules above, about 570 characters ([#9](https://github.com/DCC-BS/mcp-data-bs/pull/9)).
 
 ## Configuration
 
