@@ -5,7 +5,7 @@ editLink: true
 
 # Governance manager
 
-The governance manager covers the rules for knowledge bases (Wissensspeicher) in Bebbi Bot, as the DSFA "KI-Prototypen" V2.2 requires them: chapter 6, the measures in 7.4 and the duties of knowledge admins in annex 4.1. It started from Feedback [#293](https://github.com/DCC-BS/Feedback/issues/293) and [#353](https://github.com/DCC-BS/Feedback/issues/353).
+The governance manager covers the rules for knowledge bases (Wissensspeicher) in Bebbi Bot, as the DSFA "KI-Prototypen" V2.2 requires them: chapter 6, the measures in 7.4 and the duties of knowledge admins in annex 4.1.
 
 It is a page inside Open WebUI at `/bebbi-bot/governance/`, not a separate app. Users reach it with their Bebbi Bot login. The page, its API and the org unit lookup at login ship in the [custom image](/apps/bebbi-bot/image.md). The reminders, the report to DCC and the chat retention run in the [janitor](/apps/bebbi-bot/seeder-janitor.md#janitor).
 
