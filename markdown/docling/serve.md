@@ -37,6 +37,6 @@ The plugins read their own variables, listed on their pages.
 
 ## Releases
 
-Images are published to `ghcr.io/dcc-bs/dcc-docling-serve[-cpu|-cu128|-cu130]` by a manually dispatched workflow that takes a docling-serve release tag. Our image gets the same tag: `dcc-docling-serve:v1.38.0` is docling-serve v1.38.0 with our plugins and patches.
+Images are published to `ghcr.io/dcc-bs/dcc-docling-serve[-cpu|-cu128|-cu130]` by a manually dispatched workflow that takes a docling-serve release tag. Our image gets the same tag: `dcc-docling-serve:v1.38.1` is docling-serve v1.38.1 with our plugins and patches.
 
 Since v1.37.0 the image no longer patches OCR for vector shapes: docling 2.136 fixed it upstream, so table rules, underlines and background fills no longer send regions with PDF text to OCR. `DCC_OCR_IGNORE_SHAPES` has no effect any more.
