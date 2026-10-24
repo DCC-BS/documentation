@@ -15,6 +15,7 @@ We do not fork Open WebUI. We run the upstream project and add our own pieces ar
 | [Seeder and janitor](/apps/bebbi-bot/seeder-janitor.md) | How models, tools and settings get into Open WebUI from git, and the daily cleanup job |
 | [Tools and workspace content](/apps/bebbi-bot/tools.md) | The tools, filters, skills, prompts and tool servers that ship with Bebbi Bot |
 | [Deep research](/apps/bebbi-bot/deep-research.md) | The research agent, and an explanation of pipes |
+| [Governance manager](/apps/bebbi-bot/governance.md) | Declarations and yearly confirmation of knowledge bases, the directory, the knowledge admin role, chat retention |
 
 ## What users see
 
@@ -90,6 +91,7 @@ graph TB
 * A [janitor](/apps/bebbi-bot/seeder-janitor.md#janitor) that deletes what Open WebUI leaves behind and enforces a policy on models users build themselves.
 * [Tools](/apps/bebbi-bot/tools.md) to create and edit Office files, a web search tool with a review step, and connections to external MCP servers (Open Case Law, [Statistik.bs MCP](/mcp/statistik-bs.md), [Data.bs.ch MCP](/mcp/data-bs.md), and [Grosser Rat MCP](/mcp/grosser-rat.md)).
 * A [deep research agent](/apps/bebbi-bot/deep-research.md), connected to Open WebUI through a pipe function.
+* A [governance manager](/apps/bebbi-bot/governance.md) for the DSFA rules on knowledge bases: declarations, yearly confirmation, a directory, the knowledge admin role and chat retention.
 
 ## Deployment
 

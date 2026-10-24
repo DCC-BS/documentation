@@ -65,6 +65,10 @@ export default withMermaid({
                                 text: "Deep research",
                                 link: "/apps/bebbi-bot/deep-research.md",
                             },
+                            {
+                                text: "Governance manager",
+                                link: "/apps/bebbi-bot/governance.md",
+                            },
                         ],
                     },
                 ],
