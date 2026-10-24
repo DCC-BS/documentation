@@ -81,6 +81,8 @@ Open WebUI never cleans up after itself. Deleting a chat leaves its uploaded fil
 5. **Orphaned embeddings.** Collections in pgvector whose owner is gone. Collections without an owner row, such as web search results, are checked twice, five minutes apart, and deleted only if both checks agree.
 6. **Orphaned S3 objects.** Objects named like an upload whose file row no longer exists. Other keys in the bucket are never touched.
 7. **Report.** What deleted users still own, so someone can decide.
+8. **Chat retention.** Deletes chats unused for a year, after a notice by mail. See [Governance manager](/apps/bebbi-bot/governance.md#chat-retention).
+9. **Governance.** Reminders to knowledge base owners, the duties mail for role requests and the weekly report to DCC. See [Governance manager](/apps/bebbi-bot/governance.md#reminders-and-the-report-to-dcc).
 
 ### Model policy
 
@@ -110,3 +112,5 @@ All in `values.yaml` under `janitor:`.
 | `keepRuns` | `5` | Finished runs kept, with their logs |
 
 Turn `dryRun` on for a new stage, read the logs of the first runs, then turn it off.
+
+Chat retention and the governance mails have their own settings and dry runs under `janitor.retention` and `janitor.governance`.
