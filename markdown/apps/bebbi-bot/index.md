@@ -38,7 +38,7 @@ Two more models exist but stay hidden from users: Gemma 4 31B and Qwen 3.5 4B as
 
 The content of pictures inside documents is not understood: charts, photos and diagrams. This holds for documents in a knowledge base (Wissensspeicher) and for documents attached to a chat. Text is not affected, including printed text on scanned pages, because OCR is on (`do_ocr: true` in `DOCLING_PARAMS`).
 
-The cause is the text extraction for uploads. Docling is selected by `CONTENT_EXTRACTION_ENGINE=docling`, and `docling_async/docling_async_loader.py` calls it with `image_export_mode: "placeholder"`, so each picture becomes a placeholder in the markdown. No picture description is configured. Only text is chunked and embedded.
+The cause is the text extraction for uploads. Docling extracts the text, and our [image](/apps/bebbi-bot/image.md) asks it to export each picture as a placeholder in the markdown. No picture description is configured. Only text is chunked and embedded.
 
 Only an image file uploaded directly into a chat goes to the vision-capable model (Gemma 4 31B accepts image input) and is analysed.
 
