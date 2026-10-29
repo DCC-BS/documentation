@@ -19,7 +19,7 @@ All endpoints are public and need no authentication. They only read data that is
 
 ## Who uses them
 
-* **[Bebbi Bot](/apps/bebbi-bot/index.md).** Open WebUI connects the three servers as tool servers, next to the external [OpenCaseLaw](https://mcp.opencaselaw.ch) server for Swiss law. See [Tools and workspace content](/apps/bebbi-bot/tools.md#mcp-tool-servers).
+* **[Bebbi Bot](/apps/bebbi-bot/index.md).** Open WebUI connects the three servers as tool servers, next to two external servers: [OpenCaseLaw](https://mcp.opencaselaw.ch) for Swiss law and Alva, the bs.ch server of BaselCityGPT by Liip. See [Tools and workspace content](/apps/bebbi-bot/tools.md#mcp-tool-servers).
 * **[Deep research](/apps/bebbi-bot/deep-research.md).** The research presets call a subset of the tools. The `grossrat` preset works almost only with the Grosser Rat server, `statistik` with data.bs.ch and statistik.bs.ch, and the legal and administration presets use them as helpers.
 * **Anyone else.** Claude Desktop, Cursor, ChatGPT connectors, the Antigravity CLI and other MCP clients can use the same endpoints. The two open source servers also run locally over stdio with `uvx`.
 

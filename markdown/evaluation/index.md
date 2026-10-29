@@ -21,6 +21,7 @@ We publish how we work, including our rules, our steps and our test code. We kee
 | [Selection standard](/evaluation/selection-standard) | The five basic checks, and what else we look at for each kind of model |
 | [How we test](/evaluation/how-we-test) | The five rounds of testing, with links to the code |
 | [Model lifecycle](/evaluation/lifecycle) | How often we review models, how we switch, and what we write down |
+| [Testing Bebbi Bot](/evaluation/bebbi-bot) | The test suites of our chat assistant: Office files, citations, model habits, load |
 
 The list of models we run today is on [Models & APIs](/infrastructure/models). Our servers are described on [GPU Compute Cluster](/infrastructure/hardware), and the software that runs the models on [Inference Software Stack](/infrastructure/software).
 
@@ -28,6 +29,7 @@ The list of models we run today is on [Models & APIs](/infrastructure/models). O
 
 - We don't publish test data, results, scores or rankings.
 - We also test models that find personal data in texts (for anonymisation) and models that support decisions. That test code isn't public yet.
+- The test suites of Bebbi Bot are in an internal repository of IT BS. We describe them, but the code isn't public.
 - We judge synthetic voices by listening to them, following a written checklist. We have no automatic score for voices.
 - The governance board doesn't exist yet.
 - When we last switched models, we didn't record every measurement we should have. The [decision record](/evaluation/lifecycle#model-decision-record) now asks for all of them.

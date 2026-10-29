@@ -13,9 +13,15 @@ Every 6 to 12 months we look at what is available and compare it with what we ru
 ## How a switch works
 
 1. **Candidate.** Someone proposes a new model. It has to pass the [five basic checks](/evaluation/selection-standard#the-five-basic-checks).
-2. **Testing.** We run rounds 1 to 4 from [How we test](/evaluation/how-we-test).
+2. **Testing.** We run rounds 1 to 4 from [How we test](/evaluation/how-we-test). For a new chat model this includes the [Bebbi Bot suites](/evaluation/bebbi-bot#when-we-run-what): Office files, citations, endless loops and foreign characters.
 3. **Running both.** The old and the new model run side by side for a while. Apps and workflows get adjusted, and we compare the two in real use.
 4. **Switching over.** The apps move to the new model. We first switch the old model off, and remove it completely some time later.
+
+## Changes that aren't a new model
+
+A model can behave differently without being replaced. A new compression, a new vLLM version, a new Open WebUI version or a longer system prompt can each change what users get. Two examples from Bebbi Bot: the 4-bit version of Gemma 4 writes foreign characters into German words about 2.5 times as often as the 8-bit version, and a longer system prompt makes it about 1.5 times as likely. We treat such changes like a small model switch and rerun the suites that cover them.
+
+Every Open WebUI upgrade also gets a written record, one per version. It lists every upstream change that touches our additions and the evidence that each was checked. See [Upgrading Open WebUI](/apps/bebbi-bot/repository.md#upgrading-open-webui).
 
 ## Going back
 

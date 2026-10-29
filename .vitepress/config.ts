@@ -54,12 +54,16 @@ export default withMermaid({
                                 link: "/apps/bebbi-bot/image.md",
                             },
                             {
-                                text: "Seeder and janitor",
+                                text: "Seeder, janitor and reindex",
                                 link: "/apps/bebbi-bot/seeder-janitor.md",
                             },
                             {
                                 text: "Tools and workspace content",
                                 link: "/apps/bebbi-bot/tools.md",
+                            },
+                            {
+                                text: "Knowledge bases and citations",
+                                link: "/apps/bebbi-bot/knowledge.md",
                             },
                             {
                                 text: "Deep research",
@@ -68,6 +72,10 @@ export default withMermaid({
                             {
                                 text: "Governance manager",
                                 link: "/apps/bebbi-bot/governance.md",
+                            },
+                            {
+                                text: "Repository and releases",
+                                link: "/apps/bebbi-bot/repository.md",
                             },
                         ],
                     },
@@ -346,6 +354,10 @@ export default withMermaid({
                     {
                         text: "Model Lifecycle",
                         link: "/evaluation/lifecycle.md",
+                    },
+                    {
+                        text: "Testing Bebbi Bot",
+                        link: "/evaluation/bebbi-bot.md",
                     },
                 ],
             },
