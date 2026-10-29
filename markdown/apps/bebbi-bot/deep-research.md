@@ -5,7 +5,7 @@ editLink: true
 
 # Deep research
 
-Deep research answers a question with a cited report instead of a chat reply. A user picks a model such as "Deep Research · Recht" in Bebbi Bot, answers at most two clarifying questions, approves a research plan, and gets a German report with numbered sources back in the same chat. Most runs happen at night, because one report takes minutes of model time and the GPUs are busy during office hours.
+Deep research answers a question with a cited report instead of a chat reply. A user picks the model "Deep Research" in Bebbi Bot, confirms where to research (the service suggests a profile such as Recht or Grosser Rat), answers at most two clarifying questions, approves a research plan, and gets a German report with numbered sources back in the same chat. Jobs run at night, because one report takes minutes of model time and the GPUs are busy during office hours.
 
 The agent lives in its own repository, [DCC-BS/bebbi-deep-research](https://github.com/DCC-BS/bebbi-deep-research). Open WebUI reaches it through a pipe. This page first explains what a pipe is, then how the agent works.
 
@@ -33,10 +33,12 @@ sequenceDiagram
     participant O as Open WebUI
     participant P as Pipe
     participant S as Research service
-    U->>O: Question, model "Deep Research · Recht"
+    U->>O: Question, model "Deep Research"
     O->>P: Chat request
-    P->>S: Clarify
-    S-->>P: At most two questions
+    P->>S: Clarify, suggest a preset
+    S-->>P: Preset and at most two questions
+    P->>U: Ask-user card: where to research
+    U->>P: Confirm or pick another preset
     P-->>U: Questions in the chat
     U->>P: Answers
     P->>S: Plan
@@ -50,26 +52,29 @@ sequenceDiagram
     U->>O: Opens the chat next morning
 ```
 
-1. **Clarify.** The service asks at most two questions, and only when the task is unclear.
-2. **Plan.** The service writes a plan of sub-questions. The user sees it in Open WebUI's ask-user card with three buttons: approve, change, discard. "Change" opens an input box, and the plan is rewritten and shown again, up to three times. Closing the card or letting it time out counts as discard, and nothing runs.
-3. **Queue.** After approval the job goes into a queue in PostgreSQL. It starts inside the night window, 20:00 to 05:00 in Europe/Zurich. The one exception is a quick run of a focus preset (below), which may start during the day.
-4. **Research.** The service searches the web, reads pages and calls MCP servers, collects evidence with verbatim quotes, and writes the report.
-5. **Delivery.** The finished report replaces the "queued" text in the user's chat, with sources as numbered badges and a source list. A button under the message adds a Word file.
+1. **Choose the preset.** The service suggests the research profile that fits the task. The user sees an ask-user card "Wo soll recherchiert werden?" with the suggestion first and the other presets below, each with a short description. Closing the card starts nothing.
+2. **Clarify.** The service asks at most two questions, and only when the task is unclear. The user answers or writes "weiter".
+3. **Plan.** The service writes a plan of sub-questions. The user sees it in Open WebUI's ask-user card with three buttons: approve, change, discard. "Change" opens an input box, and the plan is rewritten and shown again, up to three times. Closing the card or letting it time out counts as discard, and nothing runs.
+4. **Queue.** After approval the job goes into a queue in PostgreSQL. It starts inside the night window, 20:00 to 05:00 in Europe/Zurich. The service could start a quick run of a focus preset during the day, but the pipe currently queues every job for the night.
+5. **Research.** The service searches the web, reads pages and calls MCP servers, collects evidence with verbatim quotes, and writes the report.
+6. **Delivery.** The finished report replaces the "queued" text in the user's chat, with sources as numbered badges and a source list. A button under the message adds a Word file.
+
+While a job waits or runs, a message that is only "abbrechen" (or "Recherche abbrechen", "stopp") cancels it. A later message in the same chat before the delivery returns the job's status, or the report if the delivery failed.
 
 The user can say "schnell" or "gründlich" in the question to choose a quick or deep run. Quick, standard and deep differ in rounds, number of sub-questions and a hard token cap per run (200k, 450k, 900k tokens).
 
 ## Presets
 
-Each preset is a research profile and appears as its own model.
+Each preset is a research profile. The user chooses it in the card at the start. With the valve `PRESET_MODELS` on, the pipe also lists one model per preset ("Deep Research · Recht" and so on), which skips the choice. That was the original setup and is off today.
 
-| Model | Preset | Sources |
+| Label | Preset | Sources |
 |---|---|---|
-| Deep Research · Recht | `rechtsrecherche` | Federal and cantonal legislation and court decisions through OpenCaseLaw, plus the web |
-| Deep Research · Grosser Rat | `grossrat` | All business of the Grosser Rat since 1973 through its MCP server |
-| Deep Research · Statistik | `statistik` | Open data portal data.bs.ch and official statistics |
-| Deep Research · Verwaltung | `verwaltung_web` | Strategies and web offers of Confederation, cantons and cities, with the Grosser Rat, data.bs.ch and OpenCaseLaw servers as helpers |
-| Deep Research · Web | `web_survey` | Broad web research on international topics |
-| Deep Research · Eigene Dokumente | `dokumente` | Only files and knowledge bases of the user, no web |
+| Recht | `rechtsrecherche` | Federal and cantonal legislation and court decisions through OpenCaseLaw, plus the web |
+| Grosser Rat | `grossrat` | All business of the Grosser Rat since 1973 through its MCP server |
+| Statistik | `statistik` | Open data portal data.bs.ch and official statistics |
+| Verwaltung | `verwaltung_web` | Strategies and web offers of Confederation, cantons and cities, with the Grosser Rat, data.bs.ch and OpenCaseLaw servers as helpers |
+| Web | `web_survey` | Broad web research on international topics |
+| Eigene Dokumente | `dokumente` | Only files and knowledge bases of the user, no web |
 
 Presets live in `config/presets.yaml`, mounted as a ConfigMap. They set the engine, the preferred domains, the MCP tools the model may use, the budgets and the report style. Adding a topic needs no code. German reports follow the house style of the canton (Swiss spelling, short sentences, gender-neutral wording).
 
@@ -88,12 +93,16 @@ Files uploaded in the chat and knowledge bases attached to the chat or the model
 
 | Part | Where | Role |
 |---|---|---|
-| `bebbi_deep_research` pipe | seeded function | The manifold. One model per preset, talks to the service with a bearer token |
-| `bebbi_deep_research_download` action | seeded function | Button that adds the Word file to a report delivered at night |
-| Model entries | seeded models | Name, description, public read grant, citations capability |
+| `bebbi_deep_research` pipe | seeded function | The manifold. One model "Deep Research", optionally one per preset. Talks to the service with a bearer token |
+| `bebbi_deep_research_download` action | seeded function | Button that adds the Word file to a report delivered at night. Attached to the Deep Research model only |
+| Model entry | seeded model | Name, description, suggestion prompts, public read grant, citations capability |
 | Delivery route | custom image | Lets the service write into a chat at night |
 
+The seeder installs the pipe only once the service token is in the stage's secrets, so a stage without the research service shows no Deep Research model.
+
 The pipe keeps its chat state in an invisible marker inside the assistant message, written as a Markdown link reference definition that Open WebUI never renders. The marker records whether the chat is waiting for answers, for a decision, or for a delivered report, and a later message in the same chat continues from it. The pipe also answers Open WebUI's background tasks (title, tags, follow-ups) itself, so they do not start a research turn.
+
+The pipe sends its API version with every call. The service refuses a version it does not speak with a German message, so a pipe and a service that do not fit together fail visibly instead of half working.
 
 The pipe depends on `httpx` and `pydantic` only, both already in the Open WebUI image. Its valves:
 
@@ -103,7 +112,9 @@ The pipe depends on `httpx` and `pydantic` only, both already in the Open WebUI 
 | `SERVICE_TOKEN` | Bearer token, equal to the service's `RA_TOKEN` |
 | `DEFAULT_DEPTH` | `quick`, `standard` or `deep` when the user says nothing |
 | `DECISION_MINUTES` | How long the approve card waits, default 30 |
-| `PRESETS` | List of `preset:label` pairs, one model each |
+| `PRESETS` | List of `preset:label` pairs, in the order of the card |
+| `PRESET_MODELS` | Also list one model per preset |
+| `DEFAULT_PRESET` | Preset when the service suggests none and no card can be shown |
 | `OWN_SOURCES` | Use uploaded files and knowledge bases |
 
 ### Delivering the report
@@ -113,7 +124,21 @@ At night no user is logged in, yet the service must write into a user's chat. Si
 * Off unless `DCC_DEEP_RESEARCH_DELIVERY_SECRET` is set to a secret of at least 32 characters.
 * The secret is separate from every Open WebUI API key and is checked in constant time before the body is read. The body is capped at 4 MB.
 * The route writes only into an assistant message of a deep research model whose state marker says a job is queued, in a chat that belongs to the given user. After delivery the marker is gone, so the message is closed.
-* Block `/api/v1/dcc/` for external clients at the gateway. Only the in-cluster service needs it.
+* The public route blocks `/api/v1/dcc/deep-research`. Only the in-cluster service needs it.
+* The secret can be rotated without downtime: while `DCC_DEEP_RESEARCH_DELIVERY_SECRET_PREVIOUS` is set, both secrets are accepted.
+
+### Keeping the pipe in sync
+
+The two seeded functions are copies of `pipe/` in bebbi-deep-research, pinned to one commit. The commit is in a `# source:` line at the top of each file. Every release there gets a tag `v<version>`, and a pull request that changes the pipe must bump the version.
+
+```bash
+uv run python scripts/sync_deep_research.py check               # also in CI: fails on any other difference
+uv run python scripts/sync_deep_research.py update --ref v1.2.2  # take a release
+```
+
+`check` also prints a notice when a newer release exists. Nothing syncs automatically, because GitHub Actions may not open pull requests in the IT BS organization. When a release changes the service contract, deploy the job service of the same version at the same time.
+
+CI also loads both functions inside the built image and imports every Open WebUI module they use, including the imports inside functions. A renamed internal then fails the build instead of the Word download.
 
 ## Service
 

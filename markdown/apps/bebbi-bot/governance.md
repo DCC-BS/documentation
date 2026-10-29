@@ -68,7 +68,7 @@ Nothing is taken away or deleted because of a finding in the report. DCC follows
 
 ## Chat retention
 
-Chats are deleted one year after their last use, together with the files uploaded in them. Two weeks before, the owner gets a mail that lists the chats and their deletion dates. Writing in a chat again starts the year over. No chat is deleted without that notice.
+Chats are deleted one year after their last use, together with the files uploaded in them. Two weeks before, the owner gets a mail that lists the chats and their deletion dates. Writing in a chat again starts the year over. No chat is deleted without that notice. Archiving a chat does not stop the deletion, so Bebbi Bot hides the archive button.
 
 Knowledge base files are never deleted automatically. Their owners confirm every year that they are still needed.
 

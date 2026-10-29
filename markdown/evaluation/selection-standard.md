@@ -25,11 +25,12 @@ Our main outside source is [Artificial Analysis](https://artificialanalysis.ai/)
 Then we check the things rankings can't tell us:
 
 - How much memory the model needs for our text lengths. The tool [`hf-mem`](https://pypi.org/project/hf-mem/) gives us a first estimate.
-- Which compressed version of the model runs fast and reliably on our cards. A reliable version doesn't get stuck repeating itself.
+- Which compressed version of the model runs fast and reliably on our cards. A reliable version doesn't get stuck repeating itself and doesn't slip foreign characters into German words. We measure both with the [Bebbi Bot suites](/evaluation/bebbi-bot#model-behaviour). For Gemma 4, the 4-bit versions did the second about 2.5 times as often as the 8-bit one.
 - How long a text the model can handle.
 - Known problems with the model in vLLM.
 - What other users report about it.
 - How it feels to work with it on our own computers.
+- How it works inside our apps: whether it calls tools correctly, cites its sources and edits files without breaking them. Round 3 of [How we test](/evaluation/how-we-test) covers this.
 
 ### Reading documents (layout and OCR)
 

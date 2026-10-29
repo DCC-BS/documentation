@@ -23,7 +23,7 @@ For technical setup, environment variables, and deployment details, see the resp
 | [TextMate](/apps/textmate.md) | AI writing assistant: rewriting, proofreading, document advisor | Azure AD (Entra ID) | Installable icon only | ✅ | ✅ |
 | [BS-Übersetzer](/apps/bs-uebersetzer.md) | AI translation for text, documents & speech | No auth (Azure AD capable) | Full PWA | ❌ | ✅ |
 | [Transcribo](/apps/transcribo.md) | Audio/video transcription & summarization | No auth | Full PWA | ❌ | ✅ |
-| [Bebbi Bot](/apps/bebbi-bot/index.md) | General AI assistant, our [Open WebUI](https://docs.openwebui.com/) deployment: chat, Office file creation and editing, web search, deep research | Microsoft Entra ID | – | – | – |
+| [Bebbi Bot](/apps/bebbi-bot/index.md) | General AI assistant, our [Open WebUI](https://docs.openwebui.com/) deployment: chat, Office file creation and editing, knowledge bases with cited passages, web search, cantonal data through MCP, deep research | Microsoft Entra ID | – | – | – |
 
 ::: tip App Store
 "App Store" refers to the **IT BS Unternehmensportal App Store**, the internal catalog through which cantonal employees install apps on their managed iPhones.

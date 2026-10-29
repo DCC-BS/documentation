@@ -37,8 +37,13 @@ Do our apps still work correctly with the new model?
 - [dcc-docling-serve](https://github.com/DCC-BS/dcc-docling-serve/tree/main/benchmarks) tests document conversion with made-up PDFs.
 - [text-mate-backend](https://github.com/DCC-BS/text-mate-backend/tree/main/evals) tests the advice and simplification features of TextMate.
 - [transcribo-backend](https://github.com/DCC-BS/transcribo-backend) and [bs-translator-backend](https://github.com/DCC-BS/bs-translator-backend) have tests that also run against a live model.
-- [deep-research-evaluation](https://github.com/DCC-BS/deep-research-evaluation) tests the research assistant in Bebbi Bot.
-- The MCP citation suite in kdkp-open-web-ui (`mcp_citations/e2e/`) asks Bebbi Bot 115 questions over all tools of the four MCP servers in the real chat interface. It checks that the needed tools are called, that answers with sources cite with `[n]`, and that every number points to the right source.
+- [deep-research-evaluation](https://github.com/DCC-BS/deep-research-evaluation) tests the research assistant in Bebbi Bot. It also runs a local copy of the production model stack, which the Bebbi Bot suites below use.
+- Bebbi Bot has its own suites in the internal kdkp-open-web-ui repository. [Testing Bebbi Bot](/evaluation/bebbi-bot) describes each one. In short:
+  - `tests/e2e/mcp_citations/` asks 115 questions over all tools of the MCP servers in the real chat interface and checks that every `[n]` opens the right source.
+  - `tests/e2e/rag_citations/` does the same for knowledge bases, files, web search and sub-agents, and measures how many facts the search finds.
+  - `benchmarks/office_edit/` and `benchmarks/skills/` send realistic requests for Word, PowerPoint and Excel files and check the files that come back.
+  - `benchmarks/repetition/` and `benchmarks/foreign_script/` look at two habits of the model: endless loops, and foreign characters in German words.
+  - `benchmarks/rag_chunking/` and `benchmarks/word_artifacts/` check how tables are split for the search and what is left of Markdown in Word files.
 
 ## 4. Load tests
 
@@ -46,6 +51,7 @@ Does the model stay fast when many people use it at once? We send many requests 
 
 - [vllm-benchmark](https://github.com/DCC-BS/vllm-benchmark) covers chat, search, translation and image input.
 - [bentoml-faster-whisper](https://github.com/DCC-BS/bentoml-faster-whisper) has its own load tests for speech-to-text.
+- For Bebbi Bot, `benchmarks/vllm_queueing/` measures how long short chats wait behind very long prompts, `benchmarks/embedding_queue/` how long a search waits behind uploads, and `benchmarks/resources/` what each of our tools costs in the pod. See [Testing Bebbi Bot](/evaluation/bebbi-bot#load-and-cost).
 
 ## 5. Trial in daily use
 
@@ -57,3 +63,4 @@ How does the model behave in real work? For a while the old and the new model ru
 - For synthetic voices we have only our ears and the checklist.
 - Round 5 depends on people paying attention in daily use.
 - Some of the repositories above contain test results from earlier work. This section doesn't add any.
+- The Bebbi Bot suites are in an internal repository, so you can't run them. They use public or made-up material, so the Bebbi Bot pages show some of their numbers.
