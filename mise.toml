@@ -2,7 +2,7 @@
 # TEMPORARY until 2026-10-29: bun 1.4.4 fixes CVE-2026-111497 (Brotli decoder) but is younger than
 # the 7-day cooldown. The weekly dependency routine deletes this comment once 1.4.4 is 7 days old.
 bun = "1.4.4"
-usage = "7.0.1"
+usage = "7.0.2"
 node = "24.22.1"
 
 [hooks]
