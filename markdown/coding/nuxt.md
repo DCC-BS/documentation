@@ -274,6 +274,8 @@ minimumReleaseAgeExcludes = [
 ]
 ```
 
+Our own `@dcc-bs/*` packages are always exempt, so apps can move to a new release right after it is published. A **security fix younger than 7 days** can be exempted *temporarily*: add the packages to `minimumReleaseAgeExcludes` under a `# TEMPORARY until <date>: ...` comment (e.g. `"nuxt", "@nuxt/kit", ...` for a Nuxt security release). The weekly dependency routine removes the entries once the release is 7 days old.
+
 ## Folder Structure Example
 
 ```
