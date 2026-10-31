@@ -25,7 +25,7 @@ jobs:
                   fetch-depth: 0
             # bun from mise.toml (not "latest")
             - name: Setup mise
-              uses: DCC-BS/ci-workflows/actions/setup-mise@8152661ef37d34457568d0684b3287bacffb2c2c # main
+              uses: DCC-BS/ci-workflows/actions/setup-mise@a7a5611d4ea9bc55f27ca8bc22327181d0e0cbc0 # v10.0.0
             - name: Install dependencies
               run: bun install --frozen-lockfile
             - name: Lint
