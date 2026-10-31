@@ -36,7 +36,7 @@ We use the following tools to maintain high quality and performance:
 
 ## General Principles
 
-- **Do:** Optimize for **Python 3.13**.
+- **Do:** Target the Python version in the project's `requires-python` (current services run on **Python 3.14–3.15**; new projects start on the newest release whose dependencies all ship wheels for it).
 - **Do:** Follow **[PEP 8](https://peps.python.org/pep-0008/)** style guide.
 - **Do:** Write **docstrings** for modules, classes, and functions.
 - **Do:** Write small functions that do one thing.
@@ -727,12 +727,15 @@ We configure this using `uv` in `pyproject.toml` (see [uv documentation](https:/
 
 ```toml
 [tool.uv]
-# Global cooldown: ignore releases newer than 1 week
-exclude-newer = "1 week"
-
-# Override for specific internal packages (e.g., 1 day cooldown)
-exclude-newer-package = { dcc-backend-common = "P1D" }
+# Supply-chain cooldown: uv only uses distributions uploaded at least 7 days ago.
+exclude-newer = "P7D"
+# Our own packages: always current (permanent).
+exclude-newer-package = { dcc-backend-common = "P0D" }
 ```
+
+- **Our own packages** (`dcc-backend-common`, `docling-glm-ocr`, `docling-pp-doc-layout`, `docling-pp-ocrv6`) are permanently exempt with `P0D`, so apps can move to a new release right after it is published.
+- **Security fixes younger than 7 days** get a *temporary* exemption: add the package with `P0D`, pin the fixed version (`uv lock --upgrade-package <pkg>==<version>`) and put a `# TEMPORARY until <date>: ...` comment above the entry. The weekly dependency routine removes it once the version is 7 days old.
+- Removing or changing `exclude-newer-package` re-resolves the whole lock. Check the lock diff for unexpected downgrades.
 
 Example `pyproject.toml` snippet for scripts:
 

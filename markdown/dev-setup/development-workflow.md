@@ -113,12 +113,18 @@ Once the review is clean, CI is green, the version is bumped, and the documentat
 
 ### 15. Publish the package or container
 
-Release using the [CI reusable workflows](#reusable-workflows):
+Release using the [CI reusable workflows](#reusable-workflows). Publishing is always a manual `workflow_dispatch` on `main`, so merging never publishes anything by itself.
 
-* **Frontend (UI):** publish the npm package, or build and publish the Docker image.
-* **Python backend:** publish the PyPI package, or build and publish the Docker image.
+* **npm packages** (`@dcc-bs/*.bs.js`): run the repo's **Publish Package** workflow (`gh workflow run publish.yml -R DCC-BS/<repo> --ref main`).
+* **PyPI packages** (`dcc-backend-common`, the docling plugins): run the repo's `publish.yml`.
+* **Docker images** (apps and backends): run **Build and Publish Docker Image** (`gh workflow run docker-publish.yml -R DCC-BS/<repo> --ref main`). The image is tagged with the version from `package.json` / `pyproject.toml`.
+* **dcc-docling-serve**: `gh workflow run cd.yml -R DCC-BS/dcc-docling-serve --ref main -f version=<docling-serve tag>`; the image tag is the upstream docling-serve tag.
+* **bentoml-faster-whisper** has no publish workflow. From a clone of `main`, run `make docker-build docker-push`. It needs `HF_TOKEN` in the environment (the gated pyannote weights are baked in) and a `docker login quay.io`, and pushes `quay.io/ktbs/fd-itbs/faster-whisper:v<version>`.
 
-The publishing workflows live in [`DCC-BS/ci-workflows`](https://github.com/DCC-BS/ci-workflows) — see [Reusable Workflows](#reusable-workflows).
+**Release order when our own packages changed.** Apps depend on our packages, so release bottom-up:
+
+1. **Our packages first**: npm packages, [nuxt layers](../nuxt-layers/index.md) and PyPI packages. Bump the version, merge, publish. The layers are installed from `main` (`github:DCC-BS/nuxt-layers/<layer>`), so merging them is their release. Before publishing a Nuxt module, install the packed tarball (`bun pm pack`) into one app and build it: module CI only builds the module itself.
+2. **Then the apps**: bump every internal package they use to the version just published (our packages are exempt from the [dependency cooldown](../coding/nuxt.md#dependency-cooldowns), so this works immediately), run the app's checks, tests and e2e suite, bump the app's version, merge, and publish its Docker image.
 
 ### 16. Deploy to Kubernetes
 
@@ -199,20 +205,20 @@ To prevent tag overwrite supply chain attacks, we only use the full SHA hash to 
 
 ```yaml
 # Good
-uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
 # Bad
-uses: actions/checkout@v4
+uses: actions/checkout@v7
 ```
 
 ## Reusable Workflows
 
-Common CI/CD logic lives in the [`DCC-BS/ci-workflows`](https://github.com/DCC-BS/ci-workflows) repository as **reusable workflows** and composite actions (frontend build & test, Python backend checks, Docker/npm publishing, version bumping, and the documentation auto-updater). Consume them with `uses:` and pin to the current major tag so you receive compatible updates:
+Common CI/CD logic lives in the [`DCC-BS/ci-workflows`](https://github.com/DCC-BS/ci-workflows) repository as **reusable workflows** and composite actions: `ci.yml` (the one CI pipeline for frontends and backends, see [mise › CI workflows](./mise.md#ci-workflows)), `publish-docker.yml`, `npm-publish.yml`, the `setup-mise` and `bump-version` actions, and the documentation auto-updater. Consume them with `uses:` and, like every action (see [Security](#security)), pin them to a full commit SHA with the version as a comment. Renovate keeps the pin current ("Update DCC-BS/ci-workflows digest" PRs):
 
 ```yaml
 jobs:
   ci:
-    uses: DCC-BS/ci-workflows/.github/workflows/frontend-ci.yml@v9
+    uses: DCC-BS/ci-workflows/.github/workflows/ci.yml@8152661ef37d34457568d0684b3287bacffb2c2c # main
 ```
 
 See the [ci-workflows README](https://github.com/DCC-BS/ci-workflows#readme) for the full list of workflows, inputs, and secrets.

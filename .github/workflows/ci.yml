@@ -1,0 +1,36 @@
+# Checks every pull request before it can reach the GitHub Pages site (deploy.yml runs on main).
+# The VitePress build fails on dead internal links, so a broken page or link blocks the merge.
+name: CI
+
+on:
+    pull_request:
+        branches: [main]
+    workflow_dispatch:
+
+permissions:
+    contents: read
+
+concurrency:
+    group: ci-${{ github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    build:
+        name: Lint & build site
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+              with:
+                  fetch-depth: 0
+            # bun from mise.toml (not "latest")
+            - name: Setup mise
+              uses: DCC-BS/ci-workflows/actions/setup-mise@8152661ef37d34457568d0684b3287bacffb2c2c # main
+            - name: Install dependencies
+              run: bun install --frozen-lockfile
+            - name: Lint
+              run: bunx biome ci .
+            - name: Build with VitePress
+              run: bun run build
+            - name: Compile Agent Skills
+              run: bun run package-skills

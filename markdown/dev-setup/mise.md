@@ -144,7 +144,7 @@ toolchain. Per-package `package.json` and `biome.json` stay in place.
 ## CI workflows
 
 The shared [ci-workflows](https://github.com/DCC-BS/ci-workflows) repository
-provides reusable GitHub Actions that are mise-based (v2): the pipeline is
+provides reusable GitHub Actions that are mise-based: the pipeline is
 language-agnostic and driven entirely by the project's `mise.toml`.
 
 - **Setup** — the `setup-mise` composite action installs mise via
@@ -167,7 +167,7 @@ language-agnostic and driven entirely by the project's `mise.toml`.
 ```yaml
 jobs:
   ci:
-    uses: DCC-BS/ci-workflows/.github/workflows/ci.yml@v2
+    uses: DCC-BS/ci-workflows/.github/workflows/ci.yml@8152661ef37d34457568d0684b3287bacffb2c2c # main
 ```
 
 Absent tasks are skipped automatically — there is nothing to configure beyond
