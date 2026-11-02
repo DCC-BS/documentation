@@ -1,6 +1,6 @@
 [tools]
 bun = "1.4.4"
-usage = "7.0.2"
+usage = "7.1.0"
 node = "24.22.1"
 
 [hooks]
