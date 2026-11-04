@@ -24,7 +24,7 @@ The test doesn't normalise the text. Wrong capitals and punctuation count as err
 
 | Model | Tested | WER | CER | Status | Notes |
 |---|---|---:|---:|---|---|
-| [Voxtral Small 24B](https://huggingface.co/RedHatAI/Voxtral-Small-24B-2507-FP8-dynamic) (FP8) | Jul 2026 | 0.41 | 0.14 | not adopted | <!-- TODO: why we did not switch --> |
+| [Voxtral Small 24B](https://huggingface.co/RedHatAI/Voxtral-Small-24B-2507-FP8-dynamic) (FP8) | Jul 2026 | 0.41 | 0.14 | not adopted | Slightly better than Whisper large-v2, but much bigger and slower. The gain isn't worth the GPUs |
 | [Whisper large-v2](https://huggingface.co/openai/whisper-large-v2) (faster-whisper) | Jun to Jul 2026 | 0.45 to 0.47 | 0.15 to 0.19 | in use | 11 runs with different settings of our transcription service |
 | [Whisper large-v3](https://huggingface.co/openai/whisper-large-v3) (faster-whisper) | Jun to Jul 2026 | 0.49 to 0.56 | 0.19 to 0.25 | not adopted | Worse than large-v2 on our recordings |
 | [Parakeet TDT 0.6B v3](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3) | Jul 2026 | 0.58 | 0.21 | not adopted | |
