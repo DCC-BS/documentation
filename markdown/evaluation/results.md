@@ -39,7 +39,7 @@ A range means we ran the model more than once, with other settings or on another
 
 ## Reading handwriting
 
-The test data is public: 500 lines of German handwriting from [fhswf/german_handwriting](https://huggingface.co/datasets/fhswf/german_handwriting), tested in October 2026. Code: [ocr](https://github.com/DCC-BS/ai-model-evaluation/blob/main/ocr/README.md).
+The test data is public: 500 lines of German handwriting from [fhswf/german_handwriting](https://huggingface.co/datasets/fhswf/german_handwriting), tested in October and November 2026. Code: [ocr](https://github.com/DCC-BS/ai-model-evaluation/blob/main/ocr/README.md).
 
 *Raw* compares the output as it comes. *Normalised* first removes capitals and punctuation on both sides, so it shows how much of the error is only formatting.
 
