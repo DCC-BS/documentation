@@ -18,7 +18,7 @@ All KDKP Large Language Models, embeddings, and rerankers are exposed via OpenAI
 
 Every candidate model must pass five hard gates (GPU fit, one server, vLLM, licence, Hugging Face), then we test it on our own data, in our apps and under load. Leaderboards such as [Artificial Analysis](https://artificialanalysis.ai/) are inputs, not the decision.
 
-The full method is described in [selection standard](/evaluation/selection-standard).
+The full method is described in [selection standard](/evaluation/selection-standard). [Test results](/evaluation/results) has the scores of the speech, OCR and document models, and lists the models we tested and didn't adopt.
 
 ---
 

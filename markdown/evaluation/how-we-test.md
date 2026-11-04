@@ -2,7 +2,7 @@
 
 We test every model in five rounds. Each round answers one question. A model that does well in a public ranking still has to prove itself on our material, inside our apps and with many users at the same time.
 
-Most of our test code is public, so anyone can look at it or use it. Our test data and results stay private, because they come from the daily work of real people. The [data policy](https://github.com/DCC-BS/ai-model-evaluation/blob/main/docs/data-policy.md) explains this in more detail.
+Most of our test code is public, so anyone can look at it or use it. The scores are on [Test results](/evaluation/results). Our own test data stays private, because it comes from the daily work of real people. For tests on that data we publish one total per model. The [data policy](https://github.com/DCC-BS/ai-model-evaluation/blob/main/docs/data-policy.md) explains this in more detail.
 
 The [repository](https://github.com/DCC-BS/ai-model-evaluation/blob/main/docs/eval-layers.md) has the technical details for each round.
 
@@ -24,7 +24,7 @@ Is the model worth a closer look? We read public rankings and test results, list
 
 How well does the model handle material like ours? The code for these tests is in [ai-model-evaluation](https://github.com/DCC-BS/ai-model-evaluation).
 
-- **Speech-to-text** ([stt](https://github.com/DCC-BS/ai-model-evaluation/blob/main/stt/README.md)). We use German and Swiss German recordings and count the words and letters the model gets wrong. The public example uses a few clips of read Standard German from the FLEURS collection. They only show that the code works. Our Swiss German recordings and results stay private.
+- **Speech-to-text** ([stt](https://github.com/DCC-BS/ai-model-evaluation/blob/main/stt/README.md)). We use German and Swiss German recordings and count the words and letters the model gets wrong. The public example uses a few clips of read Standard German from the FLEURS collection. They only show that the code works. Our Swiss German recordings stay private, and the [results](/evaluation/results#speech-to-text) show one total per model.
 - **Reading handwriting** ([ocr](https://github.com/DCC-BS/ai-model-evaluation/blob/main/ocr/README.md)). We use a public collection of German handwriting and count the words and letters the model gets wrong.
 - **Synthetic voices** ([tts](https://github.com/DCC-BS/ai-model-evaluation/blob/main/tts/README.md)). We listen and follow a [written checklist](https://github.com/DCC-BS/ai-model-evaluation/blob/main/tts/LISTENING_PROTOCOL.md). There is no automatic score.
 - **Anonymisation and decision models.** We test them with our own tests. That code isn't public yet.
@@ -59,8 +59,8 @@ How does the model behave in real work? For a while the old and the new model ru
 
 ## What these rounds can't show you
 
-- Round 2 runs on our private data. You can run the same tests on your own data, but you won't get our numbers.
+- For speech-to-text, round 2 runs on our private data. You can run the same tests on your own data, but you can't check our numbers.
 - For synthetic voices we have only our ears and the checklist.
 - Round 5 depends on people paying attention in daily use.
-- Some of the repositories above contain test results from earlier work. This section doesn't add any.
+- Some of the repositories above contain more detailed results from earlier work. [Test results](/evaluation/results) brings the main numbers together.
 - The Bebbi Bot suites are in an internal repository, so you can't run them. They use public or made-up material, so the Bebbi Bot pages show some of their numbers.
