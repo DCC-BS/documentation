@@ -4,7 +4,7 @@ The Canton of Basel-Stadt runs open AI models on its own platform, the KDKP. Bef
 
 The DCC AI team chooses and tests every model on the KDKP. We are setting up a governance board for these decisions. Until it exists, the team carries the responsibility.
 
-We publish how we work, including our rules, our steps and our test code. We keep our test data and our results to ourselves, because the data comes from the daily work of real people. Further down this page we list what you can't check from the outside.
+We publish how we work, including our rules, our steps, our test code and our results. We keep our own test data to ourselves, because it comes from the daily work of real people. Further down this page we list what you can't check from the outside.
 
 ## How we work
 
@@ -12,7 +12,7 @@ We publish how we work, including our rules, our steps and our test code. We kee
 - **We look at many things at once.** A model first has to pass five basic checks. Then we compare test results, see how it copes with many users at the same time, and use it ourselves.
 - **People make the decision.** The team decides and writes down why. Test results help us, and the final call is ours.
 - **We switch over slowly.** For a while, the old and the new model run side by side. If the new one causes problems, we go back to the old one.
-- **We share the method and keep the data.** You can read and run our test code. You can't repeat our results, because they come from our internal data.
+- **We share the method and the results, and keep the data.** You can read and run our test code and see how each model did. Where a test uses our internal data, we publish one total per model and you can't repeat it.
 
 ## Pages in this section
 
@@ -20,6 +20,7 @@ We publish how we work, including our rules, our steps and our test code. We kee
 |---|---|
 | [Selection standard](/evaluation/selection-standard) | The five basic checks, and what else we look at for each kind of model |
 | [How we test](/evaluation/how-we-test) | The five rounds of testing, with links to the code |
+| [Test results](/evaluation/results) | Every model we tested, how it scored and what we decided |
 | [Model lifecycle](/evaluation/lifecycle) | How often we review models, how we switch, and what we write down |
 | [Testing Bebbi Bot](/evaluation/bebbi-bot) | The test suites of our chat assistant: Office files, citations, model habits, load |
 
@@ -27,7 +28,8 @@ The list of models we run today is on [Models & APIs](/infrastructure/models). O
 
 ## What we don't publish, and what is still missing
 
-- We don't publish test data, results, scores or rankings.
+- We don't publish our own test data, or anything made from it item by item: transcripts, model outputs, scores of single recordings or documents. For tests on our own data, [Test results](/evaluation/results) shows one total per model.
+- Results for anonymisation, decision models and load tests aren't on the results page yet.
 - We also test models that find personal data in texts (for anonymisation) and models that support decisions. That test code isn't public yet.
 - The test suites of Bebbi Bot are in an internal repository of IT BS. We describe them, but the code isn't public.
 - We judge synthetic voices by listening to them, following a written checklist. We have no automatic score for voices.

@@ -1,0 +1,105 @@
+# Test results
+
+This page lists the models we tested and how they did. It covers models we use and models we turned down.
+
+How much we publish depends on the test data:
+
+- **Public or made-up data.** We publish the full scores. You can run the same test and should get the same numbers. The code is linked in each section.
+- **Our own data.** We publish one total per model for the whole test set. We never publish the recordings, the documents, the transcripts, the model outputs or the score of a single item. You can't repeat these numbers, because you don't have the data.
+
+The test code and method are described on [How we test](/evaluation/how-we-test). The models we run today are on [Models & APIs](/infrastructure/models).
+
+## How to read the scores
+
+- **WER** (word error rate) and **CER** (character error rate) count the words and letters a model gets wrong, compared with a reference text. Lower is better. 0.20 means one wrong word in five.
+- A WER above 1 means the model wrote more wrong words than the reference has words. This usually happens when a model gets stuck and repeats itself.
+- **Status** is what we decided: *in use*, *chosen* (decided, not live yet) or *not adopted*.
+- A score belongs to one test set on one date. A model that does badly on our Swiss German may do well on something else.
+
+## Speech-to-text
+
+The test data is our own: 33 dictated reports in Swiss German, about 2 hours 50 minutes in total, from three use cases, some structured and some free. The reference text is in Standard German, with punctuation and with numbers written as digits. So a model has to understand Swiss German and write Standard German.
+
+The test doesn't normalise the text. Wrong capitals and punctuation count as errors. Code: [stt](https://github.com/DCC-BS/ai-model-evaluation/blob/main/stt/README.md).
+
+| Model | Tested | WER | CER | Status | Notes |
+|---|---|---:|---:|---|---|
+| [Voxtral Small 24B](https://huggingface.co/RedHatAI/Voxtral-Small-24B-2507-FP8-dynamic) (FP8) | Jul 2026 | 0.41 | 0.14 | not adopted | Slightly better than Whisper large-v2, but much bigger and slower. The gain isn't worth the GPUs |
+| [Whisper large-v2](https://huggingface.co/openai/whisper-large-v2) (faster-whisper) | Jun to Jul 2026 | 0.45 to 0.47 | 0.15 to 0.19 | in use | 11 runs with different settings of our transcription service |
+| [Whisper large-v3](https://huggingface.co/openai/whisper-large-v3) (faster-whisper) | Jun to Jul 2026 | 0.49 to 0.56 | 0.19 to 0.25 | not adopted | Worse than large-v2 on our recordings |
+| [Parakeet TDT 0.6B v3](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3) | Jul 2026 | 0.58 | 0.21 | not adopted | |
+| [Nemotron 3.5 Transcribe 30B-A4B](https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B-FP8) (FP8) | Nov 2026 | 0.64 | 0.30 | not adopted | Writes Swiss German as it sounds ("erpressig") and spells out numbers. Best of four prompts, the others scored 0.70 to 0.78 |
+| [MOSS-Transcribe-Diarize](https://huggingface.co/OpenMOSS-Team/MOSS-Transcribe-Diarize) | Jul 2026 | 0.78 | 0.31 | not adopted | |
+| [VibeVoice](https://github.com/microsoft/VibeVoice) | Jun to Jul 2026 | 0.84 to 0.91 | 0.71 to 0.85 | not adopted | |
+| [Nemotron 3.5 ASR Streaming 0.6B](https://huggingface.co/nvidia/nemotron-3.5-asr-streaming-0.6b) | Jun to Jul 2026 | 0.89 | 0.54 | not adopted | |
+| [Granite 4.0 1B Speech](https://huggingface.co/ibm-granite/granite-4.0-1b-speech) | Jun to Jul 2026 | 1.71 | 1.04 | not adopted | Repeats itself |
+| [Granite Speech 4.1 2B Plus](https://huggingface.co/ibm-granite/granite-speech-4.1-2b-plus) | Jun to Jul 2026 | 7.3 to 7.6 | 5.0 to 5.2 | not adopted | Repeats itself |
+
+A range means we ran the model more than once, with other settings or on another date. Apart from Voxtral, we turned the other models down because they score worse than Whisper large-v2.
+
+## Reading handwriting
+
+The test data is public: 500 lines of German handwriting from [fhswf/german_handwriting](https://huggingface.co/datasets/fhswf/german_handwriting), tested in October and November 2026. Code: [ocr](https://github.com/DCC-BS/ai-model-evaluation/blob/main/ocr/README.md).
+
+*Raw* compares the output as it comes. *Normalised* first removes capitals and punctuation on both sides, so it shows how much of the error is only formatting.
+
+| Model | WER raw | CER raw | WER normalised | CER normalised | Status |
+|---|---:|---:|---:|---:|---|
+| [GLM-OCR](https://huggingface.co/zai-org/GLM-OCR) | 0.24 | 0.039 | 0.18 | 0.032 | in use |
+| [LightOnOCR-3-4B](https://huggingface.co/lightonai/LightOnOCR-3-4B) | 0.22 | 0.094 | 0.23 | 0.094 | not adopted |
+| [PaddleOCR-VL-1.6](https://huggingface.co/PaddlePaddle/PaddleOCR-VL-1.6) | 0.30 | 0.057 | 0.24 | 0.044 | not adopted |
+| [Nemotron-3.5-Parse](https://huggingface.co/nvidia/Nemotron-3.5-Parse) | 1.44 | 1.16 | 1.00 | 0.76 | not adopted |
+| Unlimited-OCR-2 | no score | | | | not adopted |
+
+LightOnOCR-3 gets slightly fewer words wrong but more than twice as many letters, because it returns nothing for some lines and cuts off the end of others. Nemotron-3.5-Parse is built for whole pages and invents text on single lines. We have no score file for Unlimited-OCR-2. It returns nothing for some lines and repeats itself on others. The [OCR README](https://github.com/DCC-BS/ai-model-evaluation/blob/main/ocr/README.md#models-tested-in-october-2026) lists the weaknesses of each model.
+
+## Document conversion
+
+The test data is made-up administrative documents with known content, and public documents such as an EU regulation and the Basel-Stadt Legislaturplan. Code and full results: [dcc-docling-serve/benchmarks](https://github.com/DCC-BS/dcc-docling-serve/tree/main/benchmarks).
+
+| Tool | Status | What we found |
+|---|---|---|
+| [Docling](https://www.docling.ai/), GPU OCR | in use | Same Markdown as before on 22 of 27 documents, the rest at least 97.7 % alike. 165 s for all documents instead of 1,300 s |
+| Marker | not adopted | Best match with the made-up documents (text F1 0.98, reading order 0.99) and the only tool that writes formulas. Slowest per page, 2.5 minutes to start, and loses the body of long tables |
+| MarkItDown, Jina Reader | not adopted | Mostly flat text, no OCR. Scanned pages come out almost empty |
+| docTR | not adopted | OCR only. Reads text inside pictures, but makes OCR errors even on digital pages and has weak tables |
+
+Inside Docling we also compared OCR and layout engines, last in October 2026 on 96 documents. Docling runs two OCR engines side by side, and each request picks one.
+
+| OCR and layout | Status | What we found |
+|---|---|---|
+| [PP-OCRv6](/docling/pp-ocrv6) with PP-DocLayout-V3 | in use, for print | Best setup without a vision-language model on plans and administrative documents (F1 0.95 on the made-up documents, 84 % of the text in the PDF text layers found). Slightly better than RapidOCR, Docling's default, at the same speed. Can't read handwriting (39 % of a handwritten note) |
+| [GLM-OCR](/docling/glm-ocr) with PP-DocLayout-V3 | in use, for handwriting | Best on handwriting and photos (96 % of the note, 89 % of handwriting in a phone photo). Can misread a word in a way that changes the meaning, and described a photo without text in one English paragraph |
+| Nemotron OCR v2 | not adopted | Can't read umlauts or ß |
+| Egret layout models | not adopted | No gain over the default layout, and they miss the labels on building plans |
+| Nemotron 3.5 Parse, LightOnOCR-3-4B | not adopted | Convert whole pages with a vision-language model and are slower than GLM-OCR, LightOnOCR about 10 times. LightOnOCR returns no table structure |
+
+## Deep research
+
+The test data is public: 20 English tasks from [DeepResearch Bench](https://github.com/Ayanami0730/deep_research_bench), and a German set of administrative questions that we wrote ourselves, with no personal data. All engines ran on Gemma 4 31B, the model we use in production, in October 2026. Code: [deep-research-evaluation](https://github.com/DCC-BS/deep-research-evaluation). Summary: [bebbi-deep-research](https://github.com/DCC-BS/bebbi-deep-research/blob/main/docs/evaluation.md).
+
+| Engine | Report quality (RACE) | Correct citations | Tokens per report (median) | Time per report | Status |
+|---|---:|---:|---:|---:|---|
+| Our own engine | 46.1 | 82.5 % | 169k | 6.0 min | chosen |
+| GPT-Researcher, with our fixes | 46.3 | 75.7 % | 282k | 13.6 min | not adopted |
+| NVIDIA Deep Researcher | 46.5 (lean setup 45.2) | 62.6 % (lean) | 775k | 13.8 min | not adopted |
+| Gemma without search | 43.9 | | | | baseline |
+
+Differences in report quality below 1.5 points are noise, and no engine is 3 points better than Gemma without search. The model limits the quality, so we chose on citations, tokens and time. On the German set, our engine reached 66.6 %, a simple loop with the same tools 58.9 % and NVIDIA Deep Researcher 54.6 %.
+
+## Chat assistant
+
+The suites for Bebbi Bot use public laws, public open data and made-up documents. [Testing Bebbi Bot](/evaluation/bebbi-bot) describes them, and the [knowledge base page](/apps/bebbi-bot/knowledge.md#measurements) shows some of their numbers.
+
+## Not on this page yet
+
+- **Anonymisation and decision models.** Both run on our own data. We will add one total per model, as for speech-to-text.
+- **Synthetic voices.** We judge them by listening, so there is no score.
+- **Load tests.** The numbers depend on our servers and change with every vLLM version. We keep them with the decision record of each model change.
+
+## What these numbers can't tell you
+
+- Our speech-to-text set has 33 recordings from one kind of work. It shows which models cope with Swiss German dictation, not how they do on meetings or Standard German.
+- Most models ran once with one setting. A single run can be off by a few points.
+- We use the prompt from each model card and don't tune prompts for each model. A better prompt can change a score.
+- Voxtral and Nemotron 3.5 Transcribe ran in compressed form (FP8) on two 24 GB GPUs, which are smaller than our production GPUs.

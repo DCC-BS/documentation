@@ -18,7 +18,7 @@ All KDKP Large Language Models, embeddings, and rerankers are exposed via OpenAI
 
 Every candidate model must pass five hard gates (GPU fit, one server, vLLM, licence, Hugging Face), then we test it on our own data, in our apps and under load. Leaderboards such as [Artificial Analysis](https://artificialanalysis.ai/) are inputs, not the decision.
 
-The full method is described in [selection standard](/evaluation/selection-standard).
+The full method is described in [selection standard](/evaluation/selection-standard). [Test results](/evaluation/results) has the scores of the speech, OCR and document models, and lists the models we tested and didn't adopt.
 
 ---
 
@@ -95,6 +95,11 @@ Speech-to-text runtime for transcription and speaker indexing.
 OCR engine for multi-lingual document layouts; extracts text from scanned images and forms.
 * **Hugging Face Model**: [zai-org/GLM-OCR](https://huggingface.co/zai-org/GLM-OCR)
 * **Applications**: RPA (Robotic Process Automation) workloads in the GD department, StatA survey questionnaires.
+
+#### PP-OCRv6 — 🟢 Active
+OCR engine for printed text inside Docling. Runs locally in the Docling worker, next to GLM-OCR for handwriting. See [Docling PP-OCRv6 Plugin](/docling/pp-ocrv6).
+* **Hugging Face Model**: [PaddlePaddle/PP-OCRv6_medium_det_onnx](https://huggingface.co/PaddlePaddle/PP-OCRv6_medium_det_onnx) (detection) and [PaddlePaddle/PP-OCRv6_medium_rec_onnx](https://huggingface.co/PaddlePaddle/PP-OCRv6_medium_rec_onnx) (recognition)
+* **Applications**: Docling (`ocr_preset: "pp-ocrv6"`).
 
 #### Dots.ocr — ⚪ Retired
 Alternative OCR engine.

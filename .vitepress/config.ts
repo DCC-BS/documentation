@@ -352,6 +352,10 @@ export default withMermaid({
                         link: "/evaluation/how-we-test.md",
                     },
                     {
+                        text: "Test Results",
+                        link: "/evaluation/results.md",
+                    },
+                    {
                         text: "Model Lifecycle",
                         link: "/evaluation/lifecycle.md",
                     },

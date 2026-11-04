@@ -43,7 +43,8 @@ For every model change we fill in a decision record. These records are internal.
 
 - The status of each model (in use, switched off or removed) in the public [model list](/infrastructure/models).
 - An internal page and the change history of our infrastructure.
-- Load test results and earlier test results. These are private.
+- The scores of every model we tested, on the public [Test results](/evaluation/results) page. For tests on our own data, that page has one total per model.
+- Load test results, and the result of each single recording or document. These are private.
 
 ## What we still need to improve
 
