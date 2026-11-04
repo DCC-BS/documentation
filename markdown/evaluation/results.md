@@ -35,7 +35,7 @@ The test doesn't normalise the text. Wrong capitals and punctuation count as err
 | [Granite 4.0 1B Speech](https://huggingface.co/ibm-granite/granite-4.0-1b-speech) | Jun to Jul 2026 | 1.71 | 1.04 | not adopted | Repeats itself |
 | [Granite Speech 4.1 2B Plus](https://huggingface.co/ibm-granite/granite-speech-4.1-2b-plus) | Jun to Jul 2026 | 7.3 to 7.6 | 5.0 to 5.2 | not adopted | Repeats itself |
 
-A range means we ran the model more than once, with other settings or on another date.
+A range means we ran the model more than once, with other settings or on another date. Apart from Voxtral, we turned the other models down because they score worse than Whisper large-v2.
 
 ## Reading handwriting
 
@@ -64,7 +64,15 @@ The test data is made-up administrative documents with known content, and public
 | MarkItDown, Jina Reader | not adopted | Mostly flat text, no OCR. Scanned pages come out almost empty |
 | docTR | not adopted | OCR only. Reads text inside pictures, but makes OCR errors even on digital pages and has weak tables |
 
-Inside Docling we compared OCR and layout engines. RapidOCR with PP-DocLayout-V3 is our choice for printed documents, scans, plans and photos with printed text. GLM-OCR with PP-DocLayout-V3 is better when there is handwriting.
+Inside Docling we also compared OCR and layout engines, last in October 2026 on 96 documents. Docling runs two OCR engines side by side, and each request picks one.
+
+| OCR and layout | Status | What we found |
+|---|---|---|
+| [PP-OCRv6](/docling/pp-ocrv6) with PP-DocLayout-V3 | in use, for print | Best setup without a vision-language model on plans and administrative documents (F1 0.95 on the made-up documents, 84 % of the text in the PDF text layers found). Slightly better than RapidOCR, Docling's default, at the same speed. Can't read handwriting (39 % of a handwritten note) |
+| [GLM-OCR](/docling/glm-ocr) with PP-DocLayout-V3 | in use, for handwriting | Best on handwriting and photos (96 % of the note, 89 % of handwriting in a phone photo). Can misread a word in a way that changes the meaning, and described a photo without text in one English paragraph |
+| Nemotron OCR v2 | not adopted | Can't read umlauts or ß |
+| Egret layout models | not adopted | No gain over the default layout, and they miss the labels on building plans |
+| Nemotron 3.5 Parse, LightOnOCR-3-4B | not adopted | Convert whole pages with a vision-language model and are slower than GLM-OCR, LightOnOCR about 10 times. LightOnOCR returns no table structure |
 
 ## Deep research
 
