@@ -56,6 +56,8 @@ The test data is public: all 10,854 lines of German handwriting in [fhswf/german
 | [LightOnOCR-2-1B](https://huggingface.co/lightonai/LightOnOCR-2-1B) | Feb 2026 | 0.76 | 0.674 | 0.64 | 0.460 | 363 s | not adopted |
 | [Unlimited-OCR-2](https://huggingface.co/baidu/Unlimited-OCR-2) | Nov 2026 | 1.08 | 0.679 | 0.96 | 0.544 | 3,819 s | not adopted |
 
+![Error rates of all handwriting models on 10,854 lines, sorted from best to worst, with run time under each name](/imgs/evaluation/ocr-handwriting.png)
+
 GLM-OCR scored the same in February and November (CER 0.075). LightOnOCR-3 gets fewer words wrong than GLM-OCR but 1.5 times as many letters, because it returns nothing for some lines and cuts off the end of others. It is still a large step up from LightOnOCR-2; PaddleOCR-VL-1.6 improves only a little on 1.5. Nemotron-3.5-Parse is built for whole pages and invents text on some single lines. Unlimited-OCR-2 also parses whole pages only, so we put each line on a blank A4 page first. It still returns nothing for some lines and on others repeats a fragment until it hits its token limit, and it is more than 12 times slower than GLM-OCR. Baidu's own reference code gives the same answers. The [OCR README](https://github.com/DCC-BS/ai-model-evaluation/blob/main/ocr/README.md#models-tested-in-october-2026) lists the weaknesses of each model.
 
 Runs from October and early November 2026 used only the first 500 lines and are not in this table. GLM-OCR has CER 0.039 on those lines and 0.075 on all of them, so scores from the two sets can't be compared.
