@@ -39,23 +39,32 @@ A range means we ran the model more than once, with other settings or on another
 
 ## Reading handwriting
 
-The test data is public: 500 lines of German handwriting from [fhswf/german_handwriting](https://huggingface.co/datasets/fhswf/german_handwriting), tested in October and November 2026. Code: [ocr](https://github.com/DCC-BS/ai-model-evaluation/blob/main/ocr/README.md).
+The test data is public: all 10,854 lines of German handwriting in [fhswf/german_handwriting](https://huggingface.co/datasets/fhswf/german_handwriting). Code: [ocr](https://github.com/DCC-BS/ai-model-evaluation/blob/main/ocr/README.md). We keep older versions in the table, such as PaddleOCR-VL-1.5 next to 1.6 and LightOnOCR-2 next to 3, so it shows how the models change over time.
 
-*Raw* compares the output as it comes. *Normalised* first removes capitals and punctuation on both sides, so it shows how much of the error is only formatting.
+*Raw* compares the output as it comes. *Normalised* first removes capitals and punctuation on both sides, so it shows how much of the error is only formatting. *Time* is for all lines on one RTX 4090.
 
-| Model | WER raw | CER raw | WER normalised | CER normalised | Status |
-|---|---:|---:|---:|---:|---|
-| [GLM-OCR](https://huggingface.co/zai-org/GLM-OCR) | 0.24 | 0.039 | 0.18 | 0.032 | in use |
-| [LightOnOCR-3-4B](https://huggingface.co/lightonai/LightOnOCR-3-4B) | 0.22 | 0.094 | 0.23 | 0.094 | not adopted |
-| [PaddleOCR-VL-1.6](https://huggingface.co/PaddlePaddle/PaddleOCR-VL-1.6) | 0.30 | 0.057 | 0.24 | 0.044 | not adopted |
-| [Nemotron-3.5-Parse](https://huggingface.co/nvidia/Nemotron-3.5-Parse) | 1.44 | 1.16 | 1.00 | 0.76 | not adopted |
-| Unlimited-OCR-2 | no score | | | | not adopted |
+| Model | Tested | WER raw | CER raw | WER normalised | CER normalised | Time | Status |
+|---|---|---:|---:|---:|---:|---:|---|
+| [GLM-OCR](https://huggingface.co/zai-org/GLM-OCR) | Nov 2026 | 0.30 | 0.075 | 0.24 | 0.065 | 301 s | in use |
+| [LightOnOCR-3-4B](https://huggingface.co/lightonai/LightOnOCR-3-4B) | Nov 2026 | 0.22 | 0.115 | 0.20 | 0.100 | 637 s | not adopted |
+| [PaddleOCR-VL-1.6](https://huggingface.co/PaddlePaddle/PaddleOCR-VL-1.6) | Nov 2026 | 0.39 | 0.121 | 0.35 | 0.110 | 276 s | not adopted |
+| [PaddleOCR-VL-1.5](https://huggingface.co/PaddlePaddle/PaddleOCR-VL-1.5) | Feb 2026 | 0.41 | 0.134 | 0.36 | 0.116 | 278 s | not adopted |
+| [olmOCR-2-7B](https://huggingface.co/allenai/olmOCR-2-7B-1025-FP8) | Feb 2026 | 0.30 | 0.140 | 0.23 | 0.122 | 758 s | not adopted |
+| [Nemotron-3.5-Parse](https://huggingface.co/nvidia/Nemotron-3.5-Parse) | Nov 2026 | 0.57 | 0.258 | 0.47 | 0.202 | 183 s | not adopted |
+| [dots.ocr](https://huggingface.co/dots-studio/dots.ocr) | Feb 2026 | 0.49 | 0.266 | 0.45 | 0.253 | 713 s | not adopted |
+| [DeepSeek-OCR-2](https://huggingface.co/deepseek-ai/DeepSeek-OCR-2) | Feb 2026 | 0.72 | 0.439 | 0.68 | 0.391 | 1,489 s | not adopted |
+| [LightOnOCR-2-1B](https://huggingface.co/lightonai/LightOnOCR-2-1B) | Feb 2026 | 0.76 | 0.674 | 0.64 | 0.460 | 363 s | not adopted |
+| [Unlimited-OCR-2](https://huggingface.co/baidu/Unlimited-OCR-2) | Nov 2026 | 1.08 | 0.679 | 0.96 | 0.544 | 3,819 s | not adopted |
 
-LightOnOCR-3 gets slightly fewer words wrong but more than twice as many letters, because it returns nothing for some lines and cuts off the end of others. Nemotron-3.5-Parse is built for whole pages and invents text on single lines. We have no score file for Unlimited-OCR-2. It returns nothing for some lines and repeats itself on others. The [OCR README](https://github.com/DCC-BS/ai-model-evaluation/blob/main/ocr/README.md#models-tested-in-october-2026) lists the weaknesses of each model.
+![Error rates of all handwriting models on 10,854 lines, sorted from best to worst, with run time under each name](/imgs/evaluation/ocr-handwriting.png)
+
+GLM-OCR scored the same in February and November (CER 0.075). LightOnOCR-3 gets fewer words wrong than GLM-OCR but 1.5 times as many letters, because it returns nothing for some lines and cuts off the end of others. It is still a large step up from LightOnOCR-2; PaddleOCR-VL-1.6 improves only a little on 1.5. Nemotron-3.5-Parse is built for whole pages and invents text on some single lines. Unlimited-OCR-2 also parses whole pages only, so we put each line on a blank A4 page first. It still returns nothing for some lines and on others repeats a fragment until it hits its token limit, and it is more than 12 times slower than GLM-OCR. Baidu's own reference code gives the same answers. The [OCR README](https://github.com/DCC-BS/ai-model-evaluation/blob/main/ocr/README.md#models-tested-in-october-2026) lists the weaknesses of each model.
+
+Runs from October and early November 2026 used only the first 500 lines and are not in this table. GLM-OCR has CER 0.039 on those lines and 0.075 on all of them, so scores from the two sets can't be compared.
 
 ## Document conversion
 
-The test data is made-up administrative documents with known content, and public documents such as an EU regulation and the Basel-Stadt Legislaturplan. Code and full results: [dcc-docling-serve/benchmarks](https://github.com/DCC-BS/dcc-docling-serve/tree/main/benchmarks).
+The test data is made-up administrative documents with known content, and public documents such as an EU regulation and the Basel-Stadt Legislaturplan. Code and summary tables: [dcc-docling-serve/benchmarks](https://github.com/DCC-BS/dcc-docling-serve/tree/main/benchmarks). The scores per configuration and per public document are in our private [results repository](https://github.com/DCC-BS/ai-model-evaluation-results/blob/main/docling/README.md).
 
 | Tool | Status | What we found |
 |---|---|---|
@@ -64,15 +73,16 @@ The test data is made-up administrative documents with known content, and public
 | MarkItDown, Jina Reader | not adopted | Mostly flat text, no OCR. Scanned pages come out almost empty |
 | docTR | not adopted | OCR only. Reads text inside pictures, but makes OCR errors even on digital pages and has weak tables |
 
-Inside Docling we also compared OCR and layout engines, last in October 2026 on 96 documents. Docling runs two OCR engines side by side, and each request picks one.
+Inside Docling we also compared OCR and layout engines, last in October and November 2026 on 96 documents. Docling runs two OCR engines side by side, and each request picks one.
 
 | OCR and layout | Status | What we found |
 |---|---|---|
-| [PP-OCRv6](/docling/pp-ocrv6) with PP-DocLayout-V3 | in use, for print | Best setup without a vision-language model on plans and administrative documents (F1 0.95 on the made-up documents, 84 % of the text in the PDF text layers found). Slightly better than RapidOCR, Docling's default, at the same speed. Can't read handwriting (39 % of a handwritten note) |
-| [GLM-OCR](/docling/glm-ocr) with PP-DocLayout-V3 | in use, for handwriting | Best on handwriting and photos (96 % of the note, 89 % of handwriting in a phone photo). Can misread a word in a way that changes the meaning, and described a photo without text in one English paragraph |
-| Nemotron OCR v2 | not adopted | Can't read umlauts or ß |
-| Egret layout models | not adopted | No gain over the default layout, and they miss the labels on building plans |
-| Nemotron 3.5 Parse, LightOnOCR-3-4B | not adopted | Convert whole pages with a vision-language model and are slower than GLM-OCR, LightOnOCR about 10 times. LightOnOCR returns no table structure |
+| [PP-OCRv6](/docling/pp-ocrv6) ([model](https://huggingface.co/PaddlePaddle/PP-OCRv6_medium_rec_onnx)) with [PP-DocLayout-V3](https://huggingface.co/PaddlePaddle/PP-DocLayoutV3) | in use, for print | Best setup without a vision-language model on plans and administrative documents (F1 0.95 on the made-up documents, 84 % of the text in the PDF text layers found). Slightly better than RapidOCR, Docling's default, at the same speed. Can't read handwriting (39 % of a handwritten note) |
+| [GLM-OCR](/docling/glm-ocr) ([model](https://huggingface.co/zai-org/GLM-OCR)) with [PP-DocLayout-V3](https://huggingface.co/PaddlePaddle/PP-DocLayoutV3) | in use, for handwriting | Best on handwriting and photos (96 % of the note, 89 % of handwriting in a phone photo). Can misread a word in a way that changes the meaning, and described a photo without text in one English paragraph |
+| [Nemotron OCR v2](https://huggingface.co/nvidia/nemotron-ocr-v2) | not adopted | Worse on German text: its recogniser is English-only, so umlauts and ß come out wrong or missing (precision 0.83 to 0.91 on the German XFUND forms, against 0.94 for PP-OCRv6), and it reads 62 % of the handwritten note. On its own it is the fastest engine, but it needs torch 2.11, which makes the rest of the pipeline (RapidOCR, layout, TableFormer) about 7 times slower in the same image |
+| Egret layout models ([medium](https://huggingface.co/docling-project/docling-layout-egret-medium), [large](https://huggingface.co/docling-project/docling-layout-egret-large), [xlarge](https://huggingface.co/docling-project/docling-layout-egret-xlarge)) | not adopted | No gain over the default layout, and they miss the labels on building plans |
+| [Nemotron 3.5 Parse](https://huggingface.co/nvidia/Nemotron-3.5-Parse), [LightOnOCR-3-4B](https://huggingface.co/lightonai/LightOnOCR-3-4B) | not adopted | Convert whole pages with a vision-language model and are slower than GLM-OCR, LightOnOCR about 10 times. LightOnOCR returns no table structure |
+| [Unlimited-OCR-2](https://huggingface.co/baidu/Unlimited-OCR-2) | not adopted | Quality close to the OCR engines (F1 0.93 on the made-up documents), but it converts every page with a vision-language model and is about 10 times slower than GLM-OCR. Sending the whole document in one request, as the model card does, is slower still and ends in repetition loops on some documents |
 
 ## Deep research
 
