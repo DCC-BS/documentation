@@ -39,19 +39,26 @@ A range means we ran the model more than once, with other settings or on another
 
 ## Reading handwriting
 
-The test data is public: 500 lines of German handwriting from [fhswf/german_handwriting](https://huggingface.co/datasets/fhswf/german_handwriting), tested in October and November 2026. Code: [ocr](https://github.com/DCC-BS/ai-model-evaluation/blob/main/ocr/README.md).
+The test data is public: all 10,854 lines of German handwriting in [fhswf/german_handwriting](https://huggingface.co/datasets/fhswf/german_handwriting). Code: [ocr](https://github.com/DCC-BS/ai-model-evaluation/blob/main/ocr/README.md). We keep older versions in the table, such as PaddleOCR-VL-1.5 next to 1.6 and LightOnOCR-2 next to 3, so it shows how the models change over time.
 
-*Raw* compares the output as it comes. *Normalised* first removes capitals and punctuation on both sides, so it shows how much of the error is only formatting.
+*Raw* compares the output as it comes. *Normalised* first removes capitals and punctuation on both sides, so it shows how much of the error is only formatting. *Time* is for all lines on one RTX 4090.
 
-| Model | WER raw | CER raw | WER normalised | CER normalised | Status |
-|---|---:|---:|---:|---:|---|
-| [GLM-OCR](https://huggingface.co/zai-org/GLM-OCR) | 0.24 | 0.039 | 0.18 | 0.032 | in use |
-| [LightOnOCR-3-4B](https://huggingface.co/lightonai/LightOnOCR-3-4B) | 0.22 | 0.094 | 0.23 | 0.094 | not adopted |
-| [PaddleOCR-VL-1.6](https://huggingface.co/PaddlePaddle/PaddleOCR-VL-1.6) | 0.30 | 0.057 | 0.24 | 0.044 | not adopted |
-| [Nemotron-3.5-Parse](https://huggingface.co/nvidia/Nemotron-3.5-Parse) | 1.44 | 1.16 | 1.00 | 0.76 | not adopted |
-| [Unlimited-OCR-2](https://huggingface.co/baidu/Unlimited-OCR-2) | 2.13 | 1.39 | 2.44 | 1.22 | not adopted |
+| Model | Tested | WER raw | CER raw | WER normalised | CER normalised | Time | Status |
+|---|---|---:|---:|---:|---:|---:|---|
+| [GLM-OCR](https://huggingface.co/zai-org/GLM-OCR) | Nov 2026 | 0.30 | 0.075 | 0.24 | 0.065 | 301 s | in use |
+| [LightOnOCR-3-4B](https://huggingface.co/lightonai/LightOnOCR-3-4B) | Nov 2026 | 0.22 | 0.115 | 0.20 | 0.100 | 637 s | not adopted |
+| [PaddleOCR-VL-1.6](https://huggingface.co/PaddlePaddle/PaddleOCR-VL-1.6) | Nov 2026 | 0.39 | 0.121 | 0.35 | 0.110 | 276 s | not adopted |
+| [PaddleOCR-VL-1.5](https://huggingface.co/PaddlePaddle/PaddleOCR-VL-1.5) | Feb 2026 | 0.41 | 0.134 | 0.36 | 0.116 | 278 s | not adopted |
+| [olmOCR-2-7B](https://huggingface.co/allenai/olmOCR-2-7B-1025-FP8) | Feb 2026 | 0.30 | 0.140 | 0.23 | 0.122 | 758 s | not adopted |
+| [Nemotron-3.5-Parse](https://huggingface.co/nvidia/Nemotron-3.5-Parse) | Nov 2026 | 0.57 | 0.258 | 0.47 | 0.202 | 183 s | not adopted |
+| [dots.ocr](https://huggingface.co/dots-studio/dots.ocr) | Feb 2026 | 0.49 | 0.266 | 0.45 | 0.253 | 713 s | not adopted |
+| [DeepSeek-OCR-2](https://huggingface.co/deepseek-ai/DeepSeek-OCR-2) | Feb 2026 | 0.72 | 0.439 | 0.68 | 0.391 | 1,489 s | not adopted |
+| [LightOnOCR-2-1B](https://huggingface.co/lightonai/LightOnOCR-2-1B) | Feb 2026 | 0.76 | 0.674 | 0.64 | 0.460 | 363 s | not adopted |
+| [Unlimited-OCR-2](https://huggingface.co/baidu/Unlimited-OCR-2) | Nov 2026 | 1.08 | 0.679 | 0.96 | 0.544 | 3,819 s | not adopted |
 
-LightOnOCR-3 gets slightly fewer words wrong but more than twice as many letters, because it returns nothing for some lines and cuts off the end of others. Nemotron-3.5-Parse is built for whole pages and invents text on single lines. Unlimited-OCR-2 also parses whole pages only, so we put each line on a blank A4 page first. It still returns nothing for some lines and on others repeats a fragment until it hits its token limit. Without those runaway lines its CER is about 0.17, four times that of GLM-OCR, and it takes 232 s for the 500 lines instead of 14 s. Baidu's own reference code gives the same answers. The [OCR README](https://github.com/DCC-BS/ai-model-evaluation/blob/main/ocr/README.md#models-tested-in-october-2026) lists the weaknesses of each model.
+GLM-OCR scored the same in February and November (CER 0.075). LightOnOCR-3 gets fewer words wrong than GLM-OCR but 1.5 times as many letters, because it returns nothing for some lines and cuts off the end of others. It is still a large step up from LightOnOCR-2; PaddleOCR-VL-1.6 improves only a little on 1.5. Nemotron-3.5-Parse is built for whole pages and invents text on some single lines. Unlimited-OCR-2 also parses whole pages only, so we put each line on a blank A4 page first. It still returns nothing for some lines and on others repeats a fragment until it hits its token limit, and it is more than 12 times slower than GLM-OCR. Baidu's own reference code gives the same answers. The [OCR README](https://github.com/DCC-BS/ai-model-evaluation/blob/main/ocr/README.md#models-tested-in-october-2026) lists the weaknesses of each model.
+
+Runs from October and early November 2026 used only the first 500 lines and are not in this table. GLM-OCR has CER 0.039 on those lines and 0.075 on all of them, so scores from the two sets can't be compared.
 
 ## Document conversion
 
