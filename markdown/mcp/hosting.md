@@ -5,7 +5,9 @@ editLink: true
 
 # Hosting and Facade
 
-The three MCP servers run together in a Docker Compose stack managed in [DCC-BS/dcc-mcp-facade](https://github.com/DCC-BS/dcc-mcp-facade).
+The data.bs.ch, statistik.bs.ch and Grosser Rat MCP servers run together in a Docker Compose stack managed in [DCC-BS/dcc-mcp-facade](https://github.com/DCC-BS/dcc-mcp-facade).
+
+The [Medienmitteilungen MCP](/mcp/medienmitteilungen.md) is not part of the stack yet. Its repository suggests `mcp-medienmitteilungen.statistik.bs.ch` as hostname. Adding it means a new service with a Traefik router for that host, `MCP_ALLOWED_HOSTS` set to the bare hostname, and an nginx server block.
 
 ## Architecture
 
@@ -25,7 +27,7 @@ client ──HTTPS──> nginx (TLS termination)
 ```
 
 - **nginx** is external to the compose project: it terminates TLS for each domain and forwards traffic to the Traefik container over the shared Docker bridge network (`mcp`).
-- **Traefik** (pinned to `v3.6.1+` for Docker v29+ API compatibility) routes incoming requests strictly by their `Host` header to the respective service container. Any unrouted host receives a `404`.
+- **Traefik** (pinned to `v3.7.16`; Docker v29+ needs at least `v3.6.1`) routes incoming requests strictly by their `Host` header to the respective service container. Any unrouted host receives a `404`.
 
 ## Services
 
@@ -34,7 +36,7 @@ client ──HTTPS──> nginx (TLS termination)
 | `ogd` | `mcp-ogd` | `ghcr.io/dcc-bs/mcp-data-bs:latest` | MCP server for data.bs.ch |
 | `grossrat` | `mcp-grossrat` | `ghcr.io/dcc-bs/grossrat-bs-mcp:latest` | MCP server for the Grosser Rat Basel-Stadt |
 | `statistik` | `mcp-statistik` | `ghcr.io/dcc-bs/mcp-statistikportal:latest` | MCP server for statistik.bs.ch |
-| `reverse-proxy` | `mcp-reverse-proxy` | `traefik:v3.6.1` | Hostname-based reverse proxy |
+| `reverse-proxy` | `mcp-reverse-proxy` | `traefik:v3.7.16` | Hostname-based reverse proxy |
 
 ## Configuration & Environment
 
@@ -49,7 +51,7 @@ cp .env.example .env
 | `DOCKER_SOCKET` | Docker daemon socket for Traefik's Docker provider | `/var/run/docker.sock` (rootful) or `/run/user/<UID>/docker.sock` (rootless) |
 | `TRAEFIK_PORT` | Published host port for the Traefik proxy | `8001` (default) |
 
-### Allowed Hosts (`MCP_ALLOWED_HOSTS`)
+### Allowed Hosts (`MCP_ALLOWED_HOSTS`) {#allowed-hosts}
 
 The MCP HTTP servers include DNS-rebinding protection by default. Because nginx forwards a **bare** `Host` header (e.g., `Host: mcp.data.bs.ch` without a port), `MCP_ALLOWED_HOSTS` in the container configuration must be an **exact match**:
 
@@ -76,7 +78,7 @@ docker compose ps
 docker compose logs reverse-proxy
 ```
 
-To update the `grossrat` server with a newer data release:
+The `grossrat` image carries its data and is built on the machine that holds it (`mise run deploy:mcp` in [DCC-BS/grossrat-bs-mcp](https://github.com/DCC-BS/grossrat-bs-mcp)), not by CI. The host needs `docker login ghcr.io` with `read:packages` unless the package is public. To update the `grossrat` server with a newer data release:
 
 ```bash
 docker compose pull grossrat && docker compose up -d grossrat

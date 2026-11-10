@@ -65,7 +65,7 @@ The portal delivers every value as a string, and web tables keep the layout of t
 * `get_indicator_data` parses numbers and derives `unit` from the subtitle ("in %" becomes `%`, "Anzahl Personen" becomes `Personen`, `null` if unclear). Up to 600 characters of explanations and reading aid go along as `notes`, so definitions and series breaks reach the model.
 * `get_table` joins multi-row headers into one column name ("Schweizer Bevölkerung – Männlich") and turns group rows such as `Total` into a `Gruppe` column. Numbers are rounded to six significant digits. Placeholders like `…` stay text.
 * Long series keep the newest rows. Output stops at `max_rows` (default 200) and at about 12,000 characters, with `truncated: true` and a `hint`. `get_table` pages with `offset` or `from_end=True`.
-* Invalid input fails with a `ToolError` that names the fix: an unknown sheet lists the valid sheets, a bad indicator id points to `search_indicators`.
+* Invalid input fails with a `ToolError` that names the fix: an unknown sheet lists the valid sheets, a bad indicator id points to `search_indicators`. Since version 0.2.0, a failing Meilisearch call in `search_portal` names its cause too: invalid key, rejected query, unreachable or no JSON.
 
 ## Configuration
 

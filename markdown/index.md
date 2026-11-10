@@ -24,7 +24,7 @@ features:
     linkText: View Applications
 
   - title: MCP Servers
-    details: Canton Basel-Stadt Model Context Protocol servers for Data.bs.ch (OGD), Statistik.bs, and Grosser Rat.
+    details: Canton Basel-Stadt Model Context Protocol servers for Data.bs.ch (OGD), Statistik.bs, Grosser Rat, and Medienmitteilungen.
     icon:
       light: https://cdn.simpleicons.org/anthropic
       dark: https://cdn.simpleicons.org/anthropic/white

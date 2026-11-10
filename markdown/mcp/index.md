@@ -5,23 +5,24 @@ editLink: true
 
 # MCP servers
 
-The DCC builds and runs three [MCP](https://modelcontextprotocol.io/) servers that give language models access to public data of the canton of Basel-Stadt. A model calls their tools to search, read and cite. It does not have to guess figures or business numbers from memory.
+The DCC builds four [MCP](https://modelcontextprotocol.io/) servers that give language models access to public data of the canton of Basel-Stadt. A model calls their tools to search, read and cite. It does not have to guess figures or business numbers from memory.
 
 | Server | Data | Endpoint | Code |
 |---|---|---|---|
 | [Data.bs.ch MCP](/mcp/data-bs.md) | Datasets of the open government data portal [data.bs.ch](https://data.bs.ch) | `https://mcp.data.bs.ch/mcp` | [DCC-BS/mcp-data-bs](https://github.com/DCC-BS/mcp-data-bs) |
 | [Statistik.bs MCP](/mcp/statistik-bs.md) | Indicators, time series and web tables of [statistik.bs.ch](https://statistik.bs.ch) | `https://mcp.statistik.bs.ch/mcp` | [DCC-BS/mcp-statistikportal](https://github.com/DCC-BS/mcp-statistikportal) |
-| [Grosser Rat MCP](/mcp/grosser-rat.md) | Every business item, document and transcript of the [Grosser Rat](https://grosserrat.bs.ch) since 1973 | `https://mcp-grosserrat.statistik.bs.ch/mcp` | Not public yet. Image `ghcr.io/dcc-bs/grossrat-bs-mcp` |
+| [Grosser Rat MCP](/mcp/grosser-rat.md) | Every business item, document and transcript of the [Grosser Rat](https://grosserrat.bs.ch) since 1973 | `https://mcp-grosserrat.statistik.bs.ch/mcp` | [DCC-BS/grossrat-bs-mcp](https://github.com/DCC-BS/grossrat-bs-mcp) |
+| [Medienmitteilungen MCP](/mcp/medienmitteilungen.md) | About 18,000 press releases of the canton on [www.bs.ch](https://www.bs.ch/medien/medienmitteilungen) since 1994 | Not hosted yet | [DCC-BS/mcp-medienmitteilungen](https://github.com/DCC-BS/mcp-medienmitteilungen) |
 
-A fourth repository, [DCC-BS/dcc-mcp-facade](https://github.com/DCC-BS/dcc-mcp-facade), holds the Docker Compose stack that serves all three under their hostnames. See [Hosting](/mcp/hosting.md).
+Another repository, [DCC-BS/dcc-mcp-facade](https://github.com/DCC-BS/dcc-mcp-facade), holds the Docker Compose stack that serves the first three under their hostnames. The Medienmitteilungen server is new (version 0.1.0) and not part of it yet. See [Hosting](/mcp/hosting.md).
 
 All endpoints are public and need no authentication. They only read data that is already public.
 
 ## Who uses them
 
-* **[Bebbi Bot](/apps/bebbi-bot/index.md).** Open WebUI connects the three servers as tool servers, next to two external servers: [OpenCaseLaw](https://mcp.opencaselaw.ch) for Swiss law and Alva, the bs.ch server of BaselCityGPT by Liip. See [Tools and workspace content](/apps/bebbi-bot/tools.md#mcp-tool-servers).
+* **[Bebbi Bot](/apps/bebbi-bot/index.md).** Open WebUI connects the three hosted servers as tool servers, next to two external servers: [OpenCaseLaw](https://mcp.opencaselaw.ch) for Swiss law and Alva, the bs.ch server of BaselCityGPT by Liip. See [Tools and workspace content](/apps/bebbi-bot/tools.md#mcp-tool-servers).
 * **[Deep research](/apps/bebbi-bot/deep-research.md).** The research presets call a subset of the tools. The `grossrat` preset works almost only with the Grosser Rat server, `statistik` with data.bs.ch and statistik.bs.ch, and the legal and administration presets use them as helpers.
-* **Anyone else.** Claude Desktop, Cursor, ChatGPT connectors, the Antigravity CLI and other MCP clients can use the same endpoints. The two open source servers also run locally over stdio with `uvx`.
+* **Anyone else.** Claude Desktop, Cursor, ChatGPT connectors, the Antigravity CLI and other MCP clients can use the same endpoints. The data.bs.ch, statistik.bs.ch and Medienmitteilungen servers also run locally over stdio with `uvx`.
 
 ## Architecture
 
@@ -54,7 +55,9 @@ graph LR
     GR --> IDX[(Corpus, full-text index,<br/>vectors and graph<br/>inside the image)]
 ```
 
-The data.bs.ch and statistik.bs.ch servers are thin and stateless. They translate tool calls into requests to the portal's public API and reshape the answer for a model. The Grosser Rat server is different. It carries its own corpus of about 54,000 converted documents, a search index and an entity graph inside the image, and needs no outside service at runtime.
+The Medienmitteilungen server is not in the diagram because it is not hosted yet. It reads the public JSON endpoints of www.bs.ch.
+
+The data.bs.ch, statistik.bs.ch and Medienmitteilungen servers are thin and stateless. They translate tool calls into requests to the portal's public API and reshape the answer for a model. The Grosser Rat server is different. It carries its own corpus of about 54,000 converted documents, a search index and an entity graph inside the image, and needs no outside service at runtime.
 
 ## Shared design
 
@@ -66,7 +69,7 @@ The servers follow the same rules. Most of them came out of evaluation runs with
 * Counts and aggregates link the public page that lists what was counted. For example, a publisher's dataset count links the data.bs.ch catalog filtered on that publisher.
 * A result without a public page has no URL, and clients treat the answer as having no source.
 
-Status: data.bs.ch [mcp-data-bs#9](https://github.com/DCC-BS/mcp-data-bs/pull/9), statistik.bs.ch [mcp-statistikportal#5](https://github.com/DCC-BS/mcp-statistikportal/pull/5) and [#6](https://github.com/DCC-BS/mcp-statistikportal/issues/6), Grosser Rat [Feedback#367](https://github.com/DCC-BS/Feedback/issues/367).
+Status: data.bs.ch [mcp-data-bs#9](https://github.com/DCC-BS/mcp-data-bs/pull/9), statistik.bs.ch [mcp-statistikportal#5](https://github.com/DCC-BS/mcp-statistikportal/pull/5) (facet counts still have no URL, [#6](https://github.com/DCC-BS/mcp-statistikportal/issues/6)), Grosser Rat version 0.2.0 ([Feedback#367](https://github.com/DCC-BS/Feedback/issues/367)), Medienmitteilungen from its first version.
 
 **Results fit into the context.** Large results are capped at about 12,000 characters (20,000 for Grosser Rat documents). A cut result says so with `truncated: true` and a `hint`, and offers `next_offset` to page on. The model knows that it has not seen everything.
 
@@ -80,15 +83,15 @@ They prescribe no citation format. Rules like "link portal_url" or "cite the sig
 
 **Stateless streamable HTTP.** The MCP endpoint is `/mcp`. Requests need no `initialize` handshake and no session id, so any replica can answer and a restart loses nothing. `GET /healthz` answers `{"status":"ok"}` for the container healthcheck.
 
-**Tolerant of simple clients.** The open source servers rewrite incomplete `Accept` headers to `application/json, text/event-stream`, so plain JSON-RPC clients work. `GET /` returns a JSON status page instead of holding an SSE connection open.
+**Tolerant of simple clients.** The data.bs.ch, statistik.bs.ch and Medienmitteilungen servers rewrite incomplete `Accept` headers to `application/json, text/event-stream`, so plain JSON-RPC clients work. `GET /` returns a JSON status page instead of holding an SSE connection open.
 
-**Self-describing.** The open source servers generate an OpenAPI 3.1 description from the live tool registry at `/openapi.json` and serve Swagger UI at `/docs`. Every tool appears as a `tools/call` request with a working example.
+**Self-describing.** The same three servers generate an OpenAPI 3.1 description from the live tool registry at `/openapi.json` and serve Swagger UI at `/docs`. Every tool appears as a `tools/call` request with a working example.
 
 **DNS rebinding protection.** `MCP_ALLOWED_HOSTS` lists the hostnames the server answers to. Behind nginx it must be the bare hostname, see [Hosting](/mcp/hosting.md#allowed-hosts).
 
 ## Development
 
-The two open source servers share their layout: one `main.py` with the tools, `api_docs.py` for the OpenAPI page, tests in `tests/`, and the official [MCP Python SDK](https://github.com/modelcontextprotocol/python-sdk) with `httpx` and `uvicorn`. Tooling follows the [DCC Python standards](/coding/python.md) with [mise](/dev-setup/mise.md) and uv.
+The data.bs.ch, statistik.bs.ch and Medienmitteilungen servers share their layout: one `main.py` with the tools, `api_docs.py` for the OpenAPI page, tests in `tests/`, and the official [MCP Python SDK](https://github.com/modelcontextprotocol/python-sdk) with `httpx` and `uvicorn`. Tooling follows the [DCC Python standards](/coding/python.md) with [mise](/dev-setup/mise.md) and uv.
 
 | Task | Alias | What it does |
 |---|---|---|
@@ -108,4 +111,4 @@ CI uses the shared [ci-workflows](https://github.com/DCC-BS/ci-workflows). `ci.y
 
 ### Skills instead of a server
 
-Each open source repository also ships an agent skill (`skills/data-bs/SKILL.md`, `skills/statistik-bs/SKILL.md`). It teaches a coding agent to call the public REST API directly with curl or httpx, for agents where adding an MCP server is not worth it. Copy or link the folder into the agent's skills directory, for example `~/.agents/skills/data-bs`.
+Each of these three repositories also ships an agent skill (`skills/data-bs/SKILL.md`, `skills/statistik-bs/SKILL.md`, `skills/medienmitteilungen-bs/SKILL.md`). It teaches a coding agent to call the public REST API directly with curl or httpx, for agents where adding an MCP server is not worth it. Copy or link the folder into the agent's skills directory, for example `~/.agents/skills/data-bs`.
