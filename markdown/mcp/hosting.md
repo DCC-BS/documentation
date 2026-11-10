@@ -78,7 +78,7 @@ docker compose ps
 docker compose logs reverse-proxy
 ```
 
-The `grossrat` image carries its data and is built on the machine that holds it (`mise run deploy:mcp` in [DCC-BS/grossrat-bs-mcp](https://github.com/DCC-BS/grossrat-bs-mcp)), not by CI. The host needs `docker login ghcr.io` with `read:packages` unless the package is public. To update the `grossrat` server with a newer data release:
+The `grossrat` image carries its data and is built on the machine that holds it (`mise run deploy:mcp` in [DCC-BS/grossrat-bs-mcp](https://github.com/DCC-BS/grossrat-bs-mcp)), not by CI. To update the `grossrat` server with a newer data release:
 
 ```bash
 docker compose pull grossrat && docker compose up -d grossrat

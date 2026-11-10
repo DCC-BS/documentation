@@ -11,7 +11,7 @@ The DCC builds four [MCP](https://modelcontextprotocol.io/) servers that give la
 |---|---|---|---|
 | [Data.bs.ch MCP](/mcp/data-bs.md) | Datasets of the open government data portal [data.bs.ch](https://data.bs.ch) | `https://mcp.data.bs.ch/mcp` | [DCC-BS/mcp-data-bs](https://github.com/DCC-BS/mcp-data-bs) |
 | [Statistik.bs MCP](/mcp/statistik-bs.md) | Indicators, time series and web tables of [statistik.bs.ch](https://statistik.bs.ch) | `https://mcp.statistik.bs.ch/mcp` | [DCC-BS/mcp-statistikportal](https://github.com/DCC-BS/mcp-statistikportal) |
-| [Grosser Rat MCP](/mcp/grosser-rat.md) | Every business item, document and transcript of the [Grosser Rat](https://grosserrat.bs.ch) since 1973 | `https://mcp-grosserrat.statistik.bs.ch/mcp` | [DCC-BS/grossrat-bs-mcp](https://github.com/DCC-BS/grossrat-bs-mcp) |
+| [Grosser Rat MCP](/mcp/grosser-rat.md) | Every business item, document and transcript of the [Grosser Rat](https://grosserrat.bs.ch) since 1973 | `https://mcp-grosserrat.statistik.bs.ch/mcp` | [DCC-BS/grossrat-bs-mcp](https://github.com/DCC-BS/grossrat-bs-mcp) (private) |
 | [Medienmitteilungen MCP](/mcp/medienmitteilungen.md) | About 18,000 press releases of the canton on [www.bs.ch](https://www.bs.ch/medien/medienmitteilungen) since 1994 | Not hosted yet | [DCC-BS/mcp-medienmitteilungen](https://github.com/DCC-BS/mcp-medienmitteilungen) |
 
 Another repository, [DCC-BS/dcc-mcp-facade](https://github.com/DCC-BS/dcc-mcp-facade), holds the Docker Compose stack that serves the first three under their hostnames. The Medienmitteilungen server is new (version 0.1.0) and not part of it yet. See [Hosting](/mcp/hosting.md).
