@@ -167,7 +167,7 @@ language-agnostic and driven entirely by the project's `mise.toml`.
 ```yaml
 jobs:
   ci:
-    uses: DCC-BS/ci-workflows/.github/workflows/ci.yml@8b031be53aee5210c6b392115bd941c80e798d60 # v10.0.1
+    uses: DCC-BS/ci-workflows/.github/workflows/ci.yml@6b2f0bb53bac8ccb9847ba77f68f62488b668f6d # v10.0.3
 ```
 
 Absent tasks are skipped automatically — there is nothing to configure beyond
