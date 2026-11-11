@@ -34,7 +34,7 @@ jobs:
                   fetch-depth: 0
             # bun from mise.toml (not "latest")
             - name: Setup mise
-              uses: DCC-BS/ci-workflows/actions/setup-mise@57e1c4a7fccd5cb956392fe0964193a645baa099 # v10.0.2
+              uses: DCC-BS/ci-workflows/actions/setup-mise@6b2f0bb53bac8ccb9847ba77f68f62488b668f6d # v10.0.3
             - name: Setup Pages
               uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6
             - name: Install dependencies

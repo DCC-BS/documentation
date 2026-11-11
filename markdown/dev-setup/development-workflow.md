@@ -218,7 +218,7 @@ Common CI/CD logic lives in the [`DCC-BS/ci-workflows`](https://github.com/DCC-B
 ```yaml
 jobs:
   ci:
-    uses: DCC-BS/ci-workflows/.github/workflows/ci.yml@57e1c4a7fccd5cb956392fe0964193a645baa099 # v10.0.2
+    uses: DCC-BS/ci-workflows/.github/workflows/ci.yml@6b2f0bb53bac8ccb9847ba77f68f62488b668f6d # v10.0.3
 ```
 
 See the [ci-workflows README](https://github.com/DCC-BS/ci-workflows#readme) for the full list of workflows, inputs, and secrets.
@@ -255,7 +255,7 @@ jobs:
       github.event.issue.pull_request &&
       startsWith(github.event.comment.body, '/documentation') &&
       (github.event.comment.author_association == 'OWNER' || github.event.comment.author_association == 'MEMBER')
-    uses: DCC-BS/ci-workflows/.github/workflows/llm-doc-update-conditional.yml@57e1c4a7fccd5cb956392fe0964193a645baa099 # v10.0.2
+    uses: DCC-BS/ci-workflows/.github/workflows/llm-doc-update-conditional.yml@6b2f0bb53bac8ccb9847ba77f68f62488b668f6d # v10.0.3
     with:
       doc_repo: "DCC-BS/documentation"
       doc_path: "markdown"
