@@ -89,6 +89,10 @@ export default withMermaid({
                     { text: "Data.bs.ch (OGD)", link: "/mcp/data-bs.md" },
                     { text: "Statistik.bs", link: "/mcp/statistik-bs.md" },
                     { text: "Grosser Rat", link: "/mcp/grosser-rat.md" },
+                    {
+                        text: "Medienmitteilungen",
+                        link: "/mcp/medienmitteilungen.md",
+                    },
                     { text: "Hosting & Facade", link: "/mcp/hosting.md" },
                 ],
             },
