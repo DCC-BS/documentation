@@ -94,7 +94,7 @@ In November 2026 we also ran LightOnOCR-3-4B without Docling, with [LightOn's ow
 | LightOnOCR-3 inside Docling | 4,933 s | 0.69 | 0.00 | 0.68 |
 | LightOnOCR-3 with LightOn's client | 2,457 s | 0.94 | 0.99 | 0.98 |
 
-Most of the gap comes from Docling, not from the model. LightOnOCR-3 writes tables as HTML, and Docling escapes that HTML into plain text, so every table is lost. On its own the model reads about as well as our OCR engines and is twice as fast as inside Docling. It is still 5 times slower than GLM-OCR in Docling.
+The lost tables are Docling's doing: LightOnOCR-3 writes tables as HTML, and Docling escapes that HTML into plain text. The two setups also prompt the model differently. Inside Docling it runs in plain transcription mode, which writes page headers and footers too; LightOn's client asks for labelled blocks and drops headers and footers. The lower text scores inside Docling come from both, and this test doesn't separate them. On its own the model reads about as well as our OCR engines and is twice as fast as inside Docling. It is still 5 times slower than GLM-OCR in Docling.
 
 We still don't use the client instead of Docling. It turns a PDF or an image into Markdown and nothing more. Docling does more for us:
 
