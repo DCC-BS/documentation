@@ -81,8 +81,29 @@ Inside Docling we also compared OCR and layout engines, last in October and Nove
 | [GLM-OCR](/docling/glm-ocr) ([model](https://huggingface.co/zai-org/GLM-OCR)) with [PP-DocLayout-V3](https://huggingface.co/PaddlePaddle/PP-DocLayoutV3) | in use, for handwriting | Best on handwriting and photos (96 % of the note, 89 % of handwriting in a phone photo). Can misread a word in a way that changes the meaning, and described a photo without text in one English paragraph |
 | [Nemotron OCR v2](https://huggingface.co/nvidia/nemotron-ocr-v2) | not adopted | Worse on German text: its recogniser is English-only, so umlauts and ß come out wrong or missing (precision 0.83 to 0.91 on the German XFUND forms, against 0.94 for PP-OCRv6), and it reads 62 % of the handwritten note. On its own it is the fastest engine, but it needs torch 2.11, which makes the rest of the pipeline (RapidOCR, layout, TableFormer) about 7 times slower in the same image |
 | Egret layout models ([medium](https://huggingface.co/docling-project/docling-layout-egret-medium), [large](https://huggingface.co/docling-project/docling-layout-egret-large), [xlarge](https://huggingface.co/docling-project/docling-layout-egret-xlarge)) | not adopted | No gain over the default layout, and they miss the labels on building plans |
-| [Nemotron 3.5 Parse](https://huggingface.co/nvidia/Nemotron-3.5-Parse), [LightOnOCR-3-4B](https://huggingface.co/lightonai/LightOnOCR-3-4B) | not adopted | Convert whole pages with a vision-language model and are slower than GLM-OCR, LightOnOCR about 10 times. LightOnOCR returns no table structure |
+| [Nemotron 3.5 Parse](https://huggingface.co/nvidia/Nemotron-3.5-Parse) | not adopted | Good tables and headings, but it converts every page with a vision-language model and is about 2 times slower than GLM-OCR. On large plan drawings it runs out of output tokens and returns an empty page |
+| [LightOnOCR-3-4B](https://huggingface.co/lightonai/LightOnOCR-3-4B) | not adopted | Reads handwriting and photos best, but converts every page with a vision-language model and is about 10 times slower than GLM-OCR inside Docling. Inside Docling it loses every table, see below |
 | [Unlimited-OCR-2](https://huggingface.co/baidu/Unlimited-OCR-2) | not adopted | Quality close to the OCR engines (F1 0.93 on the made-up documents), but it converts every page with a vision-language model and is about 10 times slower than GLM-OCR. Sending the whole document in one request, as the model card does, is slower still and ends in repetition loops on some documents |
+
+### LightOnOCR-3 with and without Docling
+
+In November 2026 we also ran LightOnOCR-3-4B without Docling, with [LightOn's own client](https://github.com/lightonai/LightOnOCR): every page of a document sent at once, headers and footers left out. Same 96 documents, one pass, one RTX 4090.
+
+| Setup | Time | Text F1 (made-up documents) | Tables | Precision on XFUND forms |
+|---|---:|---:|---:|---:|
+| LightOnOCR-3 inside Docling | 4,933 s | 0.69 | 0.00 | 0.68 |
+| LightOnOCR-3 with LightOn's client | 2,457 s | 0.94 | 0.99 | 0.98 |
+
+Most of the gap comes from Docling, not from the model. LightOnOCR-3 writes tables as HTML, and Docling escapes that HTML into plain text, so every table is lost. On its own the model reads about as well as our OCR engines and is twice as fast as inside Docling. It is still 5 times slower than GLM-OCR in Docling.
+
+We still don't use the client instead of Docling. It turns a PDF or an image into Markdown and nothing more. Docling does more for us:
+
+- **It uses the text that is already in a PDF.** Docling OCRs only scans and pictures. The client has the model retype every page, which is where its time goes.
+- **It reads more formats.** The client takes PDFs and images. Docling also converts Word, PowerPoint, Excel and HTML files.
+- **It returns the structure.** Docling returns headings, lists, table cells and pictures, each with its page and position, and splits documents into chunks for search. The client returns Markdown with HTML tables.
+- **It is a service.** Our [Docling image](/docling/serve) gives the applications an HTTP API with queued jobs, a web UI and the OCR engine chosen per request. With the client we would have to build and run that ourselves, next to a GPU server for the model.
+
+The client does write a short description of each picture and turns charts into tables, which Docling doesn't. If we adopt LightOnOCR-3 for handwriting, it will be inside Docling, once Docling keeps its tables.
 
 ## Deep research
 
