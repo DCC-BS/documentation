@@ -223,6 +223,10 @@ export default withMermaid({
                 ],
             },
             {
+                text: "Audio Recorder",
+                link: "/audio-recorder/index.md",
+            },
+            {
                 text: "Nuxt Layers",
                 link: "/nuxt-layers/index.md",
                 items: [
