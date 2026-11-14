@@ -16,7 +16,8 @@ Transcribo is a web application for transcribing and editing audio and video rec
 - **Real-time Editing** edit transcription text with live preview and validation
 - **AI Summarization** generate a summary of the transcribed text
 - **Export Options** export as plain text or SRT subtitle files
-- **Audio Recording** record audio directly in the app
+- **Audio Recording** record audio directly in the app; recordings are stored in the browser while they run, so a reload or a closed tab does not lose them (see [Audio Recorder](/audio-recorder/index.md))
+- **Meeting Recording** record a Teams or phone call (e.g. xphone) by sharing its window: the app records your microphone mixed with the call's audio. Requires Chrome or Edge on Windows
 - **Undo/Redo** full command-based undo/redo support
 
 Available in German and English.
