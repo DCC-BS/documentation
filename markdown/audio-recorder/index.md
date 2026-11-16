@@ -83,6 +83,7 @@ const {
     isStarting,
     isRecording,
     isProcessing,
+    isBusy,
     recordingTime,
     error,
     startRecording,
@@ -99,9 +100,25 @@ const {
 | `isStarting` | Between `startRecording()` and the first sample: device check, permission prompt, `getStream`, session creation |
 | `isRecording` | Samples are being recorded |
 | `isProcessing` | Stopped; the last chunk is encoded and all chunks are joined |
+| `isBusy` | Any of the three (since 2.2.1): audio would be lost if the page went away now |
 
 Disable your start button while `isStarting` or `isProcessing` is true. Calls to
-`startRecording()` in those phases are ignored.
+`startRecording()` in those phases are ignored. `<AudioRecorder>` exposes the same
+states through its template ref.
+
+## Stopping
+
+Since 2.2.1, `stopRecording()` can be called in any state:
+
+| State when called | Result |
+|---|---|
+| Recording | Stops, delivers the MP3 to `onRecordingStopped` |
+| Starting (e.g. permission prompt open) | Cancels the start; devices granted afterwards are released, nothing is reported |
+| Already stopping | Joins the stop in progress; the recording is delivered once |
+| No recording | Does nothing |
+
+So you can stop unconditionally, for example when a dialog with the recorder
+closes. A stop requested from inside `onRecordingStarted` is honoured too.
 
 ## Recording a meeting or another stream
 
@@ -185,7 +202,9 @@ before letting the user go. Browsers show their own fixed text for reload and
 close; put the explanation next to the recorder:
 
 ```ts
-const isBusy = computed(() => isRecording.value || isProcessing.value);
+// isBusy from useAudioRecording (or the <AudioRecorder> ref) also covers the
+// permission prompt, so a start cannot be lost either
+const { isBusy } = useAudioRecording({ /* ... */ });
 
 // reload and close: the browser's own confirmation
 useEventListener("beforeunload", (event: BeforeUnloadEvent) => {
@@ -200,6 +219,8 @@ onBeforeRouteLeave(() => (isBusy.value ? confirmLeave() : true));
 ```
 
 `useEventListener` without a target is safe during server-side rendering.
+While `isBusy` is true, also keep dialogs or drawers that hold the recorder from
+being dismissed: unmounting the recorder ends the recording.
 Transcribo's
 [`useRecordingLeaveGuard`](https://github.com/DCC-BS/transcribo-frontend/blob/main/app/composables/useRecordingLeaveGuard.ts)
 shows the full version, including the dialog.
