@@ -13,7 +13,7 @@ The test code and method are described on [How we test](/evaluation/how-we-test)
 
 - **WER** (word error rate) and **CER** (character error rate) count the words and letters a model gets wrong, compared with a reference text. Lower is better. 0.20 means one wrong word in five.
 - A WER above 1 means the model wrote more wrong words than the reference has words. This usually happens when a model gets stuck and repeats itself.
-- **Status** is what we decided: *in use*, *chosen* (decided, not live yet) or *not adopted*.
+- **Status** is what we decided: *in use*, *chosen* (decided, not live yet), *not adopted* or *open* (tested, not decided yet).
 - A score belongs to one test set on one date. A model that does badly on our Swiss German may do well on something else.
 
 ## Speech-to-text
@@ -26,16 +26,22 @@ The test doesn't normalise the text. Wrong capitals and punctuation count as err
 |---|---|---:|---:|---|---|
 | [Voxtral Small 24B](https://huggingface.co/RedHatAI/Voxtral-Small-24B-2507-FP8-dynamic) (FP8) | Jul 2026 | 0.41 | 0.14 | not adopted | Slightly better than Whisper large-v2, but much bigger and slower. The gain isn't worth the GPUs |
 | [Whisper large-v2](https://huggingface.co/openai/whisper-large-v2) (faster-whisper) | Jun to Jul 2026 | 0.45 to 0.47 | 0.15 to 0.19 | in use | 11 runs with different settings of our transcription service |
+| [Parakeet TDT 0.6B v3 Swiss German](https://huggingface.co/Flurin17/parakeet-tdt-0.6b-v3-swiss-german) | Nov 2026 | 0.46 | 0.16 | open | Swiss German fine-tune of Parakeet v3. As good as Whisper large-v2 at less than half the size. Licence CC BY-NC 4.0: use in production needs a commercial licence |
+| [Nemotron 3.5 Transcribe Swiss German](https://huggingface.co/Flurin17/nemotron-3.5-transcribe-swiss-german) (FP8) | Nov 2026 | 0.48 | 0.19 | not adopted | Swiss German fine-tune of Nemotron 3.5 Transcribe. Trained on clips of up to 30 seconds, so we cut the recordings into 30-second pieces. Licence CC BY-NC 4.0 |
 | [Whisper large-v3](https://huggingface.co/openai/whisper-large-v3) (faster-whisper) | Jun to Jul 2026 | 0.49 to 0.56 | 0.19 to 0.25 | not adopted | Worse than large-v2 on our recordings |
+| [Cohere Transcribe Swiss German](https://huggingface.co/Flurin17/cohere-transcribe-swiss-german) | Nov 2026 | 0.53 | 0.22 | not adopted | Swiss German fine-tune of Cohere Transcribe. Licence CC BY-NC 4.0 |
+| [Fluid Speech Pro](https://huggingface.co/FluidVoice-Labs/fluid-speech-pro) | Nov 2026 | 0.53 | 0.19 | not adopted | Parakeet v3 with one extra layer, trained on 25 European languages but not on Swiss German |
 | [Parakeet TDT 0.6B v3](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3) | Jul 2026 | 0.58 | 0.21 | not adopted | |
+| [Whisper large STT4SG](https://huggingface.co/matildecs/whisper-large-stt4sg) | Nov 2026 | 0.60 | 0.28 | not adopted | Swiss German fine-tune of Whisper large-v2. Ran on vLLM, which lacks faster-whisper's guards against repeating |
 | [Nemotron 3.5 Transcribe 30B-A4B](https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B-FP8) (FP8) | Nov 2026 | 0.64 | 0.30 | not adopted | Writes Swiss German as it sounds ("erpressig") and spells out numbers. Best of four prompts, the others scored 0.70 to 0.78 |
+| [Whisper large-v3 turbo Swiss German](https://huggingface.co/Flurin17/whisper-large-v3-turbo-swiss-german) | Nov 2026 | 0.70 | 0.35 | not adopted | Swiss German fine-tune. Repeats a phrase over and over on quiet stretches. Ran on vLLM, which lacks faster-whisper's guards against repeating. Licence CC BY-NC 4.0 |
 | [MOSS-Transcribe-Diarize](https://huggingface.co/OpenMOSS-Team/MOSS-Transcribe-Diarize) | Jul 2026 | 0.78 | 0.31 | not adopted | |
 | [VibeVoice](https://github.com/microsoft/VibeVoice) | Jun to Jul 2026 | 0.84 to 0.91 | 0.71 to 0.85 | not adopted | |
 | [Nemotron 3.5 ASR Streaming 0.6B](https://huggingface.co/nvidia/nemotron-3.5-asr-streaming-0.6b) | Jun to Jul 2026 | 0.89 | 0.54 | not adopted | |
 | [Granite 4.0 1B Speech](https://huggingface.co/ibm-granite/granite-4.0-1b-speech) | Jun to Jul 2026 | 1.71 | 1.04 | not adopted | Repeats itself |
 | [Granite Speech 4.1 2B Plus](https://huggingface.co/ibm-granite/granite-speech-4.1-2b-plus) | Jun to Jul 2026 | 7.3 to 7.6 | 5.0 to 5.2 | not adopted | Repeats itself |
 
-A range means we ran the model more than once, with other settings or on another date. Apart from Voxtral, we turned the other models down because they score worse than Whisper large-v2.
+A range means we ran the model more than once, with other settings or on another date. Apart from Voxtral and the Parakeet Swiss German fine-tune, we turned the other models down because they score worse than Whisper large-v2. The Parakeet and Nemotron fine-tunes do clearly better than the models they were trained from: Parakeet v3 goes from 0.58 to 0.46, Nemotron 3.5 Transcribe from 0.64 to 0.48. The Whisper fine-tunes ran on vLLM and do worse than Whisper large-v2 on faster-whisper.
 
 ## Reading handwriting
 
@@ -133,4 +139,4 @@ The suites for Bebbi Bot use public laws, public open data and made-up documents
 - Our speech-to-text set has 33 recordings from one kind of work. It shows which models cope with Swiss German dictation, not how they do on meetings or Standard German.
 - Most models ran once with one setting. A single run can be off by a few points.
 - We use the prompt from each model card and don't tune prompts for each model. A better prompt can change a score.
-- Voxtral and Nemotron 3.5 Transcribe ran in compressed form (FP8) on two 24 GB GPUs, which are smaller than our production GPUs.
+- Voxtral, Nemotron 3.5 Transcribe and its Swiss German fine-tune ran in compressed form (FP8) on two 24 GB GPUs, which are smaller than our production GPUs.
