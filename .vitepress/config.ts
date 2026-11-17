@@ -7,10 +7,23 @@ import type { Plugin } from "vitepress";
 import llmstxt from "vitepress-plugin-llms";
 import { withMermaid } from "vitepress-plugin-mermaid";
 
+const base = process.env.NODE_ENV === "production" ? "/documentation/" : "/";
+
 // https://vitepress.dev/reference/site-config
 export default withMermaid({
     srcDir: "markdown",
-    base: process.env.NODE_ENV === "production" ? "/documentation/" : "/",
+    base,
+    head: [
+        ["link", { rel: "icon", href: `${base}favicon.ico`, sizes: "48x48" }],
+        [
+            "link",
+            { rel: "icon", type: "image/png", href: `${base}favicon.png` },
+        ],
+        [
+            "link",
+            { rel: "apple-touch-icon", href: `${base}apple-touch-icon.png` },
+        ],
+    ],
     mermaid: {
         suppressErrorRendering: true,
     },
