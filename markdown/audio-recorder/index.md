@@ -2,7 +2,7 @@
 outline: deep
 editLink: true
 skillName: dcc-audio-recorder
-skillDescription: "DCC-BS Nuxt module @dcc-bs/audio-recorder.bs.js for browser audio recording that survives a reload: AudioRecorder, AudioVisualizer and AudioSessionExplorer components, the useAudioRecording and useAudioSessions composables, chunked MP3 storage in IndexedDB, recovery of abandoned recordings, and recording a caller-supplied stream (getStream) such as a meeting (microphone mixed with screen audio). Use when adding recording to a Nuxt app or debugging lost or incomplete recordings."
+skillDescription: "DCC-BS Nuxt module @dcc-bs/audio-recorder.bs.js for browser audio recording that survives a reload: AudioRecorder, AudioVisualizer and AudioSessionExplorer components, the useAudioRecording and useAudioSessions composables, chunked MP3 storage in IndexedDB, pausing and resuming (also after a reload or a closed app), recovery of abandoned recordings, and recording a caller-supplied stream (getStream) such as a meeting (microphone mixed with screen audio). Use when adding recording to a Nuxt app or debugging lost or incomplete recordings."
 ---
 # Audio Recorder
 
@@ -11,7 +11,9 @@ skillDescription: "DCC-BS Nuxt module @dcc-bs/audio-recorder.bs.js for browser a
 A Nuxt module for recording audio in the browser. While a recording runs, it is
 encoded to MP3 and written to IndexedDB chunk by chunk, so a reload, a closed tab
 or a crash loses at most the last chunk. The rest shows up as an *abandoned
-recording* the user can recover. [Transcribo](/apps/transcribo.md) uses it for
+recording* the user can recover. Since 2.3.0 a recording can also be paused: the
+pause is stored, so it can be continued after a reload, a closed tab or the
+system killing the app. [Transcribo](/apps/transcribo.md) uses it for
 microphone and meeting recordings.
 
 ## Setup
@@ -49,15 +51,18 @@ Components and composables are auto-imported. All components are client-only
 3. On stop, the remaining samples become the last chunk. All chunks are joined
    into one MP3, handed to `onRecordingStopped`, and the session is deleted.
 
+Each session has a status: `recording` (running, or cut off by a crash or a
+closed tab), `paused`, or `stopped` (a delivered recording kept as a backup).
 A session that is never stopped stays in IndexedDB. `useAudioSessions` lists such
 sessions as `abandonedRecording`, and `<AudioSessionExplorer>` lets the user
-download or process them.
+continue, download or process them.
 
 | Situation | What is kept |
 |---|---|
 | Stop | Everything, delivered as one MP3 |
-| Navigating away inside the app (component unmounts) | Everything: the samples since the last chunk are stored as a final chunk; the session stays as abandoned |
-| Reload, closing the tab or window, crash | Everything up to the last stored chunk; the seconds since then are lost |
+| Pause | Everything: the samples since the last chunk are stored, the session becomes `paused` and can be continued later |
+| Navigating away inside the app (component unmounts) | Everything: the samples since the last chunk are stored and the session is left `paused` |
+| Reload, closing the tab or window, crash | Everything up to the last stored chunk; the seconds since then are lost. A recording that was paused before loses nothing |
 
 Choose `storeToDbInterval` as the amount of audio you can afford to lose on a
 reload. The `<AudioRecorder>` component stores every 5 seconds;
@@ -82,11 +87,14 @@ For your own UI, use the composable:
 const {
     isStarting,
     isRecording,
+    isPaused,
     isProcessing,
     isBusy,
     recordingTime,
     error,
     startRecording,
+    pauseRecording,
+    resumeRecording,
     stopRecording,
 } = useAudioRecording({
     storeToDbInterval: 10,
@@ -99,11 +107,16 @@ const {
 |---|---|
 | `isStarting` | Between `startRecording()` and the first sample: device check, permission prompt, `getStream`, session creation |
 | `isRecording` | Samples are being recorded |
+| `isPaused` | Paused (since 2.3.0); everything recorded so far is stored once `isSavingPause` is false |
+| `isSavingPause` | A pause is still being stored |
 | `isProcessing` | Stopped; the last chunk is encoded and all chunks are joined |
-| `isBusy` | Any of the three (since 2.2.1): audio would be lost if the page went away now |
+| `isBusy` | Starting, recording, finishing or storing a pause: audio would be lost if the page went away now. A stored pause is not busy |
+| `isActive` | The recorder holds a session: starting, recording, paused or finishing (since 2.3.0) |
 
-Disable your start button while `isStarting` or `isProcessing` is true. Calls to
-`startRecording()` in those phases are ignored. `<AudioRecorder>` exposes the same
+`recordingTime` counts recorded seconds only; pauses do not count.
+
+Disable your start button while `isActive` is true. Calls to
+`startRecording()` in that phase are ignored. `<AudioRecorder>` exposes the same
 states through its template ref.
 
 ## Stopping
@@ -119,6 +132,62 @@ Since 2.2.1, `stopRecording()` can be called in any state:
 
 So you can stop unconditionally, for example when a dialog with the recorder
 closes. A stop requested from inside `onRecordingStarted` is honoured too.
+
+## Pausing and resuming
+
+Since 2.3.0, `<AudioRecorder>` shows a pause button (hide it with
+`:allow-pause="false"`) and emits `recording-paused` and `recording-resumed`.
+With the composable, call `pauseRecording()` and `resumeRecording()`;
+`stopRecording()` finishes a paused recording like a running one.
+
+A pause encodes and stores everything recorded so far, then marks the session
+`paused`. Once `isSavingPause` is false, nothing is lost even if the app is
+closed or killed. If part of the audio could not be stored, `pauseSaveFailed` is
+set and the session stays `recording`, so it is not mistaken for a complete
+pause. Pausing needs the default IndexedDB storage to survive a reload: with
+`disableDefaultStore` it only stops capturing.
+
+What happens to the devices while paused is set with `pauseMode`:
+
+| Mode | Devices while paused | Resume | Used by `auto` (default) |
+|---|---|---|---|
+| `release` | Closed; the browser's recording indicator goes off | Opens the devices again, which may show a permission prompt | Desktop and Android browsers |
+| `keep` | Kept open, the audio is dropped | Instant, without a prompt, as long as the devices still work | iOS (WebKit repeats permission prompts) and every `getStream` recording (asking for a screen share again always shows the picker) |
+
+On iOS a phone call or Siri takes the microphone away. The recorder then pauses
+by itself instead of recording silence (`autoPauseOnInterruption`, on by default
+on iOS), and `wasInterrupted` tells the UI why it paused.
+
+### Continuing a stored recording
+
+`resumeSession(sessionId)`, or `<AudioRecorder :resume-session-id="id">`,
+continues a stored session: one paused earlier, or one cut off by a crash or a
+closed tab. New audio is appended and `recordingTime` continues from the stored
+duration. Tag sessions with `sessionSource` (e.g. `"microphone"` or
+`"meeting"`) to know which recorder should continue them.
+
+The library allows several stored sessions; whether a new recording may start
+while one is paused is up to the app. Transcribo allows one paused recording
+and asks to continue or transcribe it first. Get the paused one from
+`useAudioSessions().pausedRecording` or `getPausedRecording()`.
+
+::: tip Several tabs
+Which page records a session is tracked with the Web Locks API: other tabs
+neither list, continue nor delete it while it is recorded. Without Web Locks
+(insecure contexts, very old browsers) there is no such coordination.
+:::
+
+Paused sessions are subject to the same cleanup as abandoned ones
+(`deleteOldSessionsDaysInterval`, `maxSessionsToKeep`). Raise those limits if
+paused recordings should be kept longer.
+
+::: warning Safari and the Home Screen app on iOS
+A web app added to the Home Screen gets its own storage, separate from Safari.
+Recordings paused in Safari cannot be continued in the installed app. Safari may
+also clear the storage of sites that are not used for a while, which an
+installed app is not subject to. Recommend the installed app for recordings
+that are paused for longer.
+:::
 
 ## Recording a meeting or another stream
 
@@ -199,12 +268,14 @@ recording can start right away. `<AudioRecorder>` shows the error itself.
 
 A reload or a closed tab ends the recording and loses the last chunk, so ask
 before letting the user go. Browsers show their own fixed text for reload and
-close; put the explanation next to the recorder:
+close; put the explanation next to the recorder. A stored pause loses nothing,
+so `isBusy` is false while paused and no warning is needed:
 
 ```ts
 // isBusy from useAudioRecording (or the <AudioRecorder> ref) also covers the
 // permission prompt, so a start cannot be lost either
-const { isBusy } = useAudioRecording({ /* ... */ });
+const { isBusy, isProcessing, pauseRecording, pauseSaveFailed } =
+    useAudioRecording({ /* ... */ });
 
 // reload and close: the browser's own confirmation
 useEventListener("beforeunload", (event: BeforeUnloadEvent) => {
@@ -214,8 +285,14 @@ useEventListener("beforeunload", (event: BeforeUnloadEvent) => {
     }
 });
 
-// navigation inside the app: your own dialog
-onBeforeRouteLeave(() => (isBusy.value ? confirmLeave() : true));
+// navigation inside the app: pause first, which stores everything; ask only
+// if that failed
+onBeforeRouteLeave(async () => {
+    // a recording being joined for upload would end up abandoned instead
+    if (isProcessing.value) return confirmLeave();
+    await pauseRecording(); // also joins a pause still being stored
+    return pauseSaveFailed.value ? confirmLeave() : true;
+});
 ```
 
 `useEventListener` without a target is safe during server-side rendering.
@@ -228,11 +305,16 @@ shows the full version, including the dialog.
 ## Recovering abandoned recordings
 
 ```ts
-const { isReady, abandonedRecording } = useAudioSessions({
-    deleteOldSessionsDaysInterval: 30,
-    maxSessionsToKeep: 10,
-});
+const { isReady, loadFailed, abandonedRecording, pausedRecording, refresh } =
+    useAudioSessions({
+        deleteOldSessionsDaysInterval: 30,
+        maxSessionsToKeep: 10,
+    });
 ```
+
+`isReady` turns true after the first successful read. If a read fails,
+`loadFailed` is set and `refresh()` retries; do not start a new recording before
+the list is known, or a paused one may be missed.
 
 ```vue
 <AudioSessionExplorer
@@ -250,9 +332,21 @@ const { isReady, abandonedRecording } = useAudioSessions({
 />
 ```
 
+A custom action can be limited to some sessions with `visible` (for example a
+*Continue* action only for sessions that are not `stopped`), and set
+`needsAudio: false` to skip joining the MP3. The explorer emits `deleted` when a
+session is deleted, so the app can refresh its own list.
+
+Another tab may continue a session while this one exports it. To hand a stored
+recording on safely, export it with `exportSession(id)`, which returns the MP3
+and its chunk count, and pass that count to `markAsStopped(id, chunkCount)` or
+`deleteAbandonedRecording(id, chunkCount)`. They refuse with `SessionChanged`
+instead of dropping audio the export did not include. The `deleteSession`
+passed to custom actions does this check on its own.
+
 Sessions older than `deleteOldSessionsDaysInterval` days, and all but the newest
 `maxSessionsToKeep`, are deleted when the component calling `useAudioSessions`
-mounts.
+mounts. Sessions recorded in another tab right now are skipped.
 
 ## Reference
 
