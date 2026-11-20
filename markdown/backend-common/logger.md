@@ -21,6 +21,7 @@ The module provides:
 - **`get_logger()`**: Get a structured logger instance for any module
 - **`get_usage_logger()`**: Get the pinned `usage` logger for usage/audit events
 - **`USAGE_LOGGER_NAME`**: The name of that logger (`"usage"`) — use it to filter in OpenSearch
+- **`EVENT_TYPES`**: The closed vocabulary allowed in the `event` field
 - **`FocusedTracebackFormatter`**: Advanced traceback rendering for development that highlights user code
 - **`DevTracebackStyle`**: Configuration options for traceback styles in development mode
 - **Automatic context**: Timestamps, module names, function names, and line numbers (plus `request_id` when the [logging middleware](/backend-common/logging_middleware) is installed)
@@ -32,7 +33,7 @@ The module provides:
 
 - Handlers attached by uvicorn / `fastapi-cli` are cleared so records flow through the root handler.
 - `uvicorn.access` is disabled entirely (`propagate = False`) — per-request 200 lines are noise for fluentbit/OpenSearch, and the [logging middleware](/backend-common/logging_middleware) reports the failures that matter.
-- Chatty libraries (`httpx`, `httpcore`, `openai`, `urllib3`, `aiohttp`) are capped at `WARNING`.
+- Chatty libraries (`httpx`, `httpx2`, `httpcore`, `openai`, `urllib3`, `aiohttp`) are capped at `WARNING`; override per app with `init_logger(library_log_levels={"httpx": "DEBUG"})`.
 - `logging.captureWarnings(True)` routes `DeprecationWarning` & friends through the pipeline instead of raw stderr.
 
 ::: warning Serving
@@ -66,7 +67,7 @@ from fastapi import FastAPI
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan handler."""
-    init_logger()  # Initialize once at startup
+    init_logger(app_name="my-app")  # Initialize once at startup
     logger = get_logger(__name__)
     logger.info("Application started")
     yield
@@ -83,7 +84,7 @@ The logger is configured via environment variables:
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `LOG_LEVEL` | `INFO` | Logging level for **application diagnostics** (`DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`). Does not affect usage events |
-| `IS_PROD` | - | Set to `true` for JSON output (fluentbit compatible) |
+| `IS_PROD` | - | **Required.** Set to `true` for JSON output (fluentbit compatible); `init_logger()` raises if it is missing |
 | `DEV_TRACEBACK_STYLE` | `focused` | Traceback style in development: `focused` (user code locals) or `rich` (all locals) |
 | `LOGGER_USER_CODE_PATHS` | `dcc_backend_common, src/, app/, tests/` | Comma-separated paths to identify user code for detailed tracebacks |
 
@@ -93,11 +94,20 @@ The logger is configured via environment variables:
   - **Traceback Styles**:
     - **`focused` (default)**: Shows the full Rich traceback but only displays local variables for frames identified as "user code" (based on `LOGGER_USER_CODE_PATHS`). This reduces noise from library internals.
     - **`rich`**: Shows the full Rich traceback with local variables displayed for **all** frames, including third-party libraries. This is more verbose but useful for deep debugging.
-- **Production** (`IS_PROD=true`): JSON output for log aggregation tools like fluentbit. Tracebacks are rendered into a string field by `format_exc_info`.
+- **Production** (`IS_PROD=true`): One JSON line per record for log aggregation tools like fluentbit. Tracebacks are rendered into the `exception` string field. `event` keeps only the closed vocabulary (`EVENT_TYPES`); any other text moves to `message`. Field types are enforced (see [Field Types](#field-types)).
 
 ::: tip Recommended levels
 `LOG_LEVEL=debug` on test stages, `LOG_LEVEL=info` in production.
 :::
+
+### Field Types
+
+All apps share one OpenSearch index, so the production pipeline enforces the [logging contract](/coding/logging) before rendering:
+
+- `level` is one of `debug`, `info`, `warning`, `error`, `critical` (`warn`, `fatal`, `trace` and custom stdlib levels are mapped).
+- Custom fields are flat scalars: dicts, lists, tuples and sets become a JSON string, other objects `str()`. Log `status=503`, not `response={"status": 503}`.
+- `error=exc` becomes `str(exc)` plus `error_type` (the class name); `exception=exc` becomes the traceback string.
+- `status_code` must be an integer and `duration_s` a number. Lossless conversions are applied (`"200"` → `200`); anything else moves to `status_code_raw` / `duration_s_raw` as a string. Other reserved fields (`message`, `error`, `path`, `request_id`, ...) are coerced to strings. A caller-supplied `timestamp`, `level` or `logger` is overwritten with the real value.
 
 ## Usage Events
 
@@ -149,7 +159,12 @@ def process_translation(request: TranslationRequest) -> TranslationResult:
         logger.info("Translation completed", result_length=len(result.text))
         return result
     except TranslationError as e:
-        logger.error("Translation failed", error=str(e), request_id=request.id)
+        logger.exception(
+            "Translation failed",
+            error=str(e),
+            error_type=type(e).__name__,
+            translation_id=request.id,  # request_id is reserved for the X-Request-ID UUID
+        )
         raise
 ```
 
@@ -160,25 +175,29 @@ The logger automatically adds context to every log entry:
 | Field | Description |
 |-------|-------------|
 | `timestamp` | ISO-8601 formatted timestamp (UTC) |
+| `app` | Service name from `init_logger(app_name=...)` (production) |
 | `logger` | The logger name passed to `get_logger()` |
 | `module` | The module name where the log was called |
 | `func_name` | The function name |
 | `lineno` | The line number |
-| `level` | The log level |
+| `level` | One of `debug`, `info`, `warning`, `error`, `critical` |
+| `message` | Human-readable text (free-text event strings are moved here in production) |
+| `event` | Closed vocabulary (`EVENT_TYPES`), only for typed events |
 | `request_id` | Unique UUID for request tracing — only present when the [logging middleware](/backend-common/logging_middleware) is installed |
 
 Example JSON output in production:
 
 ```json
 {
-  "timestamp": "2024-01-15T10:30:45.123456Z",
+  "timestamp": "2026-11-20T08:15:30.123456Z",
+  "level": "info",
+  "app": "translator-backend",
   "logger": "myapp.services.translator",
   "request_id": "550e8400-e29b-41d4-a716-446655440000",
   "module": "translator",
   "func_name": "translate",
   "lineno": 42,
-  "level": "info",
-  "event": "Translation completed",
+  "message": "Translation completed",
   "result_length": 256
 }
 ```
@@ -223,11 +242,16 @@ Initialize the logger configuration. Must be called once at application startup.
 ```python
 from dcc_backend_common.logger import init_logger
 
-init_logger()
+init_logger(app_name="my-app")
 ```
 
+**Parameters:**
+- `app_name` (`str | None`): Stamped as `app` on every production line.
+- `library_log_levels` (`dict[str, int | str] | None`): Per-library level overrides, merged over the `WARNING` default for chatty libraries.
+- `extra_event_types` (`set[str] | None`): App-specific additions to `EVENT_TYPES`.
+
 **Environment Variables:**
-- `IS_PROD`: "true" for production (JSON output), "false" for development (console output).
+- `IS_PROD` (required): "true" for production (JSON output), "false" for development (console output).
 - `LOG_LEVEL`: Logging level (default: "INFO").
 - `DEV_TRACEBACK_STYLE`: Traceback style in dev mode ("focused" or "rich").
 - `LOGGER_USER_CODE_PATHS`: Comma-separated paths to consider as user code.
@@ -266,6 +290,10 @@ usage_logger.info("llm_call", input_tokens=812, output_tokens=134)
 ### USAGE_LOGGER_NAME
 
 Module-level constant holding the usage logger's name (`"usage"`). Use it when filtering log records or configuring downstream tooling.
+
+### EVENT_TYPES
+
+`frozenset` of the event types allowed in the `event` field: `app_event`, `llm_call`, `request_finished`, `request_failed`, `health check failed`, `health check recovered`. Extend it per app with `init_logger(extra_event_types={...})`; in production any other event string moves to `message`.
 
 ::: tip Source Code
 The full implementation is available on GitHub: [dcc_backend_common/logger/logger.py](https://github.com/DCC-BS/backend-common/blob/main/src/dcc_backend_common/logger/logger.py)

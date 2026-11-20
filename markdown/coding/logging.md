@@ -21,7 +21,7 @@ Third-party apps (Open WebUI, Firecrawl, Docling, vLLM) are not bound by it; the
 
 1. **One JSON object per line on stdout.** No log files, no multi-line output, no colored console output in deployed environments.
 2. **Reserved fields have exactly the type listed below**, in every app.
-3. **Custom fields are flat scalars** (string, number, boolean) with one type per field name across all apps. Do not log nested objects or arrays; flatten them (`status_code`, not `response: {status: ...}`) or serialize them to a string.
+3. **Custom fields are flat scalars** (string, number, boolean) with one type per field name across all apps. Do not log nested objects or arrays; flatten them (`status_code`, not `response: {status: ...}`) or serialize them to a string. As a safety net, `dcc_backend_common.logger` serializes nested values in custom fields to a JSON string (other objects via `str()`) in production.
 4. **Never reuse a reserved field name** for something else (e.g. `error` as an object, `level` as a number, `time` as epoch millis).
 5. **No secrets, prompts, document contents or personal data** in any field. Log ids, sizes and counts instead.
 
@@ -40,11 +40,13 @@ Third-party apps (Open WebUI, Firecrawl, Docling, vLLM) are not bound by it; the
 | `error_type` | string | on errors | Exception class name, e.g. `TimeoutError` |
 | `exception` | string | on errors | Full traceback / stack as one string |
 | `method` | string | HTTP logs | HTTP method |
-| `path` | string | HTTP logs | Request path without query string |
+| `path` | string | HTTP logs | Route template in FastAPI (`/items/{item_id}`, `<unmatched>` for 404s); in Nuxt the request path without query string |
 | `status_code` | integer | HTTP logs | HTTP status |
 | `duration_s` | number | HTTP logs | Duration in seconds |
 
 \* A line carries `message`, `event`, or both.
+
+If a value under `status_code` or `duration_s` cannot be converted losslessly to the listed type (e.g. `"OK"`), `dcc_backend_common.logger` moves it to `status_code_raw` / `duration_s_raw` as a string so the reserved field keeps its type. It coerces the other reserved fields to strings, and turns an exception passed as `error=exc` into `error` (`str(exc)`) plus `error_type`.
 
 `module`, `func_name` and `lineno` (Python) are allowed extras with the obvious types.
 
