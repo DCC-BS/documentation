@@ -4,7 +4,7 @@
     "type": "module",
     "private": true,
     "devDependencies": {
-        "@biomejs/biome": "2.6.5",
+        "@biomejs/biome": "2.6.6",
         "@types/bun": "latest",
         "mermaid": "12.3.0",
         "playwright": "^1.57.0",
