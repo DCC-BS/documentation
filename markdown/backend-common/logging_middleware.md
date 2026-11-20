@@ -3,11 +3,11 @@ outline: deep
 editLink: true
 skillParent: dcc-backend
 skillName: backend-logging-middleware
-skillDescription: "dcc_backend_common.fastapi_logging_middleware module for per-request log correlation. Use when adding add_logging_middleware(app) / LoggingMiddleware to bind a request_id from the X-Request-ID header into the structlog context, log 4xx/5xx responses and unhandled exceptions, and skip /health/* endpoints."
+skillDescription: "dcc_backend_common.fastapi_logging_middleware module for per-request log correlation. Use when adding add_logging_middleware(app) / LoggingMiddleware to bind a request_id from the X-Request-ID header into the structlog context, emit one request_finished / request_failed event per request (method, route-template path, status_code, duration_s), and exclude health probes or other high-frequency paths."
 ---
 # Logging Middleware
 
-The `dcc_backend_common.fastapi_logging_middleware` module correlates every log line emitted while handling a request with a single `request_id`, and logs the requests that went wrong.
+The `dcc_backend_common.fastapi_logging_middleware` module correlates every log line emitted while handling a request with a single `request_id`, and emits one completion event per request.
 
 ## Overview
 
@@ -16,8 +16,8 @@ The module provides:
 - **`add_logging_middleware(app)`**: One-liner registration on a FastAPI app
 - **`LoggingMiddleware`**: The underlying Starlette `BaseHTTPMiddleware` subclass
 - **Request correlation**: Binds `request_id` into the structlog contextvars, so *every* log line during the request carries it
-- **Failure-only logging**: Successful requests are not logged; 4xx/5xx and unhandled exceptions are
-- **Health-probe exclusion**: `/health/*` is skipped entirely
+- **One completion event per request**: `request_finished` (INFO) for every response including 4xx/5xx, `request_failed` (ERROR) for unhandled exceptions; CORS preflights (`OPTIONS`) are not logged
+- **Health-probe exclusion**: paths starting with `/health` emit no `request_finished` (they still get a `request_id` and still log `request_failed` when they raise); configurable via `excluded_paths`
 
 ## Installation
 
@@ -39,7 +39,7 @@ from dcc_backend_common.fastapi_logging_middleware import add_logging_middleware
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    init_logger()
+    init_logger(app_name="my-app")
     yield
 
 
@@ -78,9 +78,11 @@ Forward the `X-Request-ID` header when calling downstream services to correlate 
 
 | Situation | Level | Event | Fields |
 |-----------|-------|-------|--------|
-| Response status `>= 400` | `WARNING` | `request_error` | `method`, `path`, `status_code`, `duration_s` |
-| Unhandled exception | `ERROR` | `request_failed` | `method`, `path`, `error`, `error_type`, `duration_s`, traceback (`exc_info`) |
-| Successful response (`< 400`) | — | *not logged* | — |
+| Any response (including 4xx/5xx) | `INFO` | `request_finished` | `method`, `path`, `status_code`, `duration_s` |
+| Unhandled exception | `ERROR` | `request_failed` | `method`, `path`, `status_code` (500), `duration_s`, `error`, `error_type`, `exception` (traceback) |
+| Excluded path or `OPTIONS`, no exception | — | *not logged* | — |
+
+`path` is the route template (`/items/{item_id}`), never the concrete URL, and `<unmatched>` for 404s: it is a terms bucket in OpenSearch and must stay low-cardinality and free of user data. For streaming responses `duration_s` is time-to-first-byte, not total transfer time.
 
 Exceptions are re-raised after logging, so your [error handler](/backend-common/error_handler) still shapes the response.
 
@@ -90,11 +92,12 @@ Example production output:
 
 ```json
 {
-  "timestamp": "2025-07-14T09:12:03.481920Z",
+  "timestamp": "2026-11-20T09:12:03.481920Z",
+  "level": "info",
+  "app": "translator-backend",
   "logger": "request",
   "request_id": "550e8400-e29b-41d4-a716-446655440000",
-  "level": "warning",
-  "event": "request_error",
+  "event": "request_finished",
   "method": "POST",
   "path": "/api/translate",
   "status_code": 422,
@@ -104,11 +107,17 @@ Example production output:
 
 ### Excluded Paths
 
-Requests whose path starts with `/health` are passed through untouched — no `request_id` binding, no logging. Kubernetes polls these every few seconds, and the [health probe router](/backend-common/probes) already does its own deduplicated failure logging.
+Requests whose raw path or route template starts with an excluded prefix (default `/health`) emit no `request_finished`. They still get a `request_id`, and they still log `request_failed` when they raise, since probe failures are what alerting needs. Kubernetes polls these every few seconds, and the [health probe router](/backend-common/probes) does its own deduplicated failure logging.
+
+Exclude more polling endpoints by route template, and include the default when overriding:
+
+```python
+add_logging_middleware(app, excluded_paths={"/health", "/task/{task_id}/status"})
+```
 
 ## API Reference
 
-### add_logging_middleware(app)
+### add_logging_middleware(app, *, excluded_paths=None)
 
 Register the middleware on a FastAPI application.
 
@@ -120,6 +129,7 @@ add_logging_middleware(app)
 
 **Parameters:**
 - `app` (`FastAPI`): The application instance
+- `excluded_paths` (`set[str] | None`): Prefixes matched against the raw URL path and the route template; matching requests emit no `request_finished` (they still emit `request_failed` on exceptions). Defaults to `{"/health"}`
 
 **Returns:** `None`
 
@@ -142,7 +152,10 @@ Register it early (outermost) so the `request_id` is bound before other middlewa
 | Constant | Value | Description |
 |----------|-------|-------------|
 | `REQUEST_ID_HEADER` | `"X-Request-ID"` | Header read on the way in and echoed on the way out |
-| `EXCLUDED_PATH_PREFIXES` | `("/health",)` | Path prefixes skipped entirely |
+| `DEFAULT_EXCLUDED_PATHS` | `frozenset({"/health"})` | Default excluded prefixes |
+| `UNMATCHED_PATH` | `"<unmatched>"` | `path` value when no route matched (404) |
+
+The constants live in `dcc_backend_common.fastapi_logging_middleware.middleware`; the package itself exports only `LoggingMiddleware` and `add_logging_middleware`.
 
 ## Related Documentation
 

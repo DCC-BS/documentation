@@ -81,7 +81,7 @@ const logger = useLogger();
 
 logger.info("Application started");
 logger.warn("This is a warning");
-logger.error("An error occurred", { details: "additional context" });
+logger.error({ details: "additional context" }, "An error occurred");
 ```
 
 ## Base Logger Layer (`logger`)
@@ -307,6 +307,7 @@ export default defineNuxtConfig({
     runtimeConfig: {
         public: {
             logger: {
+                app: "", // set NUXT_PUBLIC_LOGGER_APP, e.g. "text-mate-frontend"
                 loglevel: (import.meta.dev ? "debug" : "warn") as LogLevel,
                 includeStackTrace: true,
                 stackTraceLimit: 5,
@@ -327,8 +328,9 @@ export default defineNuxtConfig({
 
 ::: info Configuration Options
 
+- `app`: Value of the `app` field in server log lines ([logging contract](/coding/logging)). Set it with `NUXT_PUBLIC_LOGGER_APP`, e.g. `text-mate-frontend`. Left out of the log line when empty.
 - `loglevel`: Minimum log level to display (e.g., `'info'`, `'debug'`).
-- `includeStackTrace`: Whether to include stack traces in error logs.
+- `includeStackTrace`: Whether to include stack traces in error logs. `false` drops the `exception` field.
 - `stackTraceLimit`: Number of stack frames to include.
 - `logAllRequests`: If `true`, logs all HTTP requests. If `false`, logs only failed requests (4xx/5xx).
 - `breadcrumbs`: Configuration for breadcrumb tracking.
@@ -347,7 +349,7 @@ Production-ready logging using Pino, providing low-overhead JSON logging for bot
 
 - ✅ Universal logging interface (works in browser and server)
 - ✅ Standardized log levels (`fatal` to `trace`)
-- ✅ JSON output for production (easier parsing)
+- ✅ JSON output for production that follows the [logging contract](/coding/logging)
 - ✅ Pretty printing for development via `pino-pretty`
 - ✅ Automatic request/response logging middleware
 - ✅ Configurable log levels and transports
@@ -360,6 +362,8 @@ Set these environment variables:
 | Variable           | Required | Description                 | Example                                 |
 | ------------------ | -------- | --------------------------- | --------------------------------------- |
 | `LOGGER_LAYER_URI` | Yes      | Points to pino-logger layer | `github:DCC-BS/nuxt-layers/pino-logger` |
+| `NUXT_PUBLIC_LOGGER_APP` | Yes (k8s) | `app` field of every server log line | `text-mate-frontend` |
+| `NUXT_PUBLIC_LOGGER_LOGLEVEL` | No | Minimum log level | `debug` on test, `info` or `warn` on uat / prod |
 
 
 ::: tip Required Dependencies
@@ -385,8 +389,8 @@ onMounted(() => {
     logger.info("Application ready");
 
     // Log with metadata
-    logger.warn("Deprecated feature used", { feature: "oldAPI" });
-    logger.error("Failed to load data", { error: "Network timeout" });
+    logger.warn({ feature: "oldAPI" }, "Deprecated feature used");
+    logger.error({ error: "Network timeout" }, "Failed to load data");
 
     // Manual breadcrumb usage
     logger.addBreadcrumb({
@@ -420,25 +424,52 @@ export default eventHandler(async (event) => {
 
     try {
         const data = await fetchData();
-        logger.info("Data fetched successfully", { itemCount: data.length });
+        logger.info({ item_count: data.length }, "Data fetched successfully");
         return data;
     } catch (error) {
-        logger.error("Request failed", {
-            error: error.message,
-            path: event.path,
-            method: event.method,
-        });
+        // An Error under `err` becomes `error`, `error_type` and `exception`.
+        // Method and path are logged by the request middleware.
+        logger.error({ err: error }, "Request failed");
         throw error;
     }
 });
 ```
 
+Pass the data object first and the message second: `logger.info({ count: 3 }, "message")`. Use flat scalar fields; nested objects and arrays end up as JSON strings under `<key>_json`.
+
+### Production Log Format
+
+In production (`NODE_ENV=production`) the server-side loggers (SSR and Nitro) write one JSON object per line to stdout, following the [logging contract](/coding/logging):
+
+- `timestamp`: ISO-8601 in UTC
+- `level`: `debug`, `info`, `warning`, `error` or `critical` (pino `trace` → `debug`, `warn` → `warning`, `fatal` → `critical`)
+- `message`: the log message
+- `app`: from `NUXT_PUBLIC_LOGGER_APP` (left out when not set)
+- `logger`: `ssr` (server-side rendering) or `api` (Nitro server routes)
+- `request_id`: see [Request ID](#request-id)
+- `error`, `error_type`, `exception`: when an `Error` is logged (`logger.error(err, "msg")`, `{ err }` or `{ error }`)
+- Nested objects and arrays in the log object are written as JSON strings under `<key>_json` and the original key is dropped (`{ options: { a: 1 } }` → `"options_json":"{\"a\":1}"`). The new key keeps the string from clashing in OpenSearch with the object type older app versions wrote under `options`.
+- Keys the logger writes itself (`message`, `level`, `timestamp`, `app`, `logger`, `request_id`) are renamed to `<key>_field` when they appear in the log object (`{ message: "x" }` → `message_field`), so a line never has duplicate keys.
+- Values that cannot be serialized (circular references, `BigInt`) never make the log call throw: cycles become `"[Circular]"`, `BigInt` becomes a string.
+- Warnings and errors carry the breadcrumb trail as a JSON string in `breadcrumbs_json`.
+
+```text
+{"level":"error","timestamp":"2026-11-20T09:55:02.176Z","app":"text-mate-frontend","logger":"api","request_id":"575debb5-acad-418c-8439-7d406b3ce31b","event":"request_finished","method":"GET","path":"/api/items","status_code":500,"duration_s":0.0053,"message":"Failed request (500)"}
+```
+
+In development the output goes through `pino-pretty`.
+
 ### Request Logging Middleware
 
-The Pino logger includes automatic request/response logging middleware. Its behavior is controlled by the `logAllRequests` configuration in `runtimeConfig`.
+The Pino logger includes automatic request logging middleware. It logs a request when it finishes, with `event: "request_finished"`, `method`, `path` (without query string), `status_code` and `duration_s`. Remote address and user agent are not logged.
 
-- **If `logAllRequests` is `true`**: Logs all incoming requests at `info` level.
-- **If `logAllRequests` is `false`** (default): Logs only failed requests (status code >= 400) at `error` level.
+- **Failed requests** (status code >= 400) are always logged at `error` level. Repeated failures for the same method, path and status are throttled.
+- **If `logAllRequests` is `true`**: successful requests are logged at `info` level as well.
+- **If `logAllRequests` is `false`** (default): successful requests are not logged.
+
+### Request ID
+
+Every server request gets a request id: the incoming `X-Request-ID` header if it is a valid id (letters, digits, `.`, `_`, `-`, at most 128 characters), otherwise a new UUID. It is available as `event.context.requestId` and written as `request_id` on every server log line of that request. Handlers built with the [Backend Communication](./backend_communication.md#request-id-forwarding) layer forward it to the backend as `X-Request-ID`.
 
 ## Switching Between Implementations
 

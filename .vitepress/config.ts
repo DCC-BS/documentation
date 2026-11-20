@@ -139,6 +139,7 @@ export default withMermaid({
                     },
                     { text: "Python", link: "/coding/python" },
                     { text: "Nuxt / Vue", link: "/coding/nuxt" },
+                    { text: "Logging Contract", link: "/coding/logging" },
                 ],
             },
             {

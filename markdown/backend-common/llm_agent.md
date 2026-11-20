@@ -291,7 +291,7 @@ Every completed run logs an `llm_call` event through the pinned `usage` logger, 
 | `total_tokens` | Sum reported by the provider |
 | `tool_calls` | Number of tool calls in the run |
 | `requests` | Number of HTTP requests the run needed |
-| `usage_details` | Provider-specific usage breakdown |
+| `usage_details_json` | Provider-specific usage breakdown as a JSON string (in production the logger moves the nested `usage_details` dict here) |
 | `finish_reason` | Why the model stopped |
 
 ::: warning Not every mode logs

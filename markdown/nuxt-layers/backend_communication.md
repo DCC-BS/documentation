@@ -256,6 +256,7 @@ When a handler built with `backendHandlerBuilder()` is executed, the flow is:
    - Validate `API_URL` is configured
    - Call body provider to get request body
    - Determine HTTP method (from `withMethod` or inherited)
+   - Start the headers with `Content-Type: application/json` and, when the request has a request id, `X-Request-ID` (see [Request ID forwarding](#request-id-forwarding))
    - Apply `extendFetchOptions` extensions in order (each wraps the previous)
    - Make HTTP request using the fetcher
    - Apply `postMap` transformations in order (each transforms the previous)
@@ -286,6 +287,19 @@ export default backendHandlerBuilder()
 // 4. Fetch: Make POST request to backend
 // 5. postMap: Transform response
 // 6. Return: { success: true, data: {...} }
+```
+
+### Request ID Forwarding
+
+When the [pino-logger](./logger.md#request-id) layer is used, every request gets a request id in `event.context.requestId`: the incoming `X-Request-ID` header if it is a valid id, otherwise a new UUID. Handlers built with `backendHandlerBuilder()` send it to the backend as `X-Request-ID`, so frontend and backend log lines of one user action share the same `request_id` (see the [logging contract](/coding/logging#correlation)).
+
+Nothing needs to be configured. If you replace the headers in `extendFetchOptions`, spread `options.headers` to keep the header. When you call another service yourself (`$fetch`, `fetch`), forward it the same way:
+
+```typescript
+const requestId = event.context.requestId
+await $fetch(url, {
+  headers: typeof requestId === 'string' ? { 'X-Request-ID': requestId } : {},
+})
 ```
 
 ### Type Parameters
@@ -347,7 +361,7 @@ export default backendHandlerBuilder()
   - `url` - Full URL (API_URL + path)
   - `method` - HTTP method
   - `body` - Request body
-  - `headers` - Headers object
+  - `headers` - Headers object (already contains `Content-Type` and, if set, `X-Request-ID`; spread it when you add headers)
   - `event` - H3 event object
   - Returns `Promise<FetcherOptions<TBody>>` - Extended options
 
