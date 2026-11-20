@@ -33,7 +33,7 @@ Third-party apps (Open WebUI, Firecrawl, Docling, vLLM) are not bound by it; the
 | `level` | string | yes | One of `debug`, `info`, `warning`, `error`, `critical` (lowercase) |
 | `message` | string | yes* | Human-readable text |
 | `event` | string | no | Closed vocabulary for dashboards and monitors, see [Events](#events) |
-| `app` | string | yes | Service name, e.g. `text-mate-backend`, `text-mate-frontend` |
+| `app` | string | yes | Stable service name. New services use the repo name (`text-mate-frontend`); existing backend values (`textmate`, `transcribo`, `AnonyMate`, ...) stay so dashboards keep working |
 | `logger` | string | yes | Logger name (Python module, or `ssr` / `api` in Nuxt) |
 | `request_id` | string | when available | UUID from the `X-Request-ID` header |
 | `error` | string | on errors | Short error text (`str(exc)`, `err.message`) |
