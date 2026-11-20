@@ -105,9 +105,9 @@ The logger is configured via environment variables:
 All apps share one OpenSearch index, so the production pipeline enforces the [logging contract](/coding/logging) before rendering:
 
 - `level` is one of `debug`, `info`, `warning`, `error`, `critical` (`warn`, `fatal`, `trace` and custom stdlib levels are mapped).
-- Custom fields are flat scalars: dicts, lists, tuples and sets become a JSON string, other objects `str()`. Log `status=503`, not `response={"status": 503}`.
+- Custom fields are flat scalars. A dict, list, tuple or set under `key` is written as a JSON string to `key_json` and `key` is dropped, so the string never clashes with an object that other apps or older versions still send under `key` (OpenSearch rejects the whole line on a type clash). Other objects become `str()` under their own key (`repr()` if `__str__` fails); `NaN`/`Infinity` floats become `"nan"`/`"inf"`. Log `status=503`, not `response={"status": 503}`.
 - `error=exc` becomes `str(exc)` plus `error_type` (the class name); `exception=exc` becomes the traceback string.
-- `status_code` must be an integer and `duration_s` a number. Lossless conversions are applied (`"200"` → `200`); anything else moves to `status_code_raw` / `duration_s_raw` as a string. Other reserved fields (`message`, `error`, `path`, `request_id`, ...) are coerced to strings. A caller-supplied `timestamp`, `level` or `logger` is overwritten with the real value.
+- `status_code` must be an integer and `duration_s` a finite float (integers are emitted as floats). Lossless conversions are applied (`"200"` → `200`); anything else moves to `status_code_raw` / `duration_s_raw` as a string. Other reserved fields (`message`, `error`, `path`, `request_id`, ...) are coerced to strings. A caller-supplied `timestamp`, `level` or `logger` is overwritten with the real value.
 
 ## Usage Events
 

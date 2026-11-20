@@ -21,7 +21,7 @@ Third-party apps (Open WebUI, Firecrawl, Docling, vLLM) are not bound by it; the
 
 1. **One JSON object per line on stdout.** No log files, no multi-line output, no colored console output in deployed environments.
 2. **Reserved fields have exactly the type listed below**, in every app.
-3. **Custom fields are flat scalars** (string, number, boolean) with one type per field name across all apps. Do not log nested objects or arrays; flatten them (`status_code`, not `response: {status: ...}`) or serialize them to a string. As a safety net, `dcc_backend_common.logger` serializes nested values in custom fields to a JSON string (other objects via `str()`) in production.
+3. **Custom fields are flat scalars** (string, number, boolean) with one type per field name across all apps. Do not log nested objects or arrays; flatten them (`status_code`, not `response: {status: ...}`) or serialize them to a JSON string under a `<key>_json` name (`options_json`), never under the name another app uses for an object: OpenSearch rejects the whole line when a field's type differs from the index mapping. As a safety net, `dcc_backend_common.logger` does this automatically in production: a nested value under `key` is written as a JSON string to `key_json` and `key` is dropped; other objects become `str()` under their own key, and `NaN`/`Infinity` floats become strings.
 4. **Never reuse a reserved field name** for something else (e.g. `error` as an object, `level` as a number, `time` as epoch millis).
 5. **No secrets, prompts, document contents or personal data** in any field. Log ids, sizes and counts instead.
 
@@ -46,7 +46,7 @@ Third-party apps (Open WebUI, Firecrawl, Docling, vLLM) are not bound by it; the
 
 \* A line carries `message`, `event`, or both.
 
-If a value under `status_code` or `duration_s` cannot be converted losslessly to the listed type (e.g. `"OK"`), `dcc_backend_common.logger` moves it to `status_code_raw` / `duration_s_raw` as a string so the reserved field keeps its type. It coerces the other reserved fields to strings, and turns an exception passed as `error=exc` into `error` (`str(exc)`) plus `error_type`.
+If a value under `status_code` or `duration_s` cannot be converted losslessly to the listed type (e.g. `"OK"`, `NaN`), `dcc_backend_common.logger` moves it to `status_code_raw` / `duration_s_raw` as a string so the reserved field keeps its type. It coerces the other reserved fields to strings, and turns an exception passed as `error=exc` into `error` (`str(exc)`) plus `error_type`.
 
 `module`, `func_name` and `lineno` (Python) are allowed extras with the obvious types.
 
