@@ -86,6 +86,7 @@ Apps extend it with `init_logger(extra_event_types={...})`. In Nuxt, `event` is 
 | `IS_PROD` | Python | `true` (JSON output; required, `init_logger` fails without it) |
 | `LOG_LEVEL` | Python | `debug` on test, `info` on uat / prod |
 | `NODE_ENV` | Nuxt | `production` (JSON output; set by the production image) |
+| `NUXT_PUBLIC_LOGGER_APP` | Nuxt | Service name for the `app` field (required), e.g. `text-mate-frontend` |
 | `NUXT_PUBLIC_LOGGER_LOGLEVEL` | Nuxt | `debug` on test, `info` or `warn` on uat / prod |
 
 Run Python services with plain `uvicorn ... --no-access-log`, not `fastapi run` (its Rich handlers bypass the JSON pipeline).

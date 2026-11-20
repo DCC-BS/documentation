@@ -435,7 +435,7 @@ export default eventHandler(async (event) => {
 });
 ```
 
-Pass the data object first and the message second: `logger.info({ count: 3 }, "message")`. Use flat scalar fields; nested objects and arrays end up as JSON strings.
+Pass the data object first and the message second: `logger.info({ count: 3 }, "message")`. Use flat scalar fields; nested objects and arrays end up as JSON strings under `<key>_json`.
 
 ### Production Log Format
 
@@ -448,8 +448,10 @@ In production (`NODE_ENV=production`) the server-side loggers (SSR and Nitro) wr
 - `logger`: `ssr` (server-side rendering) or `api` (Nitro server routes)
 - `request_id`: see [Request ID](#request-id)
 - `error`, `error_type`, `exception`: when an `Error` is logged (`logger.error(err, "msg")`, `{ err }` or `{ error }`)
-- Nested objects and arrays in the log object are written as JSON strings.
-- Warnings and errors carry the breadcrumb trail as a JSON string in `breadcrumbs`.
+- Nested objects and arrays in the log object are written as JSON strings under `<key>_json` and the original key is dropped (`{ options: { a: 1 } }` → `"options_json":"{\"a\":1}"`). The new key keeps the string from clashing in OpenSearch with the object type older app versions wrote under `options`.
+- Keys the logger writes itself (`message`, `level`, `timestamp`, `app`, `logger`, `request_id`) are renamed to `<key>_field` when they appear in the log object (`{ message: "x" }` → `message_field`), so a line never has duplicate keys.
+- Values that cannot be serialized (circular references, `BigInt`) never make the log call throw: cycles become `"[Circular]"`, `BigInt` becomes a string.
+- Warnings and errors carry the breadcrumb trail as a JSON string in `breadcrumbs_json`.
 
 ```text
 {"level":"error","timestamp":"2026-11-20T09:55:02.176Z","app":"text-mate-frontend","logger":"api","request_id":"575debb5-acad-418c-8439-7d406b3ce31b","event":"request_finished","method":"GET","path":"/api/items","status_code":500,"duration_s":0.0053,"message":"Failed request (500)"}
