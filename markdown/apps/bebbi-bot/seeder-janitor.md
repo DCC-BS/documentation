@@ -137,11 +137,11 @@ Staff with the knowledge admin role can build their own models in Workspace → 
 
 | Setting | Allowed | Switched off |
 |---|---|---|
-| Capabilities | Vision, file upload, file context, code interpreter, citations, memory, usage, status updates, built-in tools, web search switch | Image generation, terminal |
+| Capabilities | Vision, file upload, file context, code interpreter, citations, memory, usage, status updates, built-in tools, web search switch | Image generation, video generation, terminal |
 | Default features | Web search switch, code interpreter | All others |
-| Built-in tools | Time, files, tasks, sub-agents, user input, knowledge, code interpreter, memory, chats, skills | Open WebUI's own web search, image generation, notes, channels, automations, calendar, notifications |
+| Built-in tools | Time, files, tasks, sub-agents, user input, knowledge, code interpreter, memory, skills | Open WebUI's own web search, image generation, video generation, visualizations, chats, tool creation, notes, channels, automations, calendar, notifications |
 
-The point is control over data flow. The web search switch in a chat only runs our [search tool with the review step](/apps/bebbi-bot/tools.md#web-search). Open WebUI's own web search, which sends queries without review, stays off. Skills are allowed because creating one needs a right users do not have.
+The point is control over data flow. The web search switch in a chat only runs our [search tool with the review step](/apps/bebbi-bot/tools.md#web-search). Open WebUI's own web search, which sends queries without review, stays off. Skills are allowed because creating one needs a right users do not have. Chats are off because since Open WebUI 0.13.4 the category also holds a user search that returns the name and mail address of every user. Visualizations render HTML and JavaScript written by the model inside the chat.
 
 Allowed settings stay as the user chose them. Sharing, parameters and everything else on the model are left alone. Each change is saved with the commit message `janitor: model policy (...)`, which shows in the model's version history.
 
@@ -155,7 +155,7 @@ The DSFA for the AI prototypes requires that chats are deleted a year after thei
 2. **Deletion.** A chat is deleted once it is a year old and its notice is at least 14 days old. Nobody with a mail address loses a chat without a warning, also on the first run after the rollout. The chat's files follow in the dangling-file step of the same run.
 3. **Feedback.** Ratings carry a copy of the rated chat, so ratings older than a year are deleted too.
 
-"Last use" is the chat's last change: a message, a rename, a pin. Using a chat again starts the year over. Sub-agent chats are hidden from users and go with their parent chat. Knowledge bases and their files are never touched: their owners confirm every year that they are still needed.
+"Last use" is the chat's last message or rename. Pinning, archiving or moving a chat into a folder does not count. Using a chat again starts the year over. Sub-agent chats are hidden from users and go with their parent chat. Knowledge bases and their files are never touched: their owners confirm every year that they are still needed.
 
 The mail goes through the IT BS relay without login, with STARTTLS when the relay offers it. If the relay rejects an address as unknown (someone who left), the chats count as noticed and expire a notice period later. A temporary error sends nothing and retries the next day.
 
