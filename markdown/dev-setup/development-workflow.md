@@ -213,12 +213,12 @@ uses: actions/checkout@v7
 
 ## Reusable Workflows
 
-Common CI/CD logic lives in the [`DCC-BS/ci-workflows`](https://github.com/DCC-BS/ci-workflows) repository as **reusable workflows** and composite actions: `ci.yml` (the one CI pipeline for frontends and backends, see [mise › CI workflows](./mise.md#ci-workflows)), `publish-docker.yml`, `npm-publish.yml`, the `setup-mise` and `bump-version` actions, and the documentation auto-updater. Consume them with `uses:` and, like every action (see [Security](#security)), pin them to a full commit SHA with the version as a comment. Renovate keeps the pin current ("Update DCC-BS/ci-workflows digest" PRs):
+Common CI/CD logic lives in the [`DCC-BS/ci-workflows`](https://github.com/DCC-BS/ci-workflows) repository as **reusable workflows** and composite actions: `ci.yml` (the one CI pipeline for frontends and backends, see [mise › CI workflows](./mise.md#ci-workflows)), `publish-docker.yml` (builds and pushes the image with an SBOM attestation), `npm-publish.yml`, the `setup-mise` and `bump-version` actions, and the documentation auto-updater. Consume them with `uses:` and, like every action (see [Security](#security)), pin them to a full commit SHA with the version as a comment. Renovate keeps the pin current ("Update DCC-BS/ci-workflows digest" PRs):
 
 ```yaml
 jobs:
   ci:
-    uses: DCC-BS/ci-workflows/.github/workflows/ci.yml@e4b0133a84dbb31d57dd2389f22fce8b85cf55b7 # v10.0.4
+    uses: DCC-BS/ci-workflows/.github/workflows/ci.yml@4594d0b9ddf95dcd54c25e599f927d5a23ae7950 # v10.0.6
 ```
 
 See the [ci-workflows README](https://github.com/DCC-BS/ci-workflows#readme) for the full list of workflows, inputs, and secrets.
@@ -255,7 +255,7 @@ jobs:
       github.event.issue.pull_request &&
       startsWith(github.event.comment.body, '/documentation') &&
       (github.event.comment.author_association == 'OWNER' || github.event.comment.author_association == 'MEMBER')
-    uses: DCC-BS/ci-workflows/.github/workflows/llm-doc-update-conditional.yml@e4b0133a84dbb31d57dd2389f22fce8b85cf55b7 # v10.0.4
+    uses: DCC-BS/ci-workflows/.github/workflows/llm-doc-update-conditional.yml@4594d0b9ddf95dcd54c25e599f927d5a23ae7950 # v10.0.6
     with:
       doc_repo: "DCC-BS/documentation"
       doc_path: "markdown"
