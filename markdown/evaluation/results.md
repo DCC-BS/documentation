@@ -35,6 +35,7 @@ The test doesn't normalise the text. Wrong capitals and punctuation count as err
 | [Whisper large STT4SG](https://huggingface.co/matildecs/whisper-large-stt4sg) | Nov 2026 | 0.60 | 0.28 | not adopted | Swiss German fine-tune of Whisper large-v2. Ran on vLLM, which lacks faster-whisper's guards against repeating |
 | [Nemotron 3.5 Transcribe 30B-A4B](https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B-FP8) (FP8) | Nov 2026 | 0.64 | 0.30 | not adopted | Writes Swiss German as it sounds ("erpressig") and spells out numbers. Best of four prompts, the others scored 0.70 to 0.78 |
 | [Whisper large-v3 turbo Swiss German](https://huggingface.co/Flurin17/whisper-large-v3-turbo-swiss-german) | Nov 2026 | 0.70 | 0.35 | not adopted | Swiss German fine-tune. Repeats a phrase over and over on quiet stretches. Ran on vLLM, which lacks faster-whisper's guards against repeating. Licence CC BY-NC 4.0 |
+| [Rumble-2-Flash](https://huggingface.co/Reson8/Rumble-2-Flash) | Nov 2026 | 0.72 to 0.73 | 0.31 to 0.37 | not adopted | Fine-tune of Qwen3-ASR 0.6B. Writes Standard German but gets many Swiss German words wrong. In 30-second pieces and as whole files |
 | [MOSS-Transcribe-Diarize](https://huggingface.co/OpenMOSS-Team/MOSS-Transcribe-Diarize) | Jul 2026 | 0.78 | 0.31 | not adopted | |
 | [VibeVoice](https://github.com/microsoft/VibeVoice) | Jun to Jul 2026 | 0.84 to 0.91 | 0.71 to 0.85 | not adopted | |
 | [Nemotron 3.5 ASR Streaming 0.6B](https://huggingface.co/nvidia/nemotron-3.5-asr-streaming-0.6b) | Jun to Jul 2026 | 0.89 | 0.54 | not adopted | |
